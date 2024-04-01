@@ -1,8 +1,21 @@
 import json
+import requests
 
-# TODO: fetch version: -> https://api.github.com/repos/erlang/otp/tags?per_page=100
+# fetch version: -> https://api.github.com/repos/erlang/otp/tags?per_page=100
 # github api has rate limt
 # prefer use local version file
+def update_all_version_from_github_api():
+    url = "https://api.github.com/repos/erlang/otp/tags?per_page=100"
+    response = requests.get(url)
+    data = response.json()
+    print(data)
+    if response.status_code != 200:
+        print("Failed to fetch data from github api")
+        return
+
+    with open("erlang_otp_versions_from_gtihub_api.json", 'w', encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
+
 def get_all_version():
     version_set = set()
     with open("erlang_otp_versions_from_gtihub_api.json", 'r', encoding="utf-8") as file:
@@ -15,6 +28,7 @@ def get_all_version():
     return version_set
 
 if __name__ == "__main__":
+    update_all_version_from_github_api()
     version_set = get_all_version()
     with open("versions.txt", 'w') as file:
         for version in version_set:

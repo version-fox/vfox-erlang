@@ -39,17 +39,14 @@ end
 
 function erlang_utils.get_erlang_release_verions()
     local resp, err = http.get({
-        url = "https://raw.githubusercontent.com/yeshan333/vfox-erlang/main/.github/workflows/versions.txt"
+        url = "https://fastly.jsdelivr.net/gh/yeshan333/vfox-erlang@main/assets/versions.txt"
     })
     local result = {}
-    -- print("resp.body: " .. resp.body)
-    print(type(resp.body))
     for version in string.gmatch(resp.body, '([^\n]+)') do
         table.insert(result, {
             version = version
         })
     end
-    -- print(peek_lua_table(result))
     return result
 end
 
