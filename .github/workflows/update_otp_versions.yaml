@@ -19,6 +19,7 @@ jobs:
       - name: Update version file
         run: |
           cd assets
+          python -m pip install requests
           python get_all_otp_versions.py
 
       - name: Push updated version file
