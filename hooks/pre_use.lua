@@ -1,17 +1,18 @@
+
 --- When user invoke `use` command, this function will be called to get the
 --- valid version information.
 --- @param ctx table Context information
 function PLUGIN:PreUse(ctx)
     --- user input version
-    local version = ctx.version
+    local input_version = ctx.version
     --- user current used version
     local previousVersion = ctx.previousVersion
 
     --- installed sdks
-    local sdkInfo = ctx.installedSdks['version']
+    local sdkInfo = ctx.installedSdks[input_version]
     local path = sdkInfo.path
     local name = sdkInfo.name
-    local version = sdkInfo.version
+    local used_version = sdkInfo.version
 
     --- working directory
     local cwd = ctx.cwd
@@ -22,6 +23,6 @@ function PLUGIN:PreUse(ctx)
 
     --- return the version information
     return {
-        version = version,
+        version = used_version
     }
 end
