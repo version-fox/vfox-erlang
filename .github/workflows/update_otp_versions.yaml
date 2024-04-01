@@ -1,4 +1,4 @@
-name: circle_translate
+name: update_otp_versions
 
 on:
   schedule:
@@ -24,6 +24,8 @@ jobs:
       - name: Push updated version file
         run: |
           pwd
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"github-actions[bot]
           git status -s
           git add .
           git commit -m "chore(versions.txt): update Erlang/OTP version file"
