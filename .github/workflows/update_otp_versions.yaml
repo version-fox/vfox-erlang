@@ -29,4 +29,4 @@ jobs:
           git status -s
           git add .
           git commit -m "chore(versions.txt): update Erlang/OTP version file"
-          git push
+          git push https://github-actions[bot]:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
