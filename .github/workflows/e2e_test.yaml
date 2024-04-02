@@ -1,0 +1,24 @@
+name: E2E tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  example_matrix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: install vfox (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
+          sudo apt-get update
+          sudo apt-get install vfox
+          echo 'eval "$(vfox activate bash)"' >> ~/.bashrc
+      - name: add vfox plugin
+        run: |
+          vfox add --source https://github.com/yeshan333/vfox-erlang/archive/refs/heads/main.zip erlang
+          vfox search erlang 
