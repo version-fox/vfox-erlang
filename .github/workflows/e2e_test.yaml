@@ -1,6 +1,8 @@
 name: E2E tests
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -39,7 +41,7 @@ jobs:
           sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
           vfox install erlang@26.2.3
           vfox use erlang@26.2.3
-          erlc -h
+          erlc -help
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
@@ -47,4 +49,4 @@ jobs:
           brew install autoconf libxslt fop wxwidgets openssl
           vfox install erlang@26.2.3
           vfox use erlang@26.2.3
-          erlc -h
+          erlc -help
