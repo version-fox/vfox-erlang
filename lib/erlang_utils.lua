@@ -39,7 +39,7 @@ end
 
 function erlang_utils.get_erlang_release_verions()
     local resp, err = http.get({
-        url = "https://fastly.jsdelivr.net/gh/yeshan333/vfox-erlang@main/assets/versions.txt"
+        url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
     })
     local result = {}
     for version in string.gmatch(resp.body, '([^\n]+)') do
