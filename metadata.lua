@@ -33,7 +33,7 @@ NOTE:
     you can set this address to the manifest file address, so that the plugin can be updated automatically.
 
  --]]
-PLUGIN.manifestUrl = "https://github.com/yeshan333/vfox-erlang/releases/download/manifest/manifest.json"
+PLUGIN.manifestUrl = "https://github.com/version-fox/vfox-erlang/releases/download/manifest/manifest.json"
 -- Some things that need user to be attention!
 PLUGIN.notes = {
     "",

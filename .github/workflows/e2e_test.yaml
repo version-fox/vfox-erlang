@@ -33,7 +33,7 @@ jobs:
       
       - name: add vfox-erlang plugin
         run: |
-          vfox add --source https://github.com/yeshan333/vfox-erlang/archive/refs/heads/main.zip erlang
+          vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
 
       - name: install Erlang/OTP by vfox-erlang plugin (Linux)
         if: runner.os == 'Linux'
