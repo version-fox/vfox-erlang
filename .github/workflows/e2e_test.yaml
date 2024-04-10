@@ -21,15 +21,12 @@ jobs:
           echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
           sudo apt-get update
           sudo apt-get install vfox
-          echo 'eval "$(vfox activate bash)"' >> ~/.bashrc
       
       - name: install vfox (MacOS)
         if: runner.os == 'MacOS'
         run: |
           brew tap version-fox/tap
           brew install vfox
-          echo 'eval "$(vfox activate bash)"' >> ~/.bashrc
-          echo 'eval "$(vfox activate zsh)"' >> ~/.zshrc
       
       - name: add vfox-erlang plugin
         run: |
@@ -40,17 +37,21 @@ jobs:
         run: |
           sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
           vfox install erlang@26.2.3
-          vfox use erlang@26.2.3
+          vfox use -g erlang@26.2.3
+          eval "$(vfox activate bash)"
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
+          erlc -help
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
         run: |
           brew install autoconf libxslt fop wxwidgets openssl
           vfox install erlang@26.2.3
-          vfox use erlang@26.2.3
+          vfox use -g erlang@26.2.3
+          eval "$(vfox activate bash)"
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
+          erlc -help
