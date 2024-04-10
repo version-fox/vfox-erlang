@@ -42,7 +42,9 @@ jobs:
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
-          erlc -help
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
@@ -54,4 +56,6 @@ jobs:
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
-          erlc -help
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
