@@ -37,3 +37,17 @@ brew install autoconf libxslt fop wxwidgets openssl
 ```
 
 You can reference the E2E test in MacOS 13: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+
+## Note
+
+By default, vfox-erlang plugin will Build [EEP-48 documentation chunks](https://www.erlang.org/doc/apps/kernel/eep48_chapter) for get doc in REPL (eg: h(list).) and [lsp docs hint](https://github.com/elixir-lsp/vscode-elixir-ls/issues/284).
+
+![erl get docs](./assets/get_docs_in_repl.png)
+
+You cal also use the `OTP_CONFIGURE_ARGS` environment variable to control install behavior. reference this documentation [https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1](https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1) for more configuration. eg:
+
+```shell
+# example
+export OTP_CONFIGURE_ARGS="--enable-jit --enable-kernel-poll"
+vfox install erlang@25.3.2.10
+```
