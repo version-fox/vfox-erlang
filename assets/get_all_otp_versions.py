@@ -5,7 +5,7 @@ import requests
 # github api has rate limt
 # prefer use local version file
 def update_all_version_from_github_api():
-    url = "https://api.github.com/repos/erlang/otp/tags?per_page=100&sort=pushed"
+    url = "https://api.github.com/repos/erlang/otp/tags?per_page=300&sort=pushed"
     response = requests.get(url)
     data = response.json()
     print(data)
