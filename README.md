@@ -1,6 +1,14 @@
+<div align="center">
+
+![logo](./assets/vfox-erlang-logo.png)
+
+[![E2E tests](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+
+</div>
+
 # vfox-erlang plugin
 
-Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage multiple Erlang/OTP versions in Linux/Darwin.
+Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage multiple [Erlang/OTP](https://www.erlang.org/) versions in Linux/Darwin.
 
 ## Usage
 
