@@ -31,7 +31,8 @@ def get_all_version():
 
 if __name__ == "__main__":
     update_all_version_from_github_api()
-    version_set = get_all_version()
+    versions = list(get_all_version())
+    versions = versions.sort()
     with open("versions.txt", 'w') as file:
-        for version in version_set:
+        for version in versions.reverse():
             file.write(version + '\n')
