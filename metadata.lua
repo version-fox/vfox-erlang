@@ -5,13 +5,13 @@ PLUGIN = {}
 --- Plugin name
 PLUGIN.name = "erlang"
 --- Plugin version
-PLUGIN.version = "0.4.1"
+PLUGIN.version = "1.0"
 --- Plugin homepage
 PLUGIN.homepage = "https://github.com/version-fox/vfox-erlang"
 --- Plugin license, please choose a correct license according to your needs.
 PLUGIN.license = "Apache 2.0"
 --- Plugin description
-PLUGIN.description = "Erlang/OTP vfox plugin, support for managing multiple Erlang/OTP versions."
+PLUGIN.description = "Erlang/OTP vfox plugin, support for managing multiple Erlang/OTP versions in Windows & Uinx-like system."
 
 
 --- !!! OPTIONAL !!!
