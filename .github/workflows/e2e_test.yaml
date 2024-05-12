@@ -38,12 +38,12 @@ jobs:
         run: |
           scoop install vfox          
 
-      - name: add vfox-erlang plugin
+      - name: add vfox-erlang plugin (Unix-like) 
         if: runner.os != 'Windows'
         run: |
           vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
 
-      - name: add vfox-erlang plugin
+      - name: add vfox-erlang plugin (Windows) 
         if: runner.os == 'Windows'
         run: |
           vfox add --source https://github.com/version-fox/vfox-erlang/archive/$env:GITHUB_REF.zip erlang
