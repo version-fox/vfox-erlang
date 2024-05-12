@@ -8,7 +8,7 @@
 
 # vfox-erlang plugin
 
-Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage multiple [Erlang/OTP](https://www.erlang.org/) versions in Linux/Darwin.
+Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage multiple [Erlang/OTP](https://www.erlang.org/) versions in Linux/Darwin MacOS/Windows. all platform~
 
 ## Usage
 
@@ -22,7 +22,7 @@ vofx search erlang
 vfox install erlang@25.3.2.10
 ```
 
-## Before install Erlang/OTP
+## Before install Erlang/OTP in Linux/Darwin MacOS
 
 vfox-erlang plugin would install Erlang/OTP through the [Erlang/OTP](https://www.erlang.org/doc/installation_guide/install#how-to-build-and-install-erlang-otp) source code compilation. So you must have the utilities mentioned in the document -> [Building and Installing Erlang/OTP](https://www.erlang.org/doc/installation_guide/install#how-to-build-and-install-erlang-otp). 
 
@@ -46,7 +46,7 @@ brew install autoconf libxslt fop wxwidgets openssl
 
 You can reference the E2E test in MacOS 13: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
 
-## Note
+### Note
 
 By default, vfox-erlang plugin will Build [EEP-48 documentation chunks](https://www.erlang.org/doc/apps/kernel/eep48_chapter) for get doc in REPL (eg: h(list).) and [lsp docs hint](https://github.com/elixir-lsp/vscode-elixir-ls/issues/284).
 
@@ -59,3 +59,19 @@ You cal also use the `OTP_CONFIGURE_ARGS` environment variable to control instal
 export OTP_CONFIGURE_ARGS="--enable-jit --enable-kernel-poll"
 vfox install erlang@25.3.2.10
 ```
+
+## install Erlang/OTP in Windows platform
+
+In windows, the vfox-erlang plugin downloads the Erlang/OTP version of the exe installer from the [Erlang/OTP releases](https://github.com/erlang/otp/releases) and executes it for you.
+
+This is an installation example in PowerShell:
+
+```pwsh
+vfox install erlang@25.3.2.12
+vfox use erlang@25.3.2.12
+Invoke-Expression "$(vfox activate pwsh)"
+# Test the installation results
+& erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
+```
+
+You can reference the E2E test in in windows-2022: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)

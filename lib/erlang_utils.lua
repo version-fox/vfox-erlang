@@ -4,7 +4,7 @@ local erlang_utils = {}
 
 local function peek_lua_table(o, indent)
     indent = indent or 0
- 
+
     local function handle_table(t, currentIndent)
         local result = {}
         for k, v in pairs(t) do
@@ -14,17 +14,11 @@ local function peek_lua_table(o, indent)
         end
         return '{\n' .. table.concat(result, ',\n') .. '\n' .. string.rep('  ', currentIndent) .. '}'
     end
- 
+
     if type(o) == 'table' then
         return handle_table(o, indent)
     else
         return tostring(o)
-    end
-end
-
-function erlang_utils.check_platform()
-    if RUNTIME.OS_TYPE == "windows" then
-        error("Windows is not supported. Please direct use the offcial installer to setup Erlang/OTP. visit: https://www.erlang.org/downloads")
     end
 end
 

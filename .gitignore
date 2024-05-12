@@ -1,3 +1,4 @@
 .idea
 .tool-versions
 *.beam
+available.cache
