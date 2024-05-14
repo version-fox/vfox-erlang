@@ -35,7 +35,7 @@ function PLUGIN:PostInstall(ctx)
 
         local install_erlang_cmd = "cd " .. path .. "&& make && make install"
         -- install with docs chunk for IDE/REPL docs hits & type hits
-        local install_erlang_docs_cmd = "cd " .. path .. " && make docs DOC_TARGETS=" .. docs_target .. " && make release_docs DOC_TARGETS=" .. docs_target
+        local install_erlang_docs_cmd = "cd " .. path .. " && make docs DOC_TARGETS=" .. docs_target .. " && make install-docs DOC_TARGETS=" .. docs_target
 
         local status = os.execute(configure_cmd .. " && " .. install_erlang_cmd .. " && " ..install_erlang_docs_cmd)
         if status ~= 0 then
