@@ -52,6 +52,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+          export MAKEFLAGS=-j4
           vfox install erlang@26.2.3
           vfox use -g erlang@26.2.3
           eval "$(vfox activate bash)"
@@ -61,11 +62,19 @@ jobs:
           cd assets
           erlc hello.erl
           erl -noshell -s hello hello_world -s init stop
+          docs=$(erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell)
+          if [ -n "$docs" ]; then
+              echo "erlang built with docs chunk"
+          else
+              echo "erlang does not built with docs chunk"
+              echo "exit"
+          fi
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
         run: |
           brew install autoconf libxslt fop wxwidgets openssl
+          export MAKEFLAGS=-j4
           vfox install erlang@26.2.3
           vfox use -g erlang@26.2.3
           eval "$(vfox activate bash)"
@@ -75,6 +84,7 @@ jobs:
           cd assets
           erlc hello.erl
           erl -noshell -s hello hello_world -s init stop
+          erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
 
       - name: install etcd by vfox-etcd plugin (Windows)
         if: runner.os == 'Windows'
@@ -86,3 +96,4 @@ jobs:
           echo $env:PATH
           echo "===============PATH==============="
           & erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
+          & erl.exe -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
