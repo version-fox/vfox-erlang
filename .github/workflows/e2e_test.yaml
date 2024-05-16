@@ -62,7 +62,7 @@ jobs:
           cd assets
           erlc hello.erl
           erl -noshell -s hello hello_world -s init stop
-          docs=$(erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell)
+          docs=$(erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell | grep "List processing functions")
           if [ -n "$docs" ]; then
               echo "erlang built with docs chunk"
           else
