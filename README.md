@@ -60,6 +60,13 @@ export OTP_CONFIGURE_ARGS="--enable-jit --enable-kernel-poll"
 vfox install erlang@25.3.2.10
 ```
 
+Building Erlang/OTP on a relatively fast computer takes approximately 5 minutes. To speed it up, you can utilize [parallel make](https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#building-3) with the `-j<num_jobs>` option. for example:
+
+```shell
+export MAKEFLAGS=-j8
+vfox install erlang@25.3.2.10
+```
+
 ## install Erlang/OTP in Windows platform
 
 In windows, the vfox-erlang plugin downloads the Erlang/OTP version of the exe installer from the [Erlang/OTP releases](https://github.com/erlang/otp/releases) and executes it for you.
