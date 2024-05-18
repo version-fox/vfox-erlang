@@ -86,7 +86,7 @@ jobs:
           erl -noshell -s hello hello_world -s init stop
           erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
 
-      - name: install etcd by vfox-etcd plugin (Windows)
+      - name: install Erlang/OTP by vfox-erlang plugin (Windows)
         if: runner.os == 'Windows'
         run: |
           vfox install erlang@25.3.2.12
