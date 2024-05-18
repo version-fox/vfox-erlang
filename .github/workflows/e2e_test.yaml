@@ -67,7 +67,7 @@ jobs:
               echo "erlang built with docs chunk"
           else
               echo "erlang does not built with docs chunk"
-              echo "exit"
+              exit 1
           fi
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
