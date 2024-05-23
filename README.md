@@ -17,7 +17,7 @@ Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage
 vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
 
 # install an available version
-vofx search erlang
+vfox search erlang
 # or specific version 
 vfox install erlang@25.3.2.10
 ```
