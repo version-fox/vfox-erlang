@@ -1,0 +1,42 @@
+name: E2E tests on Darwin MacOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
+
+jobs:
+  e2e_tests:
+    strategy:
+      matrix:
+        # ref: https://github.com/actions/runner-images
+        os: [macos-12]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: install vfox (MacOS)
+        if: runner.os == 'MacOS'
+        run: |
+          brew tap version-fox/tap
+          brew install vfox
+
+      - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
+        if: runner.os == 'MacOS'
+        run: |
+          brew install --force autoconf libxslt fop wxwidgets openssl
+          export MAKEFLAGS=-j4
+          vfox install erlang@26.2.3
+          vfox use -g erlang@26.2.3
+          eval "$(vfox activate bash)"
+          echo "===============PATH==============="
+          echo $PATH
+          echo "===============PATH==============="
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
+          erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell

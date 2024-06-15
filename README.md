@@ -35,16 +35,16 @@ Here are examples of installing on Ubuntu 20.04 and MacOS 13.
 sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
 ```
 
-You can reference the E2E test in Ubuntu 20.04: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+You can reference the E2E test in Ubuntu 20.04: [.github/workflows/e2e_test_linux.yaml](.github/workflows/e2e_test_linux.yaml)
 
-### install in Darwin (MacOS 13)
+### install in Darwin (MacOS 12)
 
 ```shell
 # install utilities
 brew install autoconf libxslt fop wxwidgets openssl
 ```
 
-You can reference the E2E test in MacOS 13: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+You can reference the E2E test in MacOS 12: [.github/workflows/e2e_test_darwin.yaml](.github/workflows/e2e_test_darwin.yaml)
 
 ### Note
 
@@ -81,4 +81,4 @@ Invoke-Expression "$(vfox activate pwsh)"
 & erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
 ```
 
-You can reference the E2E test in in windows-2022: [https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+You can reference the E2E test in in windows-2022: [.github/workflows/e2e_test_windows.yaml](.github/workflows/e2e_test_windows.yaml)

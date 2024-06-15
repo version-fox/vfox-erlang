@@ -1,0 +1,47 @@
+name: E2E tests on Linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
+
+jobs:
+  e2e_tests:
+    strategy:
+      matrix:
+        # ref: https://github.com/actions/runner-images
+        os: [ubuntu-20.04, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install vfox (Linux)
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
+          sudo apt-get update
+          sudo apt-get install vfox
+      
+      - name: install Erlang/OTP by vfox-erlang plugin (Linux)
+        run: |
+          sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+          export MAKEFLAGS=-j4
+          vfox install erlang@26.2.3
+          vfox use -g erlang@26.2.3
+          eval "$(vfox activate bash)"
+          echo "===============PATH==============="
+          echo $PATH
+          echo "===============PATH==============="
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
+          docs=$(erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell | grep "List processing functions")
+          if [ -n "$docs" ]; then
+              echo "erlang built with docs chunk"
+          else
+              echo "erlang does not built with docs chunk"
+              exit 1
+          fi
