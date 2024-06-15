@@ -76,7 +76,7 @@ jobs:
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
         run: |
-          brew install autoconf libxslt fop wxwidgets openssl
+          brew install --force autoconf libxslt fop wxwidgets openssl
           export MAKEFLAGS=-j4
           vfox install erlang@26.2.3
           vfox use -g erlang@26.2.3
