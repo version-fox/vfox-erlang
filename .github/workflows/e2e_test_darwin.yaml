@@ -25,6 +25,10 @@ jobs:
           brew tap version-fox/tap
           brew install vfox
 
+      - name: add vfox-erlang plugin (Unix-like) 
+        run: |
+          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang          
+
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
         run: |
