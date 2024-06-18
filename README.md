@@ -2,7 +2,7 @@
 
 ![logo](./assets/vfox-erlang-logo.png)
 
-[![E2E tests](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test.yaml)
+[![E2E tests on Linux](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml)
 
 </div>
 
