@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         # ref: https://github.com/actions/runner-images
-        os: [ubuntu-20.04, ubuntu-22.04]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -28,10 +28,13 @@ jobs:
       - name: add vfox-erlang plugin (Unix-like) 
         run: |
           vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
+      
+      - name: prepare Erlang/OTP deps (Linux)
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk     
           
       - name: install Erlang/OTP by vfox-erlang plugin (Linux)
-        run: | 
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+        run: |
           export MAKEFLAGS=-j4
           vfox install erlang@26.2.3
           vfox use -g erlang@26.2.3
