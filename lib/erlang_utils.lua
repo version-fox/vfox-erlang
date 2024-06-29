@@ -58,8 +58,15 @@ function erlang_utils.directory_exists(path)
 end
 
 function erlang_utils.get_erlang_release_verions()
+    local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
+
+    if erlang_utils.get_config_from_env("USE_PREBUILT") then
+        -- FIXME: replace to release branch
+        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/prebuilt_versions.txt"
+    end
+
     local resp, err = http.get({
-        url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
+        url = search_url
     })
     local result = {}
     for version in string.gmatch(resp.body, '([^\n]+)') do
