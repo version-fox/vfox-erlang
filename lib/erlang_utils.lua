@@ -60,7 +60,7 @@ end
 function erlang_utils.get_erlang_release_verions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
-    if erlang_utils.get_config_from_env("USE_PREBUILT") then
+    if erlang_utils.get_config_from_env("USE_PREBUILT_OTP") then
         -- FIXME: replace to release branch
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/prebuilt_versions.txt"
     end

@@ -14,7 +14,7 @@ function PLUGIN:PreInstall(ctx)
     -- erlangUtils.check_version_existence("https://github.com/erlang/otp/releases/tag/OTP-" .. erlang_version)
 
     local download_url
-    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT")
+    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
     if RUNTIME.osType == "windows" then
         if RUNTIME.archType == "amd64" then
             download_url = "https://github.com/erlang/otp/releases/download/OTP-" ..

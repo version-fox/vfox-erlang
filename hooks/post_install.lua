@@ -8,7 +8,7 @@ function PLUGIN:PostInstall(ctx)
     local sdkInfo = ctx.sdkInfo['erlang']
     local path = sdkInfo.path
 
-    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT")
+    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
 
     if RUNTIME.osType == "windows" then
         local installer
