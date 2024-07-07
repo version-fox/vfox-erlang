@@ -11,12 +11,12 @@ function PLUGIN:EnvKeys(ctx)
     if RUNTIME.osType == "windows" then
         mainPath = ctx.path .. "\\release\\bin"
     else
-        if not erlangUtils.directory_exists(ctx.path .. "/bin") then
-            -- install erlang by compilation
-            mainPath = ctx.path .. "/release/bin"
+        if not erlangUtils.directory_exists(ctx.path .. "/release/bin") then
+            -- install erlang from Bob prebuilt release
+            mainPath = ctx.path .. "/bin"
         end
-        -- install erlang from Bob prebuilt release
-        mainPath = ctx.path .. "/bin"
+        -- install erlang by compilation
+        mainPath = ctx.path .. "/release/bin"
     end
 
     return {
