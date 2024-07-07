@@ -60,7 +60,7 @@ end
 function erlang_utils.get_erlang_release_verions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/versions.txt"
 
-    local PRE_BUILT_OS_RELEASE = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+    -- local PRE_BUILT_OS_RELEASE = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
 
     -- if erlang_utils.get_config_from_env("USE_PREBUILT_OTP") then
     --     -- FIXME: replace to release branch
@@ -71,17 +71,10 @@ function erlang_utils.get_erlang_release_verions()
         url = search_url
     })
     local result = {}
-    local prefix = "OTP-"
     for version in string.gmatch(resp.body, '([^\n]+)') do
-        if version:sub(1, #prefix) == prefix and PRE_BUILT_OS_RELEASE then
-            table.insert(result, {
-                version = version
-            })
-        else
-            table.insert(result, {
-                version = version
-            })
-        end
+        table.insert(result, {
+            version = version
+        })
     end
     return result
 end
