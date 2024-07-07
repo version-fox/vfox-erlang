@@ -58,21 +58,30 @@ function erlang_utils.directory_exists(path)
 end
 
 function erlang_utils.get_erlang_release_verions()
-    local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
+    local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/versions.txt"
 
-    if erlang_utils.get_config_from_env("USE_PREBUILT_OTP") then
-        -- FIXME: replace to release branch
-        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/prebuilt_versions.txt"
-    end
+    local PRE_BUILT_OS_RELEASE = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+
+    -- if erlang_utils.get_config_from_env("USE_PREBUILT_OTP") then
+    --     -- FIXME: replace to release branch
+    --     search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@support-download-bin/assets/prebuilt_versions.txt"
+    -- end
 
     local resp, err = http.get({
         url = search_url
     })
     local result = {}
+    local prefix = "OTP-"
     for version in string.gmatch(resp.body, '([^\n]+)') do
-        table.insert(result, {
-            version = version
-        })
+        if version:sub(1, #prefix) == prefix and PRE_BUILT_OS_RELEASE then
+            table.insert(result, {
+                version = version
+            })
+        else
+            table.insert(result, {
+                version = version
+            })
+        end
     end
     return result
 end

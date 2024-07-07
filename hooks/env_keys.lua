@@ -14,9 +14,10 @@ function PLUGIN:EnvKeys(ctx)
         if not erlangUtils.directory_exists(ctx.path .. "/release/bin") then
             -- install erlang from Bob prebuilt release
             mainPath = ctx.path .. "/bin"
+        else
+            -- install erlang by compilation
+            mainPath = ctx.path .. "/release/bin"
         end
-        -- install erlang by compilation
-        mainPath = ctx.path .. "/release/bin"
     end
 
     return {
