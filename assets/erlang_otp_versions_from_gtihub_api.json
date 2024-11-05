@@ -130,6 +130,16 @@
         "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjcuMC1yYzE="
     },
     {
+        "name": "OTP-26.2.5.5",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-26.2.5.5",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-26.2.5.5",
+        "commit": {
+            "sha": "57f154f5ceb592ffa5360f7e338577fa04aa0d5f",
+            "url": "https://api.github.com/repos/erlang/otp/commits/57f154f5ceb592ffa5360f7e338577fa04aa0d5f"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjYuMi41LjU="
+    },
+    {
         "name": "OTP-26.2.5.4",
         "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-26.2.5.4",
         "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-26.2.5.4",
