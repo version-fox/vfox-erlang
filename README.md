@@ -37,14 +37,14 @@ sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-
 
 You can reference the E2E test in Ubuntu 20.04: [.github/workflows/e2e_test_linux.yaml](.github/workflows/e2e_test_linux.yaml)
 
-### install in Darwin (MacOS 12)
+### install in Darwin (MacOS 13)
 
 ```shell
 # install utilities
 brew install autoconf libxslt fop wxwidgets openssl
 ```
 
-You can reference the E2E test in MacOS 12: [.github/workflows/e2e_test_darwin.yaml](.github/workflows/e2e_test_darwin.yaml)
+You can reference the E2E test in MacOS 13: [.github/workflows/e2e_test_darwin.yaml](.github/workflows/e2e_test_darwin.yaml)
 
 ### Note
 
