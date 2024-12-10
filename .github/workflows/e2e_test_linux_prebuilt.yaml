@@ -1,0 +1,48 @@
+name: E2E tests on Linux (Prebuilt release)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
+
+jobs:
+  e2e_tests:
+    strategy:
+      matrix:
+        # ref: https://github.com/actions/runner-images
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install vfox (Linux)
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
+          sudo apt-get update
+          sudo apt-get install vfox
+
+      - name: add vfox-erlang plugin (Unix-like) 
+        run: |
+          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
+      
+      - name: prepare Erlang/OTP deps (Linux)
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+      
+      - name: install Erlang/OTP by vfox-erlang plugin (Linux)
+        run: |
+          export MAKEFLAGS=-j4
+          export USE_PREBUILT_OTP="ubuntu-20.04"
+          vfox install erlang@master
+          vfox use -g erlang@master
+          eval "$(vfox activate bash)"
+          echo "===============PATH==============="
+          echo $PATH
+          echo "===============PATH==============="
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
