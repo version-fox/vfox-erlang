@@ -37,8 +37,8 @@ jobs:
         run: |
           export MAKEFLAGS=-j4
           export USE_PREBUILT_OTP="ubuntu-20.04"
-          vfox install erlang@master
-          vfox use -g erlang@master
+          vfox install erlang@maint-27
+          vfox use -g erlang@maint-27
           eval "$(vfox activate bash)"
           echo "===============PATH==============="
           echo $PATH
