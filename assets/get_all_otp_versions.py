@@ -48,8 +48,12 @@ if __name__ == "__main__":
     update_all_version_from_github_api()
     versions = list(get_all_version())
     versions.sort(reverse=True)
-    versions = versions + get_all_prebuilt_version_from_bob()
     # print(versions)
     with open("versions.txt", 'w') as file:
         for version in versions:
+            file.write(version + '\n')
+    with open("prebuilt_versions.txt", 'w') as file:
+        prebuilt_versions = get_all_prebuilt_version_from_bob()
+        prebuilt_versions.sort(reverse=True)
+        for version in prebuilt_versions:
             file.write(version + '\n')

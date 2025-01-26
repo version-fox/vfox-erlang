@@ -82,3 +82,18 @@ Invoke-Expression "$(vfox activate pwsh)"
 ```
 
 You can reference the E2E test in in windows-2022: [.github/workflows/e2e_test_windows.yaml](.github/workflows/e2e_test_windows.yaml)
+
+## install a prebuilt Erlang/OTP version
+
+After vfox-erlang v1.1.0, you can also install a prebuilt Erlang/OTP version in Ubuntu linux system. 
+
+**Before install, you must disable vfox search cache.** Reference: [https://vfox.lhan.me/guides/configuration.html#cache-settings](https://vfox.lhan.me/guides/configuration.html#cache-settings)
+
+This is an installation example in Bash Shell:
+
+```shell
+# install an available version, you can also a avaliable version in: https://bobs-list.kobrakai.de/
+USE_PREBUILT_OTP="ubuntu-20.04" vfox search erlang
+```
+
+**USE_PREBUILT_OTP** var value is one of: ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"].
