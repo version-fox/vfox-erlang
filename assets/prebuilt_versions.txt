@@ -11,6 +11,7 @@ maint-19
 maint-18
 maint-17
 maint
+OTP-27.2.2
 OTP-27.2.1
 OTP-27.2
 OTP-27.1.3
