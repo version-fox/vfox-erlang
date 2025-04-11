@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         # ref: https://github.com/actions/runner-images
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
       - name: install Erlang/OTP by vfox-erlang plugin (Linux)
         run: |
           export MAKEFLAGS=-j4
-          export USE_PREBUILT_OTP="ubuntu-20.04"
+          export USE_PREBUILT_OTP="ubuntu-22.04"
           vfox install erlang@maint-27
           vfox use -g erlang@maint-27
           eval "$(vfox activate bash)"

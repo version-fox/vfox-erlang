@@ -28,7 +28,7 @@ vfox-erlang plugin would install Erlang/OTP through the [Erlang/OTP](https://www
 
 Here are examples of installing on Ubuntu 20.04 and MacOS 13.
 
-### install in Linux (Ubuntu 20.04)
+### install in Linux (Ubuntu 20.04/22.04)
 
 ```shell
 # install utilities
