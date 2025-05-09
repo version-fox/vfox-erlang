@@ -41,6 +41,8 @@ jobs:
       - name: test installation
         if: runner.os == 'Windows'
         run: |
+          echo $env:__VFOX_SHELL
+          echo $env:__VFOX_CURTMPPATH
           cat $PROFILE
           vfox use -g erlang@25.3.2.12
           echo "===============PATH==============="
