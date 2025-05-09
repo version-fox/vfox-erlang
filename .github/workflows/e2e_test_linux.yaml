@@ -1,12 +1,12 @@
 name: E2E tests on Linux
 
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
-  schedule:
-    # Runs at 12am UTC
-    - cron: '0 0 * * *'
+# on:
+#   push:
+#   pull_request:
+#   workflow_dispatch:
+#   schedule:
+#     # Runs at 12am UTC
+#     - cron: '0 0 * * *'
 
 jobs:
   e2e_tests:
@@ -24,8 +24,6 @@ jobs:
           echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
           sudo apt-get update
           sudo apt-get install vfox
-          # Hook Shell
-          echo 'eval "$(vfox activate bash)"' >> ~/.bashrc
 
       - name: add vfox-erlang plugin (Unix-like) 
         run: |

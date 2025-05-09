@@ -1,13 +1,12 @@
 name: E2E tests on Linux (Prebuilt release)
 
-# on:
-#   push:
-#     branches: [main]
-#   pull_request:
-#   workflow_dispatch:
-#   schedule:
-#     # Runs at 12am UTC
-#     - cron: '0 0 * * *'
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
 
 jobs:
   e2e_tests:
@@ -34,12 +33,18 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
       
       - name: install Erlang/OTP by vfox-erlang plugin (Linux)
+        shell: bash
         run: |
           export MAKEFLAGS=-j4
           export USE_PREBUILT_OTP="ubuntu-22.04"
           vfox install erlang@maint-27
+          # Hook Shell
+          echo 'eval "$(vfox activate bash)"' >> ~/.bashrc
+
+      - name: test installation
+        shell: bash -l {0} # use login shell to load .bashrc:
+        run: |
           vfox use -g erlang@maint-27
-          eval "$(vfox activate bash)"
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
