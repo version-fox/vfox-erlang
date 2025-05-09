@@ -40,8 +40,9 @@ jobs:
           # vfox activate pwsh | Out-File -FilePath vfox_env.ps1
       - name: test installation
         if: runner.os == 'Windows'
-        shell: powershell -NoExit -Interactive -Command ". '{0}'"
+        shell: pwsh
         run: |
+          . $PROFILE
           # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
           # cat vfox_env.ps1
           # & .\vfox_env.ps1
