@@ -45,9 +45,9 @@ jobs:
           & .\vfox_env.ps1
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
+          vfox use -g erlang@25.3.2.12
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
-          vfox use -g erlang@25.3.2.12
-          & erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
-          & erl.exe -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
+          erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
+          erl.exe -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
