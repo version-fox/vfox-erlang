@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         # ref: https://github.com/actions/runner-images
-        os: [windows-2019, windows-2022]
+        os: [windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -37,11 +37,12 @@ jobs:
         run: |
           vfox install erlang@25.3.2.12
           if (-not (Test-Path -Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content -Path $PROFILE -Value 'Invoke-Expression "$(vfox activate pwsh)"'
+          cat $PROFILE
       - name: test installation
         if: runner.os == 'Windows'
         run: |
           Invoke-Expression "$(vfox activate pwsh)"
-          vfox use erlang@25.3.2.12
+          vfox use -g erlang@25.3.2.12
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
