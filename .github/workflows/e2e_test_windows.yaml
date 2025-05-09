@@ -42,7 +42,7 @@ jobs:
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
           cat vfox_env.ps1
-          & vfox_env.ps1
+          & .\vfox_env.ps1
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
           cat $PROFILE
