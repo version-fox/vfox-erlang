@@ -36,11 +36,11 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           vfox install erlang@25.3.2.12
+          vfox activate pwsh | Out-File -FilePath vfox_env.ps1
       - name: test installation
         if: runner.os == 'Windows'
         run: |
-          vfox activate pwsh > vfox_env.ps1
-          . vfox_env.ps1
+          & vfox_env.ps1
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
           cat $PROFILE
