@@ -40,6 +40,7 @@ jobs:
       - name: test installation
         if: runner.os == 'Windows'
         run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
           cat vfox_env.ps1
           & vfox_env.ps1
           echo $env:__VFOX_SHELL
