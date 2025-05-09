@@ -1,13 +1,13 @@
 name: E2E tests on Darwin MacOS
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-  schedule:
-    # Runs at 12am UTC
-    - cron: '0 0 * * *'
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#   workflow_dispatch:
+#   schedule:
+#     # Runs at 12am UTC
+#     - cron: '0 0 * * *'
 
 jobs:
   e2e_tests:

@@ -2,7 +2,6 @@ name: E2E tests on Windows
 
 on:
   push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
   schedule:
@@ -38,6 +37,8 @@ jobs:
         run: |
           vfox install erlang@25.3.2.12
           vfox use erlang@25.3.2.12
+          if (-not (Test-Path -Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content -Path $PROFILE -Value 'Invoke-Expression "$(vfox activate pwsh)"'
+          Invoke-Expression "$(vfox activate pwsh)"
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
