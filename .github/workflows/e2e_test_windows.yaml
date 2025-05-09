@@ -36,13 +36,15 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           vfox install erlang@25.3.2.12
-          vfox activate pwsh | Out-File -FilePath vfox_env.ps1
+          if (-not (Test-Path -Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content -Path $PROFILE -Value 'Invoke-Expression "$(vfox activate pwsh)"'
+          # vfox activate pwsh | Out-File -FilePath vfox_env.ps1
       - name: test installation
         if: runner.os == 'Windows'
+        shell: powershell -NoExit -command ". '{0}'"
         run: |
-          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-          cat vfox_env.ps1
-          & .\vfox_env.ps1
+          # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+          # cat vfox_env.ps1
+          # & .\vfox_env.ps1
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
           vfox use -g erlang@25.3.2.12
