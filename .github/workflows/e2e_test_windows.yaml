@@ -36,12 +36,12 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           vfox install erlang@25.3.2.12
-          vfox use erlang@25.3.2.12
           if (-not (Test-Path -Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content -Path $PROFILE -Value 'Invoke-Expression "$(vfox activate pwsh)"'
       - name: test installation
         if: runner.os == 'Windows'
         run: |
           Invoke-Expression "$(vfox activate pwsh)"
+          vfox use erlang@25.3.2.12
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
