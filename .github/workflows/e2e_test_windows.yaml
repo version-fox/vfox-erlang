@@ -46,6 +46,7 @@ jobs:
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
           vfox use -g erlang@25.3.2.12
+          & .\vfox_env.ps1
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
