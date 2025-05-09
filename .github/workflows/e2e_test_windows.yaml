@@ -45,7 +45,6 @@ jobs:
           & .\vfox_env.ps1
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
-          cat $PROFILE
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
