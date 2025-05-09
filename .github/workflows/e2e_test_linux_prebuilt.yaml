@@ -44,7 +44,7 @@ jobs:
       - name: test installation
         shell: bash --norc -l -e -o pipefail {0} # use login shell to load .bashrc:
         run: |
-          vfox use -g erlang@maint-27
+          vfox use -s erlang@maint-27
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
