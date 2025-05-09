@@ -40,7 +40,7 @@ jobs:
           # vfox activate pwsh | Out-File -FilePath vfox_env.ps1
       - name: test installation
         if: runner.os == 'Windows'
-        shell: powershell -NoExit -command ". '{0}'"
+        shell: powershell -NoExit -Interactive -Command ". '{0}'"
         run: |
           # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
           # cat vfox_env.ps1
@@ -48,7 +48,7 @@ jobs:
           echo $env:__VFOX_SHELL
           echo $env:__VFOX_CURTMPPATH
           vfox use -g erlang@25.3.2.12
-          & .\vfox_env.ps1
+          # & .\vfox_env.ps1
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="
