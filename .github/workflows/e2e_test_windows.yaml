@@ -1,12 +1,12 @@
 name: E2E tests on Windows
 
-# on:
-#   push:
-#   pull_request:
-#   workflow_dispatch:
-#   schedule:
-#     # Runs at 12am UTC
-#     - cron: '0 0 * * *'
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
 
 jobs:
   e2e_tests:
@@ -42,14 +42,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          . $PROFILE
-          # Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-          # cat vfox_env.ps1
-          # & .\vfox_env.ps1
-          echo $env:__VFOX_SHELL
-          echo $env:__VFOX_CURTMPPATH
+          Invoke-Expression "vfox env -s pwsh"
           vfox use -g erlang@25.3.2.12
-          # & .\vfox_env.ps1
           echo "===============PATH==============="
           echo $env:PATH
           echo "===============PATH==============="

@@ -39,7 +39,7 @@ jobs:
           export USE_PREBUILT_OTP="ubuntu-22.04"
           vfox install erlang@maint-27
           # Hook Shell
-          # echo 'eval "$(vfox activate bash)"' >> "$HOME/.bash_profile"
+          echo 'eval "$(vfox activate bash)"' >> "$HOME/.bash_profile"
 
       - name: test installation
         shell: bash --norc -l -e -o pipefail {0} # use login shell to load .bashrc:
