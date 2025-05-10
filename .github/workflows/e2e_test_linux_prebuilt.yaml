@@ -48,9 +48,10 @@ jobs:
           source "$HOME/.bash_profile"
           echo $__VFOX_PID
           echo $__VFOX_SHELL
+          vfox env -s bash
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
           cd assets
-          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/bin/erlc hello.erl
-          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/bin/erl -noshell -s hello hello_world -s init stop
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
