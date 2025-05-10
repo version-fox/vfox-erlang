@@ -52,5 +52,5 @@ jobs:
           echo $PATH
           echo "===============PATH==============="
           cd assets
-          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/erlc hello.erl
-          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/erl -noshell -s hello hello_world -s init stop
+          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/bin/erlc hello.erl
+          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/bin/erl -noshell -s hello hello_world -s init stop
