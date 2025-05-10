@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   schedule:
     # Runs at 12am UTC
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   e2e_tests:
@@ -18,16 +18,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: install vfox (MacOS)
         if: runner.os == 'MacOS'
         run: |
           brew tap version-fox/tap
-          brew install vfox
+          brew install vfox@0.6.4
 
-      - name: add vfox-erlang plugin (Unix-like) 
+      - name: add vfox-erlang plugin (Unix-like)
         run: |
-          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang          
+          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
