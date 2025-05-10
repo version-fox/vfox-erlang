@@ -40,7 +40,7 @@ jobs:
           # vfox activate pwsh | Out-File -FilePath vfox_env.ps1
       - name: test installation
         if: runner.os == 'Windows'
-        shell: pwsh -command "&'$PROFILE'; . '{0}'"
+        shell: powershell -Command "&'$PROFILE'; . '{0}'"
         run: |
           Invoke-Expression "vfox env -s pwsh"
           vfox use -g erlang@25.3.2.12
