@@ -48,6 +48,7 @@ jobs:
           source "$HOME/.bash_profile"
           echo $__VFOX_PID
           echo $__VFOX_SHELL
+          echo $PROMPT_COMMAND
           vfox env -s bash
           echo "===============PATH==============="
           echo $PATH
