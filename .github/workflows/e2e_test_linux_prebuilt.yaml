@@ -45,6 +45,7 @@ jobs:
         shell: bash --norc -l -e -o pipefail {0} # use login shell to load .bashrc:
         run: |
           vfox use -s erlang@maint-27
+          eval "$(vfox activate bash)"
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
