@@ -49,7 +49,7 @@ jobs:
           echo $__VFOX_PID
           echo $__VFOX_SHELL
           echo $PROMPT_COMMAND
-          eval $PROMPT_COMMAND
+          eval "$(vfox env -s bash)"
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
