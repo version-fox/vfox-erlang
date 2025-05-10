@@ -46,9 +46,11 @@ jobs:
         run: |
           vfox use -s erlang@maint-27
           source "$HOME/.bash_profile"
+          echo $__VFOX_PID
+          echo $__VFOX_SHELL
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
           cd assets
-          erlc hello.erl
-          erl -noshell -s hello hello_world -s init stop
+          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/erlc hello.erl
+          $HOME/.version-fox/cache/erlang/v-maint-27/erlang-maint-27/erl -noshell -s hello hello_world -s init stop
