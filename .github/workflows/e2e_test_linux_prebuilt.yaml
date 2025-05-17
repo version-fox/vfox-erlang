@@ -24,7 +24,8 @@ jobs:
           git clone https://github.com/version-fox/vfox.git
           cd vfox
           go build -o vfox
-          echo "$pwd" >> $GITHUB_PATH
+          chmod +x vfox
+          cp vfox /usr/local/bin
 
       - name: add vfox-erlang plugin (Unix-like) 
         run: |
