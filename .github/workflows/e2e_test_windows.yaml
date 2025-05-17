@@ -40,7 +40,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           vfox install erlang@25.3.2.12
-          vfox use erlang@25.3.2.12
+          vfox --debug use erlang@25.3.2.12
           Invoke-Expression "$(vfox activate pwsh)"
           echo "===============PATH==============="
           echo $env:PATH
