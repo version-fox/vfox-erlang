@@ -2,7 +2,7 @@ name: E2E tests on Linux (Prebuilt release)
 
 on:
   push:
-    branches: [main]
+    # branches: [main]
   pull_request:
   workflow_dispatch:
   schedule:
@@ -19,14 +19,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install vfox (Linux)
+      - name: build vfox (Linux)
         run: |
-          echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
-          sudo apt-get update
-          sudo apt-get install vfox=0.6.4
+          git clone https://github.com/version-fox/vfox.git
+          cd vfox
+          go build -o vfox
+          echo "$pwd" >> $GITHUB_PATH
 
       - name: add vfox-erlang plugin (Unix-like) 
         run: |
+          vfox -version
           vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
       
       - name: prepare Erlang/OTP deps (Linux)
