@@ -19,11 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install vfox (Linux)
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.24.2' # The Go version to download (if necessary) and use.
+
+      - name: build vfox (Linux)
         run: |
-          echo "deb [trusted=yes] https://apt.fury.io/versionfox/ /" | sudo tee /etc/apt/sources.list.d/versionfox.list
-          sudo apt-get update
-          sudo apt-get install vfox=0.6.4
+          git clone https://github.com/version-fox/vfox.git
+          cd vfox
+          go build -o vfox
+          chmod +x vfox
+          cp vfox /usr/local/bin
 
       - name: add vfox-erlang plugin (Unix-like) 
         run: |
