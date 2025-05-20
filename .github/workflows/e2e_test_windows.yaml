@@ -19,14 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install scoop (Windows)
-        if: runner.os == 'Windows'
-        uses: MinoruSekine/setup-scoop@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.24.2' # The Go version to download (if necessary) and use.
 
-      - name: install vfox (Windows)
-        if: runner.os == 'Windows'
+      - name: build vfox (Windows)
         run: |
-          scoop install vfox@0.6.4
+          git clone https://github.com/version-fox/vfox.git
+          cd vfox
+          go build -o vfox.exe
+          echo "$pwd" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          ./vfox.exe -version
 
       - name: add vfox-erlang plugin (Windows)
         if: runner.os == 'Windows'
