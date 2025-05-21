@@ -30,6 +30,13 @@ function PLUGIN:PreInstall(ctx)
                 "Make sure the USE_PREBUILT environment variable is set to one of the following values: ubuntu-20.04, ubuntu-22.04, ubuntu-24.04")
         end
         download_url = "https://builds.hex.pm/builds/otp/" .. RUNTIME.archType .. "/" .. PRE_BUILT_OS_RELEASE .. "/" .. erlang_version .. ".tar.gz"
+    elseif RUNTIME.osType == "darwin" and PRE_BUILT_OS_RELEASE then
+        local SUPPORT_OS_RELEASE = { "x86_64-apple-darwin", "aarch64-apple-darwin" }
+        if not erlangUtils.array_contains(SUPPORT_OS_RELEASE, PRE_BUILT_OS_RELEASE) then
+            error(
+                "For macOS, USE_PREBUILT_OTP must be set to 'x86_64-apple-darwin' or 'aarch64-apple-darwin'")
+        end
+        download_url = "https://github.com/erlef/otp_builds/releases/download/" .. erlang_version .. "/otp-" .. PRE_BUILT_OS_RELEASE .. ".tar.gz"
     else
         download_url = "https://github.com/erlang/otp/archive/refs/tags/OTP-" .. erlang_version .. ".tar.gz"
     end

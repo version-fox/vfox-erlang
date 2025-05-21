@@ -83,17 +83,44 @@ Invoke-Expression "$(vfox activate pwsh)"
 
 You can reference the E2E test in in windows-2022: [.github/workflows/e2e_test_windows.yaml](.github/workflows/e2e_test_windows.yaml)
 
-## install a prebuilt Erlang/OTP version
+## Install a Prebuilt Erlang/OTP Version
 
-After vfox-erlang v1.1.0, you can also install a prebuilt Erlang/OTP version in Ubuntu linux system. 
+After vfox-erlang v1.1.0, you can install prebuilt Erlang/OTP versions, which can be significantly faster than compiling from source.
 
-**Before install, you must disable vfox search cache.** Reference: [https://vfox.lhan.me/guides/configuration.html#cache-settings](https://vfox.lhan.me/guides/configuration.html#cache-settings)
+**Before installing, you might need to disable the vfox search cache if you encounter issues finding prebuilt versions.** Reference: [https://vfox.lhan.me/guides/configuration.html#cache-settings](https://vfox.lhan.me/guides/configuration.html#cache-settings)
 
-This is an installation example in Bash Shell:
+To use a prebuilt binary, set the `USE_PREBUILT_OTP` environment variable before running `vfox install` or `vfox search`.
 
+### For Linux (Ubuntu)
+
+Prebuilt binaries for Ubuntu are sourced from `https://builds.hex.pm/builds/otp/`.
+
+Example:
 ```shell
-# install an available version, you can also a avaliable version in: https://bobs-list.kobrakai.de/
+# Search for available prebuilt versions for Ubuntu 20.04
 USE_PREBUILT_OTP="ubuntu-20.04" vfox search erlang
-```
 
-**USE_PREBUILT_OTP** var value is one of: ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"].
+# Install a specific version
+USE_PREBUILT_OTP="ubuntu-20.04" vfox install erlang@26.2.2
+```
+Supported `USE_PREBUILT_OTP` values for Linux include: "ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04". Ensure the Erlang version you wish to install is available for your chosen Ubuntu release at `https://builds.hex.pm/builds/otp/`.
+
+### For macOS (Darwin)
+
+Prebuilt binaries for macOS (x86_64 and Apple Silicon/aarch64) are sourced from `https://github.com/erlef/otp_builds`.
+
+Set `USE_PREBUILT_OTP` to your target architecture:
+- For Intel (x86_64): `export USE_PREBUILT_OTP="x86_64-apple-darwin"`
+- For Apple Silicon (aarch64): `export USE_PREBUILT_OTP="aarch64-apple-darwin"`
+
+Example:
+```shell
+# Install on Apple Silicon
+export USE_PREBUILT_OTP="aarch64-apple-darwin"
+vfox install erlang@OTP-27.0.1 
+
+# Install on Intel Mac
+export USE_PREBUILT_OTP="x86_64-apple-darwin"
+vfox install erlang@OTP-27.0.1
+```
+**Note:** Ensure the Erlang/OTP version (e.g., `OTP-27.0.1`) you specify with `vfox install erlang@<version>` is available as a prebuilt release at `https://github.com/erlef/otp_builds/releases`. The version format for these prebuilt binaries typically includes "OTP-", like `OTP-27.0.1`, which might differ from the source release tags (e.g., `27.0.1`). You can check the available tags on the `erlef/otp_builds` releases page.
