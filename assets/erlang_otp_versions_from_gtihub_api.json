@@ -1,5 +1,15 @@
 [
     {
+        "name": "patch-base-27",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/patch-base-27",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/patch-base-27",
+        "commit": {
+            "sha": "c388a2d1b3f9918652276d4798692dd4d8ef97fc",
+            "url": "https://api.github.com/repos/erlang/otp/commits/c388a2d1b3f9918652276d4798692dd4d8ef97fc"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9wYXRjaC1iYXNlLTI3"
+    },
+    {
         "name": "patch-base-26",
         "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/patch-base-26",
         "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/patch-base-26",
@@ -48,6 +58,16 @@
             "url": "https://api.github.com/repos/erlang/otp/commits/6cff38512b753172a7dfa2bedd60e8987156736d"
         },
         "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9SMTZCMDJfeWllbGRpbmdfYmluYXJ5X3RvX3Rlcm0="
+    },
+    {
+        "name": "OTP-28.0",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-28.0",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-28.0",
+        "commit": {
+            "sha": "9e6f6742c4d9e9915ee8af0dcb7d97cf1f836116",
+            "url": "https://api.github.com/repos/erlang/otp/commits/9e6f6742c4d9e9915ee8af0dcb7d97cf1f836116"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjguMA=="
     },
     {
         "name": "OTP-28.0-rc4",

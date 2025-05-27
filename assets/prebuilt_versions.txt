@@ -1,4 +1,5 @@
 master
+maint-28
 maint-27
 maint-26
 maint-25
@@ -15,6 +16,7 @@ OTP-28.0-rc4
 OTP-28.0-rc3
 OTP-28.0-rc2
 OTP-28.0-rc1
+OTP-28.0
 OTP-27.3.4
 OTP-27.3.3
 OTP-27.3.2
