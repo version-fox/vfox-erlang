@@ -1,0 +1,104 @@
+name: E2E tests on macOS (Prebuilt release)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *' # daily at midnight
+  workflow_dispatch:
+
+jobs:
+  e2e_tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        arch: [x86_64, arm64]
+        erlang_version: [OTP-27.0.1] # Check assets/prebuilt_versions.txt for available versions
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build vfox (macOS)
+        shell: bash
+        run: |
+          git clone https://github.com/version-fox/vfox.git ../vfox-repo
+          cd ../vfox-repo
+          go build -ldflags="-s -w" -o ./vfox main.go
+          echo "Built vfox at $(pwd)/vfox"
+          echo "$(pwd)" >> $GITHUB_PATH
+          vfox --version
+          cd $GITHUB_WORKSPACE
+
+      - name: Add vfox-erlang plugin
+        shell: bash
+        env:
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          echo "Attempting to add plugin from source: https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip"
+          vfox add --source "https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip" erlang
+          vfox info erlang
+
+      - name: Set Prebuilt Env for macOS
+        run: |
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            echo "USE_PREBUILT_OTP=aarch64-apple-darwin" >> $GITHUB_ENV
+            echo "Selected aarch64-apple-darwin for arm64"
+          else
+            echo "USE_PREBUILT_OTP=x86_64-apple-darwin" >> $GITHUB_ENV
+            echo "Selected x86_64-apple-darwin for x86_64"
+          fi
+        shell: bash
+
+      - name: Install Erlang/OTP
+        shell: bash
+        run: |
+          echo "USE_PREBUILT_OTP is: $USE_PREBUILT_OTP"
+          export MAKEFLAGS=-j4 # May not be needed for prebuilt, but harmless
+          echo "Installing Erlang/OTP ${{ matrix.erlang_version }}..."
+          vfox install erlang@${{ matrix.erlang_version }}
+          echo "Installation completed."
+          vfox use -g erlang@${{ matrix.erlang_version }}
+          echo "Set global version."
+          echo ">>>>> vfox version: $(vfox --version)"
+          echo ">>>>> current vfox erlang: $(vfox current erlang)"
+          eval "$(vfox activate bash)"
+          echo "vfox activated."
+
+      - name: Verify Installation
+        shell: bash
+        run: |
+          echo "PATH is: $PATH"
+          which erl
+          erl -version
+          echo "Navigating to assets directory: $GITHUB_WORKSPACE/assets"
+          cd "$GITHUB_WORKSPACE/assets"
+          ls -la
+          echo "Compiling hello.erl..."
+          erlc hello.erl
+          echo "Running hello_world..."
+          erl -noshell -s hello hello_world -s init stop
+          echo "Erlang test script executed successfully."
+          # Check if specific files exist from prebuilt package if needed
+          # Example: check for a common lib or include file
+          # ls -l $(dirname $(which erl))/../lib/
+          # ls -l $(dirname $(which erl))/../erts-*/include/
+          # if [ ! -d "$(dirname $(which erl))/../lib/asn1" ]; then
+          #   echo "Error: asn1 library not found"
+          #   exit 1
+          # fi
+          # if [ ! -f "$(dirname $(which erl))/../erts-$(erl -noshell -eval 'io:format("~s", [erlang:system_info(version)]).' -s init stop)/include/erl_nif.h" ]; then
+          #  echo "Error: erl_nif.h not found"
+          #  exit 1
+          # fi
+          echo "Prebuilt Erlang/OTP ${{ matrix.erlang_version }} on ${{ matrix.arch }} verified."
