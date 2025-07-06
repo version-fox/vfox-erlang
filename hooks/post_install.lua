@@ -32,8 +32,8 @@ function PLUGIN:PostInstall(ctx)
         if RUNTIME.osType == "darwin" then
             -- For MacOS prebuilts from @erlef/otp_builds, the tarball contains a ready-to-use installation
             -- We need to move the contents to a 'release' subdirectory to match expected structure
-            local move_cmd = "cd " .. install_path .. " && mkdir -p release && mv * release/ 2>/dev/null || true"
-            local status = os.execute(move_cmd)
+            local setup_cmd = "cd " .. install_path .. " && mkdir -p release && for item in *; do if [ \"$item\" != \"release\" ]; then mv \"$item\" release/; fi; done 2>/dev/null || true"
+            local status = os.execute(setup_cmd)
             if status ~= 0 then
                 error("Erlang/OTP install failed during file organization, please check the stdout for details.")
             end
