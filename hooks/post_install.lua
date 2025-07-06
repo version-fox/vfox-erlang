@@ -28,12 +28,23 @@ function PLUGIN:PostInstall(ctx)
     elseif PRE_BUILT_OS_RELEASE then
         print("Erlang/OTP install from prebuilt release: " .. PRE_BUILT_OS_RELEASE)
         local install_path = ctx.sdkInfo.erlang.path
-        local install_cmd = "cd " .. install_path .. " && ./Install -cross -sasl"
-
-        local status = os.execute(install_cmd)
-        if status ~= 0 then
-            error(
-            "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
+        
+        if RUNTIME.osType == "darwin" then
+            -- For MacOS prebuilts from @erlef/otp_builds, the tarball contains a ready-to-use installation
+            -- We need to move the contents to a 'release' subdirectory to match expected structure
+            local move_cmd = "cd " .. install_path .. " && mkdir -p release && mv * release/ 2>/dev/null || true"
+            local status = os.execute(move_cmd)
+            if status ~= 0 then
+                error("Erlang/OTP install failed during file organization, please check the stdout for details.")
+            end
+        else
+            -- Linux installation using the Install script
+            local install_cmd = "cd " .. install_path .. " && ./Install -cross -sasl"
+            local status = os.execute(install_cmd)
+            if status ~= 0 then
+                error(
+                "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
+            end
         end
     else
         -- use ENV OTP_COMPILE_ARGS to control compile behavior

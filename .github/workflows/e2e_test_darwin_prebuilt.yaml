@@ -1,0 +1,50 @@
+name: E2E tests on Darwin MacOS (Prebuilt release)
+
+on:
+  push:
+    # branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
+
+jobs:
+  e2e_tests:
+    strategy:
+      matrix:
+        # ref: https://github.com/actions/runner-images
+        os: [macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.24.2' # The Go version to download (if necessary) and use.
+
+      - name: build vfox (MacOS)
+        run: |
+          git clone https://github.com/version-fox/vfox.git
+          cd vfox
+          go build -o vfox
+          chmod +x vfox
+          cp vfox /usr/local/bin
+
+      - name: add vfox-erlang plugin (Unix-like) 
+        run: |
+          vfox -version
+          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
+      
+      - name: install Erlang/OTP by vfox-erlang plugin (Darwin prebuilt)
+        run: |
+          export USE_PREBUILT_OTP="macos-13"
+          vfox install erlang@26.2.3
+          vfox use -g erlang@26.2.3
+          eval "$(vfox activate bash)"
+          echo "===============PATH==============="
+          echo $PATH
+          echo "===============PATH==============="
+          cd assets
+          erlc hello.erl
+          erl -noshell -s hello hello_world -s init stop
