@@ -28,11 +28,13 @@ function PLUGIN:PostInstall(ctx)
     elseif PRE_BUILT_OS_RELEASE then
         print("Erlang/OTP install from prebuilt release: " .. PRE_BUILT_OS_RELEASE)
         local install_path = ctx.sdkInfo.erlang.path
-        
+
         if RUNTIME.osType == "darwin" then
             -- For MacOS prebuilts from @erlef/otp_builds, the tarball contains a ready-to-use installation
             -- We need to move the contents to a 'release' subdirectory to match expected structure
-            local setup_cmd = "cd " .. install_path .. " && mkdir -p release && for item in *; do if [ \"$item\" != \"release\" ]; then mv \"$item\" release/; fi; done 2>/dev/null || true"
+            local setup_cmd = "cd " ..
+            install_path ..
+            " && mkdir -p release && for item in *; do if [ \"$item\" != \"release\" ]; then mv \"$item\" release/; fi; done 2>/dev/null || true"
             local status = os.execute(setup_cmd)
             if status ~= 0 then
                 error("Erlang/OTP install failed during file organization, please check the stdout for details.")
@@ -43,7 +45,7 @@ function PLUGIN:PostInstall(ctx)
             local status = os.execute(install_cmd)
             if status ~= 0 then
                 error(
-                "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
+                    "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
             end
         end
     else
@@ -55,19 +57,19 @@ function PLUGIN:PostInstall(ctx)
         local docs_target = os.getenv("DOC_TARGETS") or "chunks"
 
         print(
-        "If you enable some Erlang/OTP features, maybe you can reference this guide: https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1")
+            "If you enable some Erlang/OTP features, maybe you can reference this guide: https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1")
         os.execute("sleep " .. tonumber(3))
         local configure_cmd = "cd " .. path .. " && ./configure --prefix=" .. path .. "/release " .. configure_args
 
         local install_erlang_cmd = "cd " .. path .. "&& make && make install"
         -- install with docs chunk for IDE/REPL docs hits & type hits
         local install_erlang_docs_cmd = "cd " ..
-        path .. " && make docs DOC_TARGETS=" .. docs_target .. " && make install-docs DOC_TARGETS=" .. docs_target
+            path .. " && make docs DOC_TARGETS=" .. docs_target .. " && make install-docs DOC_TARGETS=" .. docs_target
 
         local status = os.execute(configure_cmd .. " && " .. install_erlang_cmd .. " && " .. install_erlang_docs_cmd)
         if status ~= 0 then
             error(
-            "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
+                "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities")
         end
     end
 end
