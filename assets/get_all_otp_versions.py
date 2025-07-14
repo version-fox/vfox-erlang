@@ -10,7 +10,7 @@ def update_all_version_from_github_api():
         url = f"https://api.github.com/repos/erlang/otp/tags?per_page=100&sort=pushed&page={page}"
         response = requests.get(url)
         data = response.json()
-        all_version = all_version + data
+        all_version.extend(data)
     if response.status_code != 200:
         print("Failed to fetch data from github api")
         return
@@ -27,7 +27,7 @@ def get_all_prebuilt_version_from_bob():
     for release in ALLOW_OS_RELEASE:
         url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
         response = requests.get(url)
-        all_version_info = response.text.split("\n")
+        all_version_info.extend(response.text.split("\n"))
 
     all_prebuilt_versions = []
     for version in all_version_info:
@@ -82,8 +82,12 @@ def get_macos_prebuilt_versions():
                         break
                 
                 if has_macos_assets:
-                    all_versions.append(tag_name)
-                    print(f"Found macOS version: {tag_name}")
+                    # Remove 'OTP-' prefix except for special versions like master-latest
+                    processed_version = tag_name
+                    if processed_version.startswith("OTP-"):
+                        processed_version = processed_version[4:]  # Remove 'OTP-' prefix
+                    all_versions.append(processed_version)
+                    print(f"Found macOS version: {tag_name} -> {processed_version}")
             
             page += 1
             # Limit maximum pages to avoid infinite loop
