@@ -85,15 +85,32 @@ You can reference the E2E test in in windows-2022: [.github/workflows/e2e_test_w
 
 ## install a prebuilt Erlang/OTP version
 
-After vfox-erlang v1.1.0, you can also install a prebuilt Erlang/OTP version in Ubuntu linux system. 
+After vfox-erlang v1.1.0, you can also install a prebuilt Erlang/OTP version in Ubuntu linux system and MacOS. 
 
 **Before install, you must disable vfox search cache.** Reference: [https://vfox.lhan.me/guides/configuration.html#cache-settings](https://vfox.lhan.me/guides/configuration.html#cache-settings)
+
+### Linux (Ubuntu)
 
 This is an installation example in Bash Shell:
 
 ```shell
 # install an available version, you can also a avaliable version in: https://bobs-list.kobrakai.de/
 USE_PREBUILT_OTP="ubuntu-20.04" vfox search erlang
+USE_PREBUILT_OTP="ubuntu-20.04" vfox install erlang@26.2.3
 ```
 
-**USE_PREBUILT_OTP** var value is one of: ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"].
+**USE_PREBUILT_OTP** var value for Linux is one of: ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"].
+
+### MacOS
+
+For MacOS, you can use prebuilt Erlang/OTP versions from [@erlef/otp_builds](https://github.com/erlef/otp_builds) by setting the `USE_PREBUILT_OTP` environment variable:
+
+```shell
+# install a prebuilt version for MacOS (automatically detects architecture)
+USE_PREBUILT_OTP=true vfox search erlang
+USE_PREBUILT_OTP=true vfox install erlang@26.2.3
+```
+
+**USE_PREBUILT_OTP** can be set to any non-empty value (e.g., "1", "true", "macos") to enable prebuilt mode.
+
+Supported architectures: amd64, x86_64, arm64, aarch64. macOS uses a dedicated prebuilt version list that differs from the Ubuntu prebuilt versions.

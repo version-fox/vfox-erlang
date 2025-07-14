@@ -2,3 +2,4 @@
 .tool-versions
 *.beam
 available.cache
+.available.cache
