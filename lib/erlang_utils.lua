@@ -66,7 +66,7 @@ function erlang_utils.get_erlang_release_verions()
         -- Choose different prebuilt version lists based on platform
         if RUNTIME.osType == "darwin" then
             -- Use macOS specific prebuilt versions
-            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@copilot/fix-64e3f5aa-3f9e-470f-ae99-95b41288ed0b/assets/macos_prebuilt_versions.txt"
+            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
         else
             -- Use Ubuntu prebuilt versions for Linux
             search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"

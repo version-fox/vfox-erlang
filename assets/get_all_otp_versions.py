@@ -1,6 +1,7 @@
 import json
 import requests
 
+
 # fetch version: -> https://api.github.com/repos/erlang/otp/tags?per_page=100&sort=pushed
 # github api has rate limt: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-tags
 # prefer use local version file
@@ -20,6 +21,7 @@ def update_all_version_from_github_api():
     ) as file:
         json.dump(all_version, file, indent=4)
 
+
 def get_all_prebuilt_version_from_bob():
     # ALLOW_OS_RELEASE = ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"]
     ALLOW_OS_RELEASE = ["ubuntu-20.04"]
@@ -35,32 +37,33 @@ def get_all_prebuilt_version_from_bob():
             all_prebuilt_versions.append(version.split(" ")[0])
     return all_prebuilt_versions
 
+
 def get_macos_prebuilt_versions():
     """Fetch all available macOS prebuilt versions from erlef/otp_builds"""
-    
+
     # GitHub API URL for releases
     api_url = "https://api.github.com/repos/erlef/otp_builds/releases"
-    
+
     all_versions = []
     page = 1
-    
+
     try:
         while True:
             print(f"Fetching macOS prebuilt versions page {page}...")
             url = f"{api_url}?page={page}&per_page=100"
-            
+
             response = requests.get(url)
             if response.status_code != 200:
                 break
-            
+
             releases = response.json()
             if not releases:
                 break
-            
+
             for release in releases:
                 tag_name = release["tag_name"]
                 assets = release["assets"]
-                
+
                 # Check if there are macOS related assets
                 has_macos_assets = False
                 for asset in assets:
@@ -80,25 +83,28 @@ def get_macos_prebuilt_versions():
                     ):
                         has_macos_assets = True
                         break
-                
+
                 if has_macos_assets:
                     # Remove 'OTP-' prefix except for special versions like master-latest
                     processed_version = tag_name
                     if processed_version.startswith("OTP-"):
-                        processed_version = processed_version[4:]  # Remove 'OTP-' prefix
+                        processed_version = processed_version[
+                            4:
+                        ]  # Remove 'OTP-' prefix
                     all_versions.append(processed_version)
                     print(f"Found macOS version: {tag_name} -> {processed_version}")
-            
+
             page += 1
             # Limit maximum pages to avoid infinite loop
             if page > 20:
                 break
-    
+
     except Exception as e:
         print(f"Error fetching macOS prebuilt data: {e}")
         return []
-    
+
     return all_versions
+
 
 def get_all_version():
     version_set = set()
@@ -113,6 +119,7 @@ def get_all_version():
             version_set.add(version)
     return version_set
 
+
 if __name__ == "__main__":
     update_all_version_from_github_api()
     versions = list(get_all_version())
@@ -121,14 +128,14 @@ if __name__ == "__main__":
     with open("versions.txt", "w") as file:
         for version in versions:
             file.write(version + "\n")
-    
+
     # Generate prebuilt versions for Linux
     with open("prebuilt_versions.txt", "w") as file:
         prebuilt_versions = get_all_prebuilt_version_from_bob()
         prebuilt_versions.sort(reverse=True)
         for version in prebuilt_versions:
             file.write(version + "\n")
-    
+
     # Generate prebuilt versions for macOS
     print("\nFetching macOS prebuilt versions...")
     macos_versions = get_macos_prebuilt_versions()
@@ -137,6 +144,8 @@ if __name__ == "__main__":
         with open("macos_prebuilt_versions.txt", "w", encoding="utf-8") as file:
             for version in macos_versions:
                 file.write(version + "\n")
-        print(f"Found {len(macos_versions)} macOS prebuilt versions, saved to macos_prebuilt_versions.txt")
+        print(
+            f"Found {len(macos_versions)} macOS prebuilt versions, saved to macos_prebuilt_versions.txt"
+        )
     else:
         print("No macOS prebuilt versions found.")
