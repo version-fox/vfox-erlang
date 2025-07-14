@@ -38,7 +38,7 @@ jobs:
       
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin prebuilt)
         run: |
-          export USE_PREBUILT_OTP="macos-13"
+          export USE_PREBUILT_OTP="1"
           vfox install erlang@26.2.3
           vfox use -g erlang@26.2.3
           eval "$(vfox activate bash)"

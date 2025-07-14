@@ -2,7 +2,19 @@
 
 ![logo](./assets/vfox-erlang-logo.png)
 
-[![E2E tests on Linux](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml)
+[![E2E tests on Linux](https://github.com### MacOS
+
+For MacOS, you can use prebuilt Erlang/OTP versions from [@erlef/otp_builds](https://github.com/erlef/otp_builds) by setting the `USE_PREBUILT_OTP` environment variable:
+
+```shell
+# install a prebuilt version for MacOS (automatically detects architecture)
+USE_PREBUILT_OTP="1" vfox search erlang
+USE_PREBUILT_OTP="1" vfox install erlang@26.2.3
+```
+
+**USE_PREBUILT_OTP** can be set to any non-empty value (e.g., "1", "true", "macos") to enable prebuilt mode.
+
+Supported architectures: amd64, x86_64, arm64, aarch64. macOS uses a dedicated prebuilt version list that differs from the Ubuntu prebuilt versions.vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml)
 
 </div>
 
@@ -103,12 +115,14 @@ USE_PREBUILT_OTP="ubuntu-20.04" vfox install erlang@26.2.3
 
 ### MacOS
 
-For MacOS, you can use prebuilt Erlang/OTP versions from [@erlef/otp_builds](https://github.com/erlef/otp_builds):
+For MacOS, you can use prebuilt Erlang/OTP versions from [@erlef/otp_builds](https://github.com/erlef/otp_builds) by setting the `USE_PREBUILT_OTP` environment variable:
 
 ```shell
-# install a prebuilt version for MacOS
-USE_PREBUILT_OTP="macos-13" vfox search erlang
-USE_PREBUILT_OTP="macos-13" vfox install erlang@26.2.3
+# install a prebuilt version for MacOS (automatically detects architecture)
+USE_PREBUILT_OTP="1" vfox search erlang
+USE_PREBUILT_OTP="1" vfox install erlang@26.2.3
 ```
 
-**USE_PREBUILT_OTP** var value for MacOS is one of: ["macos-11", "macos-12", "macos-13", "macos-14"].
+**USE_PREBUILT_OTP** can be set to any non-empty value (e.g., "1", "true", "macos") to enable prebuilt mode.
+
+Supported architectures: amd64, x86_64, arm64, aarch64. macOS uses a dedicated prebuilt version list that differs from the Ubuntu prebuilt versions.

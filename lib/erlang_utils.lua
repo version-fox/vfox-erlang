@@ -60,9 +60,17 @@ end
 function erlang_utils.get_erlang_release_verions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
-    if erlang_utils.get_config_from_env("USE_PREBUILT_OTP") then
-        -- search_url = "http://localhost:3000/prebuilt_versions.txt"
-        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
+    -- Use prebuilt versions when USE_PREBUILT_OTP is explicitly set
+    local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+    if use_prebuilt then
+        -- Choose different prebuilt version lists based on platform
+        if RUNTIME.osType == "darwin" then
+            -- Use macOS specific prebuilt versions
+            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@copilot/fix-64e3f5aa-3f9e-470f-ae99-95b41288ed0b/assets/macos_prebuilt_versions.txt"
+        else
+            -- Use Ubuntu prebuilt versions for Linux
+            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
+        end
     end
 
     local resp, err = http.get({
