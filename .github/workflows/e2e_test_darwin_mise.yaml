@@ -1,10 +1,11 @@
+---
 name: E2E tests on Darwin MacOS (mise)
 
 on:
   push:
     branches: [main]
-  pull_request:
-  workflow_dispatch:
+  pull_request: true
+  workflow_dispatch: true
   schedule:
     # Runs at 12am UTC
     - cron: "0 0 * * *"
@@ -19,22 +20,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install mise
-        run: |
-          curl https://mise.run | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: install Erlang/OTP by mise with vfox-erlang plugin (Darwin)
+      - name: install mise and Erlang/OTP via vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
         run: |
+          # Install dependencies
           brew install --force autoconf libxslt fop wxwidgets openssl
+          
+          # Install mise
+          curl https://mise.run | sh
+          
+          # Add mise to PATH for this session and install Erlang
+          export PATH="$HOME/.local/bin:$PATH"
           export MAKEFLAGS=-j4
-          mise use -g vfox:version-fox/vfox-erlang@26.2.3
-          mise exec -- erl -version
+          # Try the standard mise approach for vfox plugins
+          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3 || {
+            echo "Standard approach failed, trying manual plugin installation..."
+            $HOME/.local/bin/mise plugin install vfox:version-fox/vfox-erlang https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip
+            $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
+          }
+          
+          # Test the installation
+          $HOME/.local/bin/mise exec -- erl -version
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
           cd assets
-          mise exec -- erlc hello.erl
-          mise exec -- erl -noshell -s hello hello_world -s init stop
-          mise exec -- erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell
+          $HOME/.local/bin/mise exec -- erlc hello.erl
+          $HOME/.local/bin/mise exec -- erl -noshell -s hello hello_world -s init stop
+          $HOME/.local/bin/mise exec -- erl -eval \
+            'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell

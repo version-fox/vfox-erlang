@@ -1,10 +1,11 @@
+---
 name: E2E tests on Linux (mise)
 
 on:
   push:
     branches: [main]
-  pull_request:
-  workflow_dispatch:
+  pull_request: true
+  workflow_dispatch: true
   schedule:
     # Runs at 12am UTC
     - cron: '0 0 * * *'
@@ -19,35 +20,56 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install mise
-        run: |
-          curl https://mise.run | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      
       - name: prepare Erlang/OTP deps (Linux)
         if: matrix.os != 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
-      
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
+            build-essential autoconf m4 libncurses5-dev \
+            libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev \
+            unixodbc-dev xsltproc fop libxml2-utils libncurses-dev \
+            openjdk-11-jdk
+
       - name: prepare Erlang/OTP deps (Linux)
         if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.2-dev libwxgtk-webview3.2-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
+            build-essential autoconf m4 libncurses5-dev \
+            libwxgtk3.2-dev libwxgtk-webview3.2-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev \
+            unixodbc-dev xsltproc fop libxml2-utils libncurses-dev \
+            openjdk-11-jdk
 
-      - name: install Erlang/OTP by mise with vfox-erlang plugin (Linux)
+      - name: install mise and Erlang/OTP via vfox-erlang plugin (Linux)
         run: |
+          # Install mise
+          curl https://mise.run | sh
+          
+          # Add mise to PATH for this session
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Configure mise and install Erlang (try standard approach first)
           export MAKEFLAGS=-j4
-          mise use -g vfox:version-fox/vfox-erlang@26.2.3
-          mise exec -- erl -version
+          # Try the standard mise approach for vfox plugins
+          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3 || {
+            echo "Standard approach failed, trying manual plugin installation..."
+            $HOME/.local/bin/mise plugin install vfox:version-fox/vfox-erlang https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip
+            $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
+          }
+          
+          # Test the installation
+          $HOME/.local/bin/mise exec -- erl -version
           echo "===============PATH==============="
           echo $PATH
           echo "===============PATH==============="
           cd assets
-          mise exec -- erlc hello.erl
-          mise exec -- erl -noshell -s hello hello_world -s init stop
-          docs=$(mise exec -- erl -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell | grep "List processing functions")
+          $HOME/.local/bin/mise exec -- erlc hello.erl
+          $HOME/.local/bin/mise exec -- erl -noshell -s hello hello_world -s init stop
+          docs=$($HOME/.local/bin/mise exec -- erl -eval \
+            'erlang:display(shell_docs:get_doc(lists)), halt().' \
+            -noshell | grep "List processing functions")
           if [ -n "$docs" ]; then
               echo "erlang built with docs chunk"
           else
