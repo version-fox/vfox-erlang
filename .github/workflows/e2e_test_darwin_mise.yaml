@@ -1,0 +1,43 @@
+name: E2E tests on Darwin MacOS (mise)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e_tests:
+    strategy:
+      matrix:
+        # ref: https://github.com/actions/runner-images
+        os: [macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install mise and Erlang/OTP via vfox-erlang plugin (Darwin)
+        if: runner.os == 'MacOS'
+        run: |
+          # Install dependencies
+          brew install --force autoconf libxslt fop wxwidgets openssl
+          
+          # Install mise
+          curl https://mise.run | sh
+          
+          # Add mise to PATH for this session and install Erlang
+          export PATH="$HOME/.local/bin:$PATH"
+          export MAKEFLAGS=-j4
+          # Try the standard mise approach for vfox plugins
+          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
+          
+          # Test the installation
+          $HOME/.local/bin/mise exec -- erl -version
+          echo "===============PATH==============="
+          echo $PATH
+          echo "===============PATH==============="
+          cd assets
+          $HOME/.local/bin/mise exec -- erlc hello.erl
+          $HOME/.local/bin/mise exec -- erl -noshell -s hello hello_world -s init stop
+          $HOME/.local/bin/mise exec -- erl -eval \
+            'erlang:display(shell_docs:get_doc(lists)), halt().' -noshell

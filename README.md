@@ -2,7 +2,7 @@
 
 ![logo](./assets/vfox-erlang-logo.png)
 
-[![E2E tests on Linux](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml) [![E2E tests on Darwin MacOS (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml) [![E2E tests on Linux (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml)
+[![E2E tests on Linux](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml) [![E2E tests on Darwin MacOS (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml) [![E2E tests on Linux (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml) [![E2E tests on Linux (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml) [![E2E tests on Darwin MacOS (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml)
 
 </div>
 
@@ -114,3 +114,21 @@ USE_PREBUILT_OTP=true vfox install erlang@26.2.3
 **USE_PREBUILT_OTP** can be set to any non-empty value (e.g., "1", "true", "macos") to enable prebuilt mode.
 
 Supported architectures: amd64, x86_64, arm64, aarch64. macOS uses a dedicated prebuilt version list that differs from the Ubuntu prebuilt versions.
+
+## Usage with mise
+
+The vfox-erlang plugin can also be used through [mise](https://mise.jdx.dev/), a popular dev tools manager that supports vfox plugins as a backend.
+
+### Installation with mise
+
+```shell
+# Install and activate erlang through mise using vfox backend
+mise use -g vfox:version-fox/vfox-erlang@26.2.3
+
+# Use mise exec to run erlang commands
+mise exec -- erl -version
+mise exec -- erlc hello.erl
+mise exec -- erl -noshell -s hello hello_world -s init stop
+```
+
+For more information about mise and vfox backend support, see the [mise documentation](https://mise.jdx.dev/dev-tools/backends/vfox.html).
