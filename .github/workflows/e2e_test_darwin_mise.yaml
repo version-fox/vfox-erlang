@@ -29,11 +29,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           export MAKEFLAGS=-j4
           # Try the standard mise approach for vfox plugins
-          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3 || {
-            echo "Standard approach failed, trying manual plugin installation..."
-            $HOME/.local/bin/mise plugin install vfox:version-fox/vfox-erlang https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip
-            $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
-          }
+          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
           
           # Test the installation
           $HOME/.local/bin/mise exec -- erl -version
