@@ -1,5 +1,6 @@
 master-latest
 maint-latest
+maint-28-latest
 maint-27-latest
 maint-26-latest
 maint-25-latest
