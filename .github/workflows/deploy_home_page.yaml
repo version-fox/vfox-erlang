@@ -75,7 +75,8 @@ jobs:
                - Content area margins: Set appropriate padding for each slide (60px top/bottom, 40px left/right)
                - Ensure sufficient spacing between text and background, avoid blocking and overlap
                - Limit content amount per slide to avoid information overload
-               - Implement vertical scrolling for long code blocks instead of shrinking font;
+               - Implement vertical scrolling for long code blocks instead of shrinking font
+               - Use responsive units (%, em, rem, vmin) for scalable layouts;
             
             6. Code display optimization:
                - Use Reveal.js code highlighting plugin
@@ -94,7 +95,12 @@ jobs:
                - Ensure good experience on desktop, tablet, and mobile devices
                - Appropriately reduce font size on mobile devices while maintaining readability
                - Adapt fonts and layout to different screen sizes
-               - Optimize interaction experience for touch devices;
+               - Optimize interaction experience for touch devices
+               - Implement responsive scaling with viewport units (vmin, vmax) for consistent sizing
+               - Use CSS media queries for device-specific adjustments
+               - Ensure content is not cut off or overlapped on any device
+               - Test layouts on various screen sizes to prevent obstruction
+               - Implement proper meta viewport tag for mobile rendering;
             
             9. Technical implementation:
                 - Import latest version of Reveal.js from CDN
