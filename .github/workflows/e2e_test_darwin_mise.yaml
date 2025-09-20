@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         # ref: https://github.com/actions/runner-images
-        os: [macos-13]
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
