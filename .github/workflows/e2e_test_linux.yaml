@@ -51,6 +51,7 @@ jobs:
         run: |
           export MAKEFLAGS=-j4
           vfox install erlang@26.2.3
+          eval "$(vfox activate bash)"
           vfox use -g erlang@26.2.3
           eval "$(vfox activate bash)"
           echo "===============PATH==============="
