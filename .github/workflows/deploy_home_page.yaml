@@ -119,7 +119,7 @@ jobs:
             Project URL: https://github.com/version-fox/vfox-erlang
           api_key: ${{ secrets.IFLOW_API_KEY }}
           # settings_json: ${{ secrets.IFLOW_SETTINGS_JSON }}
-          model: "Qwen3-Coder"
+          model: "glm-4.6"
           timeout: "1800"
           extra_args: "--debug"
 
