@@ -70,6 +70,16 @@
         "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjkuMC1yYzE="
     },
     {
+        "name": "OTP-28.4.1",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-28.4.1",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-28.4.1",
+        "commit": {
+            "sha": "c8fca7e34e4db5d977ccf292cc2490ddb05b5879",
+            "url": "https://api.github.com/repos/erlang/otp/commits/c8fca7e34e4db5d977ccf292cc2490ddb05b5879"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjguNC4x"
+    },
+    {
         "name": "OTP-28.4",
         "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-28.4",
         "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-28.4",
@@ -238,6 +248,16 @@
             "url": "https://api.github.com/repos/erlang/otp/commits/74ed6b0ed20da257f11fc64399a1c8dd4f967fe7"
         },
         "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjguMC1yYzE="
+    },
+    {
+        "name": "OTP-27.3.4.9",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-27.3.4.9",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-27.3.4.9",
+        "commit": {
+            "sha": "4aa809ae4eb4a20ad89c23837376acf179877f39",
+            "url": "https://api.github.com/repos/erlang/otp/commits/4aa809ae4eb4a20ad89c23837376acf179877f39"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjcuMy40Ljk="
     },
     {
         "name": "OTP-27.3.4.8",
@@ -508,6 +528,16 @@
             "url": "https://api.github.com/repos/erlang/otp/commits/b74bd21d5cb52e0fdc5ea321439c428783feea23"
         },
         "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjcuMC1yYzE="
+    },
+    {
+        "name": "OTP-26.2.5.18",
+        "zipball_url": "https://api.github.com/repos/erlang/otp/zipball/refs/tags/OTP-26.2.5.18",
+        "tarball_url": "https://api.github.com/repos/erlang/otp/tarball/refs/tags/OTP-26.2.5.18",
+        "commit": {
+            "sha": "8c304e09e4d9301f56f6d7b2c4c9f60b4f9d9425",
+            "url": "https://api.github.com/repos/erlang/otp/commits/8c304e09e4d9301f56f6d7b2c4c9f60b4f9d9425"
+        },
+        "node_id": "MDM6UmVmMzc0OTI3OnJlZnMvdGFncy9PVFAtMjYuMi41LjE4"
     },
     {
         "name": "OTP-26.2.5.17",
