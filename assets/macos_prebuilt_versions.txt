@@ -4,6 +4,7 @@ maint-28-latest
 maint-27-latest
 maint-26-latest
 maint-25-latest
+29.0-rc2
 29.0-rc1
 28.4.1
 28.4
