@@ -1,0 +1,22 @@
+{
+  "plugin_title": "vfox-erlang",
+  "product": "Erlang/OTP",
+  "repo_url": "https://github.com/version-fox/vfox-erlang",
+  "official_url": "https://www.erlang.org/",
+  "official_name": "Erlang/OTP",
+  "example_version": "26.2.3",
+  "site_url": "https://version-fox.github.io/vfox-erlang",
+  "vfox_add_code": "vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang",
+  "vfox_install_code": "vfox install erlang@26.2.3",
+  "vfox_run_code": "vfox exec erlang@26.2.3 -- erl -version",
+  "mise_prepare_code": "mise ls-remote vfox:version-fox/vfox-erlang",
+  "mise_install_code": "mise use -g vfox:version-fox/vfox-erlang@26.2.3",
+  "mise_run_code": "mise exec -- erl -version",
+  "project_code": "eval \"$(vfox activate bash)\"\nvfox use -p erlang@26.2.3\nvfox exec erlang -- erl -version",
+  "extra_code": "MAKEFLAGS=-j4 OTP_CONFIGURE_ARGS=\"--enable-jit --enable-kernel-poll\" vfox install erlang@26.2.3",
+  "special_code": "USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang\nUSE_PREBUILT_OTP=ubuntu-22.04 vfox install erlang@26.2.3",
+  "special_shell": "Bash",
+  "linux_hint": "autoconf · m4 · ncurses · OpenSSL",
+  "macos_hint": "brew install autoconf libxslt fop wxwidgets openssl",
+  "terminal_code": "$ vfox install erlang@26.2.3\n$ vfox exec erlang@26.2.3 -- erl -version"
+}
