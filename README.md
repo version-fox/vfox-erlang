@@ -147,3 +147,9 @@ the tag. If publication fails, re-run the original failed job to resume it.
 The workflow follows the shared `@v1` release-tool version. Updating the tool does
 not release this plugin. See the [shared workflow documentation](https://github.com/version-fox/plugin-manifest-action)
 for the package contract and first-rollout requirements.
+
+## Documentation website
+
+[中文](https://version-fox.github.io/vfox-erlang/) · [English](https://version-fox.github.io/vfox-erlang/en/)
+
+The bilingual site is maintained under `website/`. See [website/README.md](website/README.md) for local build and deployment instructions.
