@@ -1,0 +1,3 @@
+Official project logo, copied without modification.
+Source: https://raw.githubusercontent.com/erlang/erlang-org/master/assets/img/erlang-logo-notext.svg
+Used to identify the runtime managed by this plugin, not to imply endorsement.
