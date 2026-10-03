@@ -1,0 +1,58 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['website/**', '.github/workflows/pages.yaml', 'metadata.lua', 'README.md']
+  pull_request:
+    paths: ['website/**', '.github/workflows/pages.yaml', 'metadata.lua', 'README.md']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Plugin']
+    types: [completed]
+    # Tag releases report the tag as head_branch, so do not filter to main.
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'deploy' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Releases create a version commit after their original triggering SHA.
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+      - name: Read Pages configuration
+        id: pages
+        uses: actions/configure-pages@v6
+      - name: Build both language routes
+        env:
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
+        run: python3 website/build.py --base-url "$SITE_URL"
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
