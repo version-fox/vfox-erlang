@@ -3,3 +3,5 @@
 *.beam
 available.cache
 .available.cache
+_site/
+__pycache__/
