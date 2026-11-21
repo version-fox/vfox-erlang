@@ -2,154 +2,113 @@
 
 ![logo](./assets/vfox-erlang-logo.png)
 
-[![E2E tests on Linux](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux.yaml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Windows](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_windows.yaml) [![E2E tests on Darwin MacOS (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml) [![E2E tests on Linux (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_prebuilt.yaml) [![E2E tests on Linux (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml) [![E2E tests on Darwin MacOS (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml)
+[![Lint](https://github.com/version-fox/vfox-erlang/actions/workflows/lint.yml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/lint.yml) [![Test Plugin](https://github.com/version-fox/vfox-erlang/actions/workflows/test.yml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/test.yml) [![License](https://github.com/version-fox/vfox-erlang/actions/workflows/license.yml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/license.yml) [![E2E](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e.yml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e.yml) [![E2E tests on Darwin MacOS](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin.yaml) [![E2E tests on Darwin MacOS (Prebuilt release)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_prebuilt.yaml) [![E2E tests on Darwin MacOS (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_darwin_mise.yaml) [![E2E tests on Linux (mise)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml/badge.svg)](https://github.com/version-fox/vfox-erlang/actions/workflows/e2e_test_linux_mise.yaml)
 
 </div>
 
 # vfox-erlang plugin
 
-Erlang/OTP [vfox](https://github.com/version-fox) plugin. Use the vfox to manage multiple [Erlang/OTP](https://www.erlang.org/) versions in Linux/Darwin MacOS/Windows. all platform~
+[中文](README_CN.md) | [English](README.md)
 
-## Usage
+An [Erlang/OTP](https://www.erlang.org/) plugin for [vfox](https://github.com/version-fox/vfox). It installs and switches between several Erlang/OTP versions on Linux, macOS and Windows: from source, from prebuilt releases, or by linking an Erlang/OTP that is already on the machine.
+
+## Quick start
 
 ```shell
-# install plugin
+# 1. Add the plugin
 vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
 
-# install an available version
+# 2. Find a version and install it
 vfox search erlang
-# or specific version 
-vfox install erlang@25.3.2.10
+vfox install erlang@26.2.3
+
+# 3. Use it globally and check it
+eval "$(vfox activate bash)"
+vfox use -g erlang@26.2.3
+erl -version
 ```
 
-## Before install Erlang/OTP in Linux/Darwin MacOS
+Linux and macOS build from source by default, so install the build dependencies first, see [docs/source-build.md](docs/source-build.md). For prebuilt releases see [docs/prebuilt.md](docs/prebuilt.md); on Windows see [docs/windows.md](docs/windows.md).
 
-vfox-erlang plugin would install Erlang/OTP through the [Erlang/OTP](https://www.erlang.org/doc/installation_guide/install#how-to-build-and-install-erlang-otp) source code compilation. So you must have the utilities mentioned in the document -> [Building and Installing Erlang/OTP](https://www.erlang.org/doc/installation_guide/install#how-to-build-and-install-erlang-otp). 
+Activation has to run once in each new shell, or be added to `~/.bashrc`, because `vfox use` depends on it. For other shells, see the [vfox quick start](https://vfox.dev/guides/quick-start.html).
 
-Here are examples of installing on Ubuntu 20.04 and MacOS 13.
+## Versions
 
-### install in Linux (Ubuntu 20.04/22.04)
+| Kind | Examples | Where |
+| --- | --- | --- |
+| Release | `26.2.3` | Linux and macOS (source or prebuilt), Windows |
+| Windows release | `25.3.2.12` | Windows, the four-part numbers of the Windows installers |
+| Branch or maintenance | `master`, `maint-27` | Linux and macOS (source or prebuilt), not Windows |
+
+Prebuilt branch names on macOS end in `-latest`, for example `maint-27-latest` and `master-latest`.
+
+See [docs/versions.md](docs/versions.md) for searching, installing, switching scopes and branch versions.
+
+## Platforms
+
+| Platform | Default | Alternative | Guides |
+| --- | --- | --- | --- |
+| Linux | Source build | Prebuilt, `USE_PREBUILT_OTP=ubuntu-22.04` | [source build](docs/source-build.md), [prebuilt](docs/prebuilt.md) |
+| macOS | Source build | Prebuilt, `USE_PREBUILT_OTP=true` | [source build](docs/source-build.md), [prebuilt](docs/prebuilt.md) |
+| Windows | Official installer | None | [Windows](docs/windows.md) |
+
+Source builds install the EEP-48 documentation chunks, so `h(lists).` works in the Erlang shell.
+
+## Use an Erlang/OTP already on the machine
+
+If Erlang/OTP is already installed, from a distribution package, Homebrew, `make install`, asdf, mise or the Windows installer, vfox can use it instead of building another copy. This needs vfox 1.1.0 or later.
 
 ```shell
-# install utilities
-sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+vfox link --detect erlang      # choose which installations to link
+vfox link --detect -y erlang   # link all of them
+eval "$(vfox activate bash)"
+vfox use -g erlang@26.2.3      # a linked version is named after its OTP version
 ```
 
-You can reference the E2E test in Ubuntu 20.04: [.github/workflows/e2e_test_linux.yaml](.github/workflows/e2e_test_linux.yaml)
-
-### install in Darwin (MacOS 13)
-
-```shell
-# install utilities
-brew install autoconf libxslt fop wxwidgets openssl
-```
-
-You can reference the E2E test in MacOS 13: [.github/workflows/e2e_test_darwin.yaml](.github/workflows/e2e_test_darwin.yaml)
-
-### Note
-
-By default, vfox-erlang plugin will Build [EEP-48 documentation chunks](https://www.erlang.org/doc/apps/kernel/eep48_chapter) for get doc in REPL (eg: h(list).) and [lsp docs hint](https://github.com/elixir-lsp/vscode-elixir-ls/issues/284).
-
-![erl get docs](./assets/get_docs_in_repl.png)
-
-You cal also use the `OTP_CONFIGURE_ARGS` environment variable to control install behavior. reference this documentation [https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1](https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#configuring-1) for more configuration. eg:
-
-```shell
-# example
-export OTP_CONFIGURE_ARGS="--enable-jit --enable-kernel-poll"
-vfox install erlang@25.3.2.10
-```
-
-Building Erlang/OTP on a relatively fast computer takes approximately 5 minutes. To speed it up, you can utilize [parallel make](https://github.com/erlang/otp/blob/master/HOWTO/INSTALL.md#building-3) with the `-j<num_jobs>` option. for example:
-
-```shell
-export MAKEFLAGS=-j8
-vfox install erlang@25.3.2.10
-```
-
-## install Erlang/OTP in Windows platform
-
-In windows, the vfox-erlang plugin downloads the Erlang/OTP version of the exe installer from the [Erlang/OTP releases](https://github.com/erlang/otp/releases) and executes it for you.
-
-This is an installation example in PowerShell:
-
-```pwsh
-vfox install erlang@25.3.2.12
-vfox use erlang@25.3.2.12
-Invoke-Expression "$(vfox activate pwsh)"
-# Test the installation results
-& erl.exe -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().' -noshell
-```
-
-You can reference the E2E test in in windows-2022: [.github/workflows/e2e_test_windows.yaml](.github/workflows/e2e_test_windows.yaml)
-
-## install a prebuilt Erlang/OTP version
-
-After vfox-erlang v1.1.0, you can also install a prebuilt Erlang/OTP version in Ubuntu linux system and MacOS. 
-
-**Before install, you must disable vfox search cache.** Reference: [https://vfox.lhan.me/guides/configuration.html#cache-settings](https://vfox.lhan.me/guides/configuration.html#cache-settings)
-
-### Linux (Ubuntu)
-
-This is an installation example in Bash Shell:
-
-```shell
-# install an available version, you can also a avaliable version in: https://bobs-list.kobrakai.de/
-USE_PREBUILT_OTP="ubuntu-20.04" vfox search erlang
-USE_PREBUILT_OTP="ubuntu-20.04" vfox install erlang@26.2.3
-```
-
-**USE_PREBUILT_OTP** var value for Linux is one of: ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"].
-
-### MacOS
-
-For MacOS, you can use prebuilt Erlang/OTP versions from [@erlef/otp_builds](https://github.com/erlef/otp_builds) by setting the `USE_PREBUILT_OTP` environment variable:
-
-```shell
-# install a prebuilt version for MacOS (automatically detects architecture)
-USE_PREBUILT_OTP=true vfox search erlang
-USE_PREBUILT_OTP=true vfox install erlang@26.2.3
-```
-
-**USE_PREBUILT_OTP** can be set to any non-empty value (e.g., "1", "true", "macos") to enable prebuilt mode.
-
-Supported architectures: amd64, x86_64, arm64, aarch64. macOS uses a dedicated prebuilt version list that differs from the Ubuntu prebuilt versions.
+`vfox uninstall` on a linked version only removes the link. See [docs/link.md](docs/link.md).
 
 ## Usage with mise
 
-The vfox-erlang plugin can also be used through [mise](https://mise.jdx.dev/), a popular dev tools manager that supports vfox plugins as a backend.
-
-### Installation with mise
-
 ```shell
-# Install and activate erlang through mise using vfox backend
 mise use -g vfox:version-fox/vfox-erlang@26.2.3
-
-# Use mise exec to run erlang commands
 mise exec -- erl -version
-mise exec -- erlc hello.erl
-mise exec -- erl -noshell -s hello hello_world -s init stop
 ```
 
-For more information about mise and vfox backend support, see the [mise documentation](https://mise.jdx.dev/dev-tools/backends/vfox.html).
+See [docs/mise.md](docs/mise.md).
 
-## Releasing this plugin
+## Documentation
 
-Maintainers can publish from **Actions → Plugin → Run workflow** on the default
-branch by entering a stable plugin version without the `v` prefix. The shared
-workflow updates `metadata.lua`, creates the version commit and tag, and publishes
-the ZIP and manifest in this repository. No local tag or extra release token is
-needed. Pull requests run checks only; PR titles no longer trigger publication.
+**Using the plugin**
 
-Existing version-tag pushes are supported when `PLUGIN.version` already matches
-the tag. If publication fails, re-run the original failed job to resume it.
+- [Versions](docs/versions.md): version names, searching, installing, switching scopes and branch versions
+- [Building from source](docs/source-build.md): dependencies, `MAKEFLAGS`, `OTP_CONFIGURE_ARGS` and `DOC_TARGETS`
+- [Prebuilt releases](docs/prebuilt.md): Linux (Bob) and macOS (erlef/otp_builds) prebuilt installs and `USE_PREBUILT_OTP`
+- [Windows](docs/windows.md): the official installer and PowerShell activation
+- [Linking installed Erlang/OTP](docs/link.md): using an Erlang/OTP that is already on the machine
+- [mise](docs/mise.md): using the plugin through the vfox backend of mise
+- [Troubleshooting](docs/troubleshooting.md): common failures and the commands that diagnose them
+- [Changes](docs/changes.md): changes since 1.2.0
 
-The workflow follows the shared `@v1` release-tool version. Updating the tool does
-not release this plugin. See the [shared workflow documentation](https://github.com/version-fox/plugin-manifest-action)
-for the package contract and first-rollout requirements.
+**Working on the plugin**
+
+- [Development](docs/development.md): how the hooks work, the file layout, checks, website and release
+- [E2E tests](docs/e2e.md): what each end-to-end suite covers and how to run the Linux suite locally
 
 ## Documentation website
 
 [中文](https://version-fox.github.io/vfox-erlang/) · [English](https://version-fox.github.io/vfox-erlang/en/)
 
-The bilingual site is maintained under `website/`. See [website/README.md](website/README.md) for local build and deployment instructions.
+The bilingual site is built from [website/](website/). See [website/README.md](website/README.md) for the local build.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
+
+Copyright 2026 vfox-erlang contributors
+
+## Acknowledgements
+
+- [Erlang/OTP](https://github.com/erlang/otp), the source of every release
+- [hexpm/bob](https://github.com/hexpm/bob), which builds the Linux prebuilt packages on [builds.hex.pm](https://builds.hex.pm)
+- [erlef/otp_builds](https://github.com/erlef/otp_builds), which provides the macOS prebuilt packages
+- [vfox](https://github.com/version-fox/vfox), the version manager this plugin runs on

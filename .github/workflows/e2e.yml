@@ -1,0 +1,108 @@
+# Copyright 2026 vfox-erlang contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # A new push to a pull request replaces the run before it. Every commit on main keeps its own
+  # group, so a newer commit never cancels the run of an older one.
+  group: e2e-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  e2e-linux:
+    name: Linux (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # The lists follow tests/e2e/linux/Dockerfile: libncurses5-dev has no candidate on a
+        # clean Ubuntu 24.04 image, and the wx packages differ between the two releases.
+        include:
+          - os: ubuntu-22.04
+            packages: build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+          - os: ubuntu-24.04
+            packages: build-essential autoconf m4 libwxgtk3.2-dev libwxgtk-webview3.2-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: tests/e2e/go.mod
+          cache: false
+      - name: Install vfox 1.1.0
+        run: |
+          go install github.com/version-fox/vfox@v1.1.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Install Erlang/OTP build dependencies
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ${{ matrix.packages }}
+      # Source builds and prebuilt installs. The prebuilt test picks the Ubuntu release from
+      # /etc/os-release, so it runs on both matrix entries.
+      - name: Run the Linux install tests
+        working-directory: tests/e2e
+        env:
+          E2E_REPO: ${{ github.workspace }}
+        run: go test -v -timeout 80m -run 'TestLinux(SourceInstall|PrebuiltInstall)$' ./linux
+      # The system detection test needs an Erlang/OTP that the operating system provides, so
+      # it installs erlang-base after the install tests, and it fails rather than skips when the
+      # package is missing.
+      - name: Install the system Erlang/OTP package
+        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y erlang-base
+      - name: Run the system detection test
+        working-directory: tests/e2e
+        env:
+          E2E_REPO: ${{ github.workspace }}
+          E2E_REQUIRE_SYSTEM_ERLANG: "1"
+        run: go test -v -timeout 30m -run 'TestLinuxSystemDetect$' ./linux
+
+  e2e-windows:
+    name: Windows (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: tests/e2e/go.mod
+          cache: false
+      - name: Install vfox 1.1.0
+        shell: pwsh
+        run: |
+          go install github.com/version-fox/vfox@v1.1.0
+          "$(go env GOPATH)\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Run the Windows E2E suite
+        shell: pwsh
+        working-directory: tests/e2e
+        env:
+          E2E_REPO: ${{ github.workspace }}
+        run: go test -v -timeout 80m -run TestWindows ./windows

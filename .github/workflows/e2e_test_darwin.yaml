@@ -1,3 +1,17 @@
+# Copyright 2026 vfox-erlang contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 name: E2E tests on Darwin MacOS
 
 on:
@@ -33,7 +47,7 @@ jobs:
 
       - name: add vfox-erlang plugin (Unix-like)
         run: |
-          vfox add --source https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip erlang
+          vfox add --source "https://github.com/version-fox/vfox-erlang/archive/${GITHUB_REF}.zip" erlang
 
       - name: install Erlang/OTP by vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'
@@ -45,7 +59,7 @@ jobs:
           vfox use -g erlang@26.2.3
           eval "$(vfox activate bash)"
           echo "===============PATH==============="
-          echo $PATH
+          echo "$PATH"
           echo "===============PATH==============="
           cd assets
           erlc hello.erl
