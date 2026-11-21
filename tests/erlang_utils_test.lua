@@ -110,6 +110,49 @@ check(
     "download errors name the version list: " .. net_reason
 )
 
+-- USE_PREBUILT_OTP only changes the list on macOS and Linux. An empty value is unset, and an
+-- unknown Linux release is an error instead of a list of other builds.
+local function with_env(env, fn)
+    local original = os.getenv
+    os.getenv = function(name)
+        return env[name]
+    end
+    local ok, result = pcall(fn)
+    os.getenv = original
+    if not ok then
+        error(result, 0)
+    end
+    return result
+end
+
+local function search_on(os_name, env)
+    local saved = RUNTIME.osType
+    RUNTIME.osType = os_name
+    local ok, result = pcall(with_env, env, erlang_utils.get_erlang_release_versions)
+    RUNTIME.osType = saved
+    if not ok then
+        error(result, 0)
+    end
+    return result
+end
+
+local base_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/"
+responses[base_url .. "versions.txt"] = { status_code = 200, body = "26.2.3\n" }
+responses[base_url .. "macos_prebuilt_versions.txt"] = { status_code = 200, body = "25.3.2.12\n" }
+
+check(search_on("linux", { USE_PREBUILT_OTP = "" })[1].version == "26.2.3", "an empty USE_PREBUILT_OTP is unset")
+check(
+    search_on("windows", { USE_PREBUILT_OTP = "ubuntu-22.04" })[1].version == "26.2.3",
+    "windows ignores the variable"
+)
+check(search_on("darwin", { USE_PREBUILT_OTP = "true" })[1].version == "25.3.2.12", "macOS uses its prebuilt list")
+
+local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
+check(
+    not search_ok and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "search rejects an unknown release: " .. tostring(search_err)
+)
+
 -- Available is the hook that vfox calls; it returns the same list.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
 local available = plugin:Available({})

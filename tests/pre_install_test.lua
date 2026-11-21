@@ -84,6 +84,13 @@ check(
     "unknown release: " .. tostring(err)
 )
 
+-- An empty USE_PREBUILT_OTP is unset, so the source archive is used.
+result = pre_install({ USE_PREBUILT_OTP = "" }, "26.2.3", "linux", "amd64")
+check(
+    result.url == "https://github.com/erlang/otp/archive/refs/tags/OTP-26.2.3.tar.gz",
+    "empty USE_PREBUILT_OTP: " .. result.url
+)
+
 -- Source builds: release tags are OTP-<version>; master and maint branches come from refs/heads.
 result = pre_install({}, "26.2.3", "linux", "amd64")
 check(result.url == "https://github.com/erlang/otp/archive/refs/tags/OTP-26.2.3.tar.gz", "source tag: " .. result.url)

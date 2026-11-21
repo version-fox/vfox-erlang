@@ -51,9 +51,38 @@ function erlang_utils.array_contains(array, value)
     return false
 end
 
--- load configuration from environment variables
+-- Loads a setting from an environment variable. An empty value counts as unset, so that
+-- USE_PREBUILT_OTP= turns prebuilt mode off.
 function erlang_utils.get_config_from_env(env_name, default_value)
-    return os.getenv(env_name) or default_value
+    local value = os.getenv(env_name)
+    if value == nil or value == "" then
+        return default_value
+    end
+    return value
+end
+
+--- Ubuntu releases that have prebuilt Erlang/OTP builds on builds.hex.pm (Bob).
+erlang_utils.PREBUILT_OS_RELEASES = {
+    "ubuntu-14.04",
+    "ubuntu-16.04",
+    "ubuntu-18.04",
+    "ubuntu-20.04",
+    "ubuntu-22.04",
+    "ubuntu-24.04",
+}
+
+--- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value
+--- is an error that lists the supported values.
+function erlang_utils.check_prebuilt_release(release)
+    if not erlang_utils.array_contains(erlang_utils.PREBUILT_OS_RELEASES, release) then
+        error(
+            "USE_PREBUILT_OTP must be one of: "
+                .. table.concat(erlang_utils.PREBUILT_OS_RELEASES, ", ")
+                .. ". Got: "
+                .. release
+        )
+    end
+    return release
 end
 
 --- Returns true when vfox runs the plugin on Windows.
@@ -143,18 +172,14 @@ end
 function erlang_utils.get_erlang_release_versions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
-    -- Use prebuilt versions when USE_PREBUILT_OTP is explicitly set
+    -- USE_PREBUILT_OTP selects the prebuilt list of the platform. Windows always uses the official
+    -- installer, so its list does not change.
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
-    if use_prebuilt then
-        -- Choose different prebuilt version lists based on platform
-        if RUNTIME.osType == "darwin" then
-            -- Use macOS specific prebuilt versions
-            search_url =
-                "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
-        else
-            -- Use Ubuntu prebuilt versions for Linux
-            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
-        end
+    if use_prebuilt and RUNTIME.osType == "darwin" then
+        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
+    elseif use_prebuilt and RUNTIME.osType == "linux" then
+        erlang_utils.check_prebuilt_release(use_prebuilt)
+        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
     end
 
     local resp, err = http.get({
