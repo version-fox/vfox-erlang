@@ -25,6 +25,7 @@
 - `metadata.lua` 插件描述中的拼写错误 `Uinx` 改为 `Unix`。
 - 设置 `USE_PREBUILT_OTP` 后，Windows 的版本列表不再变化；Windows 始终使用官方安装器。
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 在搜索时读取 Bob 为所选发行版和本机架构发布的 `builds.txt` 索引，不再使用每周生成的列表，因此 arm64 机器看到的是 arm64 的构建。
+- Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 像其他列表一样显示不带 `OTP-` 前缀的正式版，例如 `29.1.2`。两种写法安装的是同一个构建。
 
 ### 修复
 
@@ -43,6 +44,7 @@
 - `vfox search` 遇到不支持的 `USE_PREBUILT_OTP` 值（如 `ubuntu-99.04`）时仍会列出构建，而不是报错。现在与 `vfox install` 一样，给出支持的取值。
 - 空的 `USE_PREBUILT_OTP` 视为未设置，会从源码构建。
 - 设置 `USE_PREBUILT_OTP` 后，在 macOS 或 Linux 上 `vfox install erlang@latest` 会安装一个分支（`master`，macOS 上是 `master-latest`），因为分支名排在列表最前。现在最新的正式版排在最前，其次是候选版，最后是分支。
+- `vfox use` 接受已安装版本的另一种写法：以 `OTP-29.1.2` 安装的版本可以用 `29.1.2` 使用，反之亦然，不再报告“未安装”。
 
 ### 移除
 
