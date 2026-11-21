@@ -85,6 +85,12 @@ function erlang_utils.check_prebuilt_release(release)
     return release
 end
 
+--- Returns the URL of the builds.hex.pm index that lists the builds of one Ubuntu release for the
+--- architecture vfox runs on. The install downloads from the same host and architecture.
+function erlang_utils.prebuilt_index_url(release)
+    return "https://builds.hex.pm/builds/otp/" .. RUNTIME.archType .. "/" .. release .. "/builds.txt"
+end
+
 --- Returns true when vfox runs the plugin on Windows.
 function erlang_utils.is_windows()
     return RUNTIME ~= nil and RUNTIME.osType == "windows"
@@ -178,9 +184,10 @@ function erlang_utils.get_erlang_release_versions()
     if use_prebuilt and RUNTIME.osType == "darwin" then
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
     elseif use_prebuilt and RUNTIME.osType == "linux" then
-        -- Each Ubuntu release has its own list: the builds that builds.hex.pm publishes for it.
+        -- Bob lists the builds of each Ubuntu release in its own index. Read that index, so the list
+        -- is the one the install downloads from.
         local release = erlang_utils.check_prebuilt_release(use_prebuilt)
-        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt/" .. release .. ".txt"
+        search_url = erlang_utils.prebuilt_index_url(release)
     end
 
     local resp, err = http.get({
@@ -198,14 +205,24 @@ function erlang_utils.get_erlang_release_versions()
         )
     end
 
-    local result = {}
+    -- The first column is the name. The jsDelivr lists hold one name per line; builds.txt adds the
+    -- commit and the build time after it.
+    local names = {}
     for line in string.gmatch(resp.body, "[^\r\n]+") do
-        local version = erlang_utils.trim(line)
-        if version ~= "" then
-            table.insert(result, {
-                version = version,
-            })
+        local name = string.match(erlang_utils.trim(line), "^%S+")
+        if name then
+            table.insert(names, name)
         end
+    end
+    -- Descending string order, the order the generated lists had.
+    table.sort(names, function(a, b)
+        return a > b
+    end)
+    local result = {}
+    for _, name in ipairs(names) do
+        table.insert(result, {
+            version = name,
+        })
     end
     return result
 end

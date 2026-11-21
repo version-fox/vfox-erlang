@@ -41,9 +41,8 @@ header:
     - "**/go.sum"
     - "**/go.mod"
     - "LICENSE"
-    # Generated version lists (assets/*.txt and the per-release assets/prebuilt/*.txt) and the
-    # upstream logo, which must stay byte-identical.
-    - "assets/**/*.txt"
+    # Generated version lists and the upstream logo, which must stay byte-identical.
+    - "assets/*.txt"
     - "website/assets/logo.svg"
     - "website/assets/LOGO-SOURCE.txt"
     # license-eye has no comment style for Erlang. assets/hello.erl carries its header by hand

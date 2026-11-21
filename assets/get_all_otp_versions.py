@@ -43,18 +43,6 @@ def update_all_version_from_github_api():
         json.dump(all_version, file, indent=4)
 
 
-# Ubuntu releases with prebuilt Erlang/OTP builds on builds.hex.pm. Each release has its own
-# builds.txt index, because Bob does not build the same versions for every release.
-PREBUILT_OS_RELEASES = [
-    "ubuntu-14.04",
-    "ubuntu-16.04",
-    "ubuntu-18.04",
-    "ubuntu-20.04",
-    "ubuntu-22.04",
-    "ubuntu-24.04",
-]
-
-
 def get_prebuilt_versions_from_bob(release):
     """Returns the build names listed in the builds.txt index of one Ubuntu release."""
     url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
@@ -72,15 +60,12 @@ def write_version_list(path, versions):
             file.write(version + "\n")
 
 
-def write_prebuilt_versions():
-    """Writes prebuilt/<release>.txt for every Ubuntu release, and prebuilt_versions.txt."""
-    lists = {release: get_prebuilt_versions_from_bob(release) for release in PREBUILT_OS_RELEASES}
-    os.makedirs("prebuilt", exist_ok=True)
-    for release, versions in lists.items():
-        write_version_list(os.path.join("prebuilt", f"{release}.txt"), versions)
-    # Plugin copies from before the per-release lists read prebuilt_versions.txt, which has always
-    # held the ubuntu-20.04 list. It is kept so that those copies keep working.
-    write_version_list("prebuilt_versions.txt", lists["ubuntu-20.04"])
+def write_legacy_prebuilt_versions():
+    """Writes prebuilt_versions.txt, the ubuntu-20.04 index, for plugin copies that predate the live index.
+
+    Linux prebuilt searches read the builds.txt index of the chosen release directly (erlang_utils.lua).
+    """
+    write_version_list("prebuilt_versions.txt", get_prebuilt_versions_from_bob("ubuntu-20.04"))
 
 
 def get_macos_prebuilt_versions():
@@ -170,8 +155,8 @@ if __name__ == "__main__":
         for version in versions:
             file.write(version + "\n")
 
-    # Generate prebuilt versions for Linux, one list per Ubuntu release
-    write_prebuilt_versions()
+    # Generate the Linux list that plugin copies from before the live index read
+    write_legacy_prebuilt_versions()
 
     # Generate prebuilt versions for macOS
     print("\nFetching macOS prebuilt versions...")
