@@ -1,5 +1,28 @@
+# Copyright 2026 vfox-erlang contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
+import os
+
 import requests
+
+# GitHub API calls are rate limited per client; the scheduled workflow passes its token so the
+# runner gets the higher authenticated limit.
+GITHUB_HEADERS = {}
+if os.environ.get("GITHUB_TOKEN"):
+    GITHUB_HEADERS["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
+REQUEST_TIMEOUT = 30
 
 
 # fetch version: -> https://api.github.com/repos/erlang/otp/tags?per_page=100&sort=pushed
@@ -9,16 +32,14 @@ def update_all_version_from_github_api():
     all_version = []
     for page in range(1, 10):
         url = f"https://api.github.com/repos/erlang/otp/tags?per_page=100&sort=pushed&page={page}"
-        response = requests.get(url)
-        data = response.json()
-        all_version.extend(data)
-    if response.status_code != 200:
-        print("Failed to fetch data from github api")
-        return
+        response = requests.get(url, headers=GITHUB_HEADERS, timeout=REQUEST_TIMEOUT)
+        # Check every page: a failed page is an error body, not a list of tags.
+        if response.status_code != 200:
+            print(f"Failed to fetch tags from github api (page {page}): HTTP {response.status_code}")
+            return
+        all_version.extend(response.json())
 
-    with open(
-        "erlang_otp_versions_from_gtihub_api.json", "w", encoding="utf-8"
-    ) as file:
+    with open("erlang_otp_versions_from_gtihub_api.json", "w", encoding="utf-8") as file:
         json.dump(all_version, file, indent=4)
 
 
@@ -28,7 +49,7 @@ def get_all_prebuilt_version_from_bob():
     all_version_info = []
     for release in ALLOW_OS_RELEASE:
         url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
-        response = requests.get(url)
+        response = requests.get(url, timeout=REQUEST_TIMEOUT)
         all_version_info.extend(response.text.split("\n"))
 
     all_prebuilt_versions = []
@@ -52,7 +73,7 @@ def get_macos_prebuilt_versions():
             print(f"Fetching macOS prebuilt versions page {page}...")
             url = f"{api_url}?page={page}&per_page=100"
 
-            response = requests.get(url)
+            response = requests.get(url, headers=GITHUB_HEADERS, timeout=REQUEST_TIMEOUT)
             if response.status_code != 200:
                 break
 
@@ -88,9 +109,7 @@ def get_macos_prebuilt_versions():
                     # Remove 'OTP-' prefix except for special versions like master-latest
                     processed_version = tag_name
                     if processed_version.startswith("OTP-"):
-                        processed_version = processed_version[
-                            4:
-                        ]  # Remove 'OTP-' prefix
+                        processed_version = processed_version[4:]  # Remove 'OTP-' prefix
                     all_versions.append(processed_version)
                     print(f"Found macOS version: {tag_name} -> {processed_version}")
 
@@ -108,9 +127,7 @@ def get_macos_prebuilt_versions():
 
 def get_all_version():
     version_set = set()
-    with open(
-        "erlang_otp_versions_from_gtihub_api.json", "r", encoding="utf-8"
-    ) as file:
+    with open("erlang_otp_versions_from_gtihub_api.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         for item in data:
             if "OTP-" not in item["tarball_url"]:
@@ -144,8 +161,6 @@ if __name__ == "__main__":
         with open("macos_prebuilt_versions.txt", "w", encoding="utf-8") as file:
             for version in macos_versions:
                 file.write(version + "\n")
-        print(
-            f"Found {len(macos_versions)} macOS prebuilt versions, saved to macos_prebuilt_versions.txt"
-        )
+        print(f"Found {len(macos_versions)} macOS prebuilt versions, saved to macos_prebuilt_versions.txt")
     else:
         print("No macOS prebuilt versions found.")
