@@ -23,6 +23,7 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - The README and the documentation are rewritten in English and Chinese.
 - The typo `Uinx` in the plugin description in `metadata.lua` is corrected to `Unix`.
 - With `USE_PREBUILT_OTP` set, the Windows version list no longer changes. Windows always uses the official installer.
+- On Linux, `vfox search` with `USE_PREBUILT_OTP` reads the `builds.txt` index that Bob publishes for the release and for the architecture vfox runs on, when you search. It no longer uses a list generated every week, so arm64 machines see arm64 builds.
 
 ### Fixed
 

@@ -23,6 +23,7 @@
 - README 与文档重写为中英双语。
 - `metadata.lua` 插件描述中的拼写错误 `Uinx` 改为 `Unix`。
 - 设置 `USE_PREBUILT_OTP` 后，Windows 的版本列表不再变化；Windows 始终使用官方安装器。
+- Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 在搜索时读取 Bob 为所选发行版和本机架构发布的 `builds.txt` 索引，不再使用每周生成的列表，因此 arm64 机器看到的是 arm64 的构建。
 
 ### 修复
 
