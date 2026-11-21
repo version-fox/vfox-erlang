@@ -28,6 +28,8 @@ function PLUGIN:PreInstall(ctx)
     -- erlangUtils.check_version_existence("https://github.com/erlang/otp/releases/tag/OTP-" .. erlang_version)
 
     local download_url
+    -- The name the install is recorded under. Linux prebuilt installs use the bare version (below).
+    local installed_version = erlang_version
     local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
     if RUNTIME.osType == "windows" then
         -- For Windows, always use OTP- prefix for regular versions
@@ -59,6 +61,9 @@ function PLUGIN:PreInstall(ctx)
             .. "/"
             .. erlangUtils.bob_build_name(erlang_version)
             .. ".tar.gz"
+        -- The install is recorded under the bare version, the name the lists show, whichever spelling was
+        -- typed. vfox checks the returned name again before it downloads, so OTP-26.2.3 and 26.2.3 are one install.
+        installed_version = erlangUtils.bare_release_name(erlang_version)
     elseif RUNTIME.osType == "darwin" and PRE_BUILT_OS_RELEASE then
         -- Use @erlef/otp_builds for MacOS prebuilt binaries
         local arch_mapping = {
@@ -146,7 +151,7 @@ function PLUGIN:PreInstall(ctx)
     print("Download Erlang/OTP from " .. download_url)
 
     return {
-        version = erlang_version,
+        version = installed_version,
         url = download_url,
     }
 end

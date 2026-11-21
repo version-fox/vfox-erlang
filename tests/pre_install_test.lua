@@ -71,12 +71,21 @@ check(
     result.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/OTP-26.2.3.tar.gz",
     "prebuilt OTP- name is not prefixed twice: " .. result.url
 )
+check(result.version == "26.2.3", "an OTP- name is installed as the bare version")
 
 result = pre_install({ USE_PREBUILT_OTP = "ubuntu-24.04" }, "maint-27", "linux", "amd64")
 check(
     result.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/maint-27.tar.gz",
     "prebuilt maint branch: " .. result.url
 )
+check(result.version == "maint-27", "a branch keeps its name")
+
+result = pre_install({ USE_PREBUILT_OTP = "ubuntu-24.04" }, "OTP-29.0-rc3", "linux", "amd64")
+check(
+    result.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-29.0-rc3.tar.gz",
+    "prebuilt release candidate: " .. result.url
+)
+check(result.version == "29.0-rc3", "a release candidate is installed as the bare version")
 
 -- Ubuntu 26.04 is published by Bob for amd64 and arm64.
 result = pre_install({ USE_PREBUILT_OTP = "ubuntu-26.04" }, "26.2.3", "linux", "amd64")
