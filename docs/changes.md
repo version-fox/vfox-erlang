@@ -42,6 +42,7 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - On Linux, `vfox search` with `USE_PREBUILT_OTP` listed the ubuntu-20.04 builds for every Ubuntu release, so builds that exist only for newer releases, such as `OTP-29.1.2` on ubuntu-24.04, were missing. The list now comes from the builds of the release that the variable names.
 - `vfox search` with an unsupported `USE_PREBUILT_OTP` value, such as `ubuntu-99.04`, listed builds instead of failing. It now reports the supported values, as `vfox install` does.
 - An empty `USE_PREBUILT_OTP` counts as unset, so the source build runs.
+- With `USE_PREBUILT_OTP` set on macOS or Linux, `vfox install erlang@latest` installed a branch (`master`, or `master-latest` on macOS), because branch names came first in the list. The newest final release is first now, then the release candidates, then the branches.
 
 ### Removed
 

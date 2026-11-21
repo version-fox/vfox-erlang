@@ -42,6 +42,7 @@
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 对每个 Ubuntu 版本都列出 ubuntu-20.04 的构建，因此只存在于较新版本的构建（如 ubuntu-24.04 上的 `OTP-29.1.2`）缺失。现在列表来自所选版本的构建。
 - `vfox search` 遇到不支持的 `USE_PREBUILT_OTP` 值（如 `ubuntu-99.04`）时仍会列出构建，而不是报错。现在与 `vfox install` 一样，给出支持的取值。
 - 空的 `USE_PREBUILT_OTP` 视为未设置，会从源码构建。
+- 设置 `USE_PREBUILT_OTP` 后，在 macOS 或 Linux 上 `vfox install erlang@latest` 会安装一个分支（`master`，macOS 上是 `master-latest`），因为分支名排在列表最前。现在最新的正式版排在最前，其次是候选版，最后是分支。
 
 ### 移除
 

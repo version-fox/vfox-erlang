@@ -29,6 +29,8 @@ vfox search erlang
 - 未设置 `USE_PREBUILT_OTP` 时，列表是插件自带的正式版本列表。
 - 设置了 `USE_PREBUILT_OTP` 时，列表是该平台的预编译列表：Linux 上是所选 Ubuntu 发行版的列表，macOS 上是 macOS 预编译列表。见 [预编译](prebuilt.md)。
 
+`vfox install erlang@latest` 安装列表中的第一个名字。设置了 `USE_PREBUILT_OTP` 时，它是最新的正式版，其次是候选版，最后是分支。
+
 vfox 默认缓存搜索结果 12 小时。如果列表看起来过旧，见 [问题排查](troubleshooting.md)。
 
 ## 安装
