@@ -1,14 +1,34 @@
+# Copyright 2026 vfox-erlang contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Build the bilingual documentation site using Python's standard library."""
+
 import argparse
 import html
 import json
-from pathlib import Path
 import re
 import shutil
+from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parent
 TOKEN = re.compile(r"\{\{([a-z0-9_]+)\}\}")
+
+
+def render(template, messages):
+    """Replace each {{key}} token in template with its HTML-escaped message."""
+    return TOKEN.sub(lambda m: html.escape(messages[m[1]], quote=True), template)
 
 
 def build(destination, base_url=None):
@@ -34,24 +54,35 @@ def build(destination, base_url=None):
         copy_data = json.dumps({key: messages[key] for key in ("copy", "copied", "copy_error")}, ensure_ascii=False)
         messages.pop("copied")
         messages.pop("copy_error")
-        messages.update(config, lang=lang, version=version, copy_data=copy_data,
-                        asset_prefix="../" if route else "", language_href="../" if route else "en/",
-                        language_lang="zh-CN" if route else "en", canonical=base_url + "/" + route,
-                        site_url=base_url)
+        messages.update(
+            config,
+            lang=lang,
+            version=version,
+            copy_data=copy_data,
+            asset_prefix="../" if route else "",
+            language_href="../" if route else "en/",
+            language_lang="zh-CN" if route else "en",
+            canonical=base_url + "/" + route,
+            site_url=base_url,
+        )
         if set(messages) != keys:
             raise ValueError(f"{locale}: missing {keys - set(messages)}, unused {set(messages) - keys}")
-        rendered = TOKEN.sub(lambda m: html.escape(messages[m[1]], quote=True), template)
+        rendered = render(template, messages)
         output = destination / route
         output.mkdir(parents=True, exist_ok=True)
         (output / "index.html").write_text(rendered, encoding="utf-8")
     if locale_keys[0] != locale_keys[1]:
         raise ValueError("Chinese and English translation keys differ")
     (destination / ".nojekyll").touch()
-    (destination / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n", encoding="utf-8")
+    (destination / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n", encoding="utf-8"
+    )
     urls = "".join(f"<url><loc>{html.escape(base_url + '/' + route)}</loc></url>\n" for route in ("", "en/"))
     (destination / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + '</urlset>\n', encoding="utf-8")
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + "</urlset>\n",
+        encoding="utf-8",
+    )
     print(f"Built Chinese and English pages for plugin {version}: {destination}")
 
 
