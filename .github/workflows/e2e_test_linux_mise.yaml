@@ -50,17 +50,17 @@ jobs:
           # Configure mise and install Erlang (try standard approach first)
           export MAKEFLAGS=-j4
           # Try the standard mise approach for vfox plugins
-          $HOME/.local/bin/mise use -g vfox:version-fox/vfox-erlang@26.2.3
+          "$HOME/.local/bin/mise" use -g vfox:version-fox/vfox-erlang@26.2.3
           
           # Test the installation
-          $HOME/.local/bin/mise exec -- erl -version
+          "$HOME/.local/bin/mise" exec -- erl -version
           echo "===============PATH==============="
-          echo $PATH
+          echo "$PATH"
           echo "===============PATH==============="
           cd assets
-          $HOME/.local/bin/mise exec -- erlc hello.erl
-          $HOME/.local/bin/mise exec -- erl -noshell -s hello hello_world -s init stop
-          docs=$($HOME/.local/bin/mise exec -- erl -eval \
+          "$HOME/.local/bin/mise" exec -- erlc hello.erl
+          "$HOME/.local/bin/mise" exec -- erl -noshell -s hello hello_world -s init stop
+          docs=$("$HOME/.local/bin/mise" exec -- erl -eval \
             'erlang:display(shell_docs:get_doc(lists)), halt().' \
             -noshell | grep "functions for list processing")
           if [ -n "$docs" ]; then
