@@ -21,6 +21,10 @@ local test = require("vfox.test")
 local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
 local detect = require("detect_erlang")
 
+-- The real list_children, kept before the fake below replaces it, so that the Windows and Unix
+-- command paths can be checked directly.
+local real_list_children = detect.list_children
+
 local files = {}
 local dirs = {}
 detect.file_exists = function(path)
@@ -141,5 +145,59 @@ check(#result == 2, "windows installs found: " .. describe(result))
 check(result[1].version == "25.3.2.12" and result[2].version == "26.2.3", "windows results are sorted")
 check(result[2].path == "C:\\Program Files\\Erlang OTP 26", "windows root is the installer directory")
 check(result[2].note == "installed in Program Files", "windows note")
+
+-- vfox 1.1.0 replaces io.popen on Windows with a handle that has read, write and close, but no
+-- lines method. list_children has to work with that handle, so these checks use a fake handle
+-- with only those methods, which returns the output one line at a time as vfox does.
+local function fake_popen(output, seen)
+    local index = 0
+    return function(command, mode)
+        seen.command = command
+        seen.mode = mode
+        return {
+            read = function(self, format)
+                index = index + 1
+                return output[index]
+            end,
+            close = function(self)
+                return true
+            end,
+        }
+    end
+end
+
+local saved_popen = io.popen
+local saved_os_type = RUNTIME.osType
+
+local seen = {}
+io.popen = fake_popen({ "26.2.3", "", "25.3.2.12\r" }, seen)
+RUNTIME.osType = "linux"
+local listed = real_list_children("/opt/erlang")
+check(seen.command == "ls -1 '/opt/erlang' 2>/dev/null", "unix lists with ls: " .. tostring(seen.command))
+check(
+    #listed == 2 and listed[1] == "/opt/erlang/26.2.3" and listed[2] == "/opt/erlang/25.3.2.12",
+    "unix output gives one path per non-blank line, with the carriage return removed"
+)
+
+seen = {}
+io.popen = fake_popen({ "Erlang OTP 26\r", "", "Git\r" }, seen)
+RUNTIME.osType = "windows"
+listed = real_list_children("C:\\Program Files")
+check(seen.command == 'dir /b /ad "C:\\Program Files" 2>nul', "windows lists with dir: " .. tostring(seen.command))
+check(
+    #listed == 2 and listed[1] == "C:\\Program Files\\Erlang OTP 26" and listed[2] == "C:\\Program Files\\Git",
+    "windows output gives backslash paths, one per non-blank line"
+)
+
+io.popen = fake_popen({}, {})
+check(#real_list_children("C:\\Missing") == 0, "an empty listing gives no children")
+
+io.popen = function()
+    return nil
+end
+check(#real_list_children("/missing") == 0, "a failed popen gives no children")
+
+io.popen = saved_popen
+RUNTIME.osType = saved_os_type
 
 print("detect_test: " .. counter.checks .. " checks passed")

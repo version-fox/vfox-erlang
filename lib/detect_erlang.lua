@@ -62,8 +62,15 @@ function detect.list_children(dir)
     if handle == nil then
         return {}
     end
+    -- vfox replaces io.popen on Windows with a handle that has read, write and close, but no
+    -- lines method. Read line by line with read("*l"), which returns nil at the end, so the
+    -- same code works on every platform.
     local result = {}
-    for line in handle:lines() do
+    while true do
+        local line = handle:read("*l")
+        if line == nil then
+            break
+        end
         local name = erlangUtils.trim(line)
         if name ~= "" then
             table.insert(result, erlangUtils.join(dir, name))
