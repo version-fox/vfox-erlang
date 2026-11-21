@@ -1,0 +1,52 @@
+# Copyright 2026 vfox-erlang contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# License header check (Apache SkyWalking Eyes). CI runs it through .github/workflows/license.yml.
+# To add the missing headers locally, run `license-eye header fix` with the same config; see
+# docs/development.md for the install command.
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: vfox-erlang contributors
+    content: |
+      Copyright 2026 vfox-erlang contributors
+
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+
+  paths-ignore:
+    # Documentation, JSON data and the license texts carry no header by design.
+    - "**/*.md"
+    - "**/*.json"
+    - "**/go.sum"
+    - "**/go.mod"
+    - "LICENSE"
+    # Generated version lists and the upstream logo, which must stay byte-identical.
+    - "assets/*.txt"
+    - "website/assets/logo.svg"
+    - "website/assets/LOGO-SOURCE.txt"
+    # license-eye has no comment style for Erlang. assets/hello.erl carries its header by hand
+    # (%% lines), and this entry keeps the checker from reporting the file as unsupported.
+    - "assets/hello.erl"
+
+  comment: on-failure
