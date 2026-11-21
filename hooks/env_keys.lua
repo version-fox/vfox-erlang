@@ -1,29 +1,31 @@
+-- Copyright 2026 vfox-erlang contributors
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--   http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 local erlangUtils = require("erlang_utils")
 
 --- Each SDK may have different environment variable configurations.
 --- This allows plugins to define custom environment variables (including PATH settings)
 --- Note: Be sure to distinguish between environment variable settings for different platforms!
+--- The bin directory is found by looking for the erl executable, so source builds, prebuilt
+--- installs and linked installs found by `vfox link --detect erlang` all work.
+--- ctx.path is the SDK installation directory.
 --- @param ctx table Context information
---- @field ctx.path string SDK installation directory
 function PLUGIN:EnvKeys(ctx)
-    --- this variable is same as ctx.sdkInfo['plugin-name'].path
-    local mainPath
-    if RUNTIME.osType == "windows" then
-        mainPath = ctx.path .. "\\release\\bin"
-    else
-        if not erlangUtils.directory_exists(ctx.path .. "/release/bin") then
-            -- install erlang from Bob prebuilt release
-            mainPath = ctx.path .. "/bin"
-        else
-            -- install erlang by compilation
-            mainPath = ctx.path .. "/release/bin"
-        end
-    end
-
     return {
         {
             key = "PATH",
-            value = mainPath
+            value = erlangUtils.find_bin_dir(ctx.path),
         },
     }
 end
