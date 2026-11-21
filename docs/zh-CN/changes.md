@@ -26,6 +26,7 @@
 - 设置 `USE_PREBUILT_OTP` 后，Windows 的版本列表不再变化；Windows 始终使用官方安装器。
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 在搜索时读取 Bob 为所选发行版和本机架构发布的 `builds.txt` 索引，不再使用每周生成的列表，因此 arm64 机器看到的是 arm64 的构建。
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 像其他列表一样显示不带 `OTP-` 前缀的正式版，例如 `29.1.2`。两种写法安装的是同一个构建。
+- Linux 上设置 `USE_PREBUILT_OTP` 后，无论输入哪种写法，安装名都是 `29.1.2`，因此安装另一种写法时会提示已安装。本次改动之前以 `OTP-29.1.2` 安装的版本保留原名；`vfox install` 不认得它，会重新安装同一版本。
 
 ### 修复
 

@@ -46,7 +46,7 @@ https://builds.hex.pm/builds/otp/<arch>/<USE_PREBUILT_OTP>/<name>.tar.gz
 ```
 
 - `<arch>` 是 vfox 报告的架构，x86-64 上为 `amd64`。
-- 正式版本会自动加上 `OTP-` 前缀：`26.2.3` 下载的是 `OTP-26.2.3.tar.gz`。已经带前缀的名字，例如 `OTP-26.2.3`，按原样使用。
+- 正式版本会自动加上 `OTP-` 前缀：`26.2.3` 下载的是 `OTP-26.2.3.tar.gz`。已经带前缀的名字，例如 `OTP-26.2.3`，下载的是同一个文件。两种名字安装的都是 `26.2.3`。
 - 分支名按原样使用，例如 `maint-27` 和 `master`。
 
 压缩包解压后，插件会在安装目录中执行 OTP 自带的 `Install` 脚本（`./Install -cross -sasl`）。

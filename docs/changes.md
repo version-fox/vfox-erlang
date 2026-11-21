@@ -26,6 +26,7 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - With `USE_PREBUILT_OTP` set, the Windows version list no longer changes. Windows always uses the official installer.
 - On Linux, `vfox search` with `USE_PREBUILT_OTP` reads the `builds.txt` index that Bob publishes for the release and for the architecture vfox runs on, when you search. It no longer uses a list generated every week, so arm64 machines see arm64 builds.
 - On Linux, `vfox search` with `USE_PREBUILT_OTP` lists releases without the `OTP-` prefix, like the other lists, for example `29.1.2`. Both spellings install the same build.
+- On Linux with `USE_PREBUILT_OTP`, an install is recorded as `29.1.2` whichever spelling was typed, so installing the other spelling of an installed release reports it as already installed. A release installed as `OTP-29.1.2` before this change keeps that name; `vfox install` does not recognise it, so it installs the release again.
 
 ### Fixed
 

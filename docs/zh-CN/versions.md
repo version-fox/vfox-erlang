@@ -14,7 +14,7 @@
 | Windows 正式版本 | `25.3.2.12` | Windows，使用 Windows 安装器的四段版本号 |
 | 分支或维护版本 | `master`、`maint-27` | Linux 和 macOS（源码构建或预编译），不支持 Windows |
 
-- Linux 预编译列表中，正式版本和其他列表一样不带前缀，例如 `26.2.3`。下载时使用服务器的 `OTP-26.2.3` 名字。两种写法在 `vfox install` 和 `vfox use` 中都可以使用。
+- Linux 预编译列表中，正式版本和其他列表一样不带前缀，例如 `26.2.3`。两种写法下载的是同一个构建，安装名都是 `26.2.3`。本次改动之前以 `OTP-26.2.3` 安装的版本保留原名：`vfox use` 两种名字都能找到，但 `vfox install` 不认得它，会重新安装同一版本。
 - macOS 预编译的分支名以 `-latest` 结尾：`master-latest`、`maint-latest` 和 `maint-27-latest`。
 - Windows 上，正式版本从 [Erlang/OTP releases](https://github.com/erlang/otp/releases) 页面上 `OTP-<版本号>` 标签下发布的安装器安装。
 

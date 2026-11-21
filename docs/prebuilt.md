@@ -46,7 +46,7 @@ https://builds.hex.pm/builds/otp/<arch>/<USE_PREBUILT_OTP>/<name>.tar.gz
 ```
 
 - `<arch>` is the architecture that vfox reports. On x86-64 it is `amd64`.
-- A release version gets the `OTP-` prefix added. `26.2.3` downloads `OTP-26.2.3.tar.gz`. A name that already has the prefix, such as `OTP-26.2.3`, is used as typed.
+- A release version gets the `OTP-` prefix added. `26.2.3` downloads `OTP-26.2.3.tar.gz`. A name that already has the prefix, such as `OTP-26.2.3`, downloads the same file. Either name installs the release as `26.2.3`.
 - A branch name is used as typed, for example `maint-27` or `master`.
 
 After the archive is unpacked, the plugin runs the `Install` script that comes with OTP (`./Install -cross -sasl`) in the install directory.
