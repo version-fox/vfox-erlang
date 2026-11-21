@@ -22,6 +22,7 @@
 - Windows 安装器调用去掉了只属于 PowerShell 的 `-Wait -PassThru` 参数。
 - README 与文档重写为中英双语。
 - `metadata.lua` 插件描述中的拼写错误 `Uinx` 改为 `Unix`。
+- 设置 `USE_PREBUILT_OTP` 后，Windows 的版本列表不再变化；Windows 始终使用官方安装器。
 
 ### 修复
 
@@ -36,6 +37,9 @@
 - `get_all_otp_versions.py` 只检查了最后一次 GitHub API 响应的状态码。
 - 源码构建的 `master` 与 `maint-<N>` 之前从 `refs/tags/` 下载归档，返回 404；现在改为 `refs/heads/`。
 - 源码构建时若输入已带 `OTP-` 前缀（如 `OTP-26.2.3`），之前会变成 `OTP-OTP-26.2.3` 并返回 404；现在不再重复添加。
+- Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 对每个 Ubuntu 版本都列出 ubuntu-20.04 的构建，因此只存在于较新版本的构建（如 ubuntu-24.04 上的 `OTP-29.1.2`）缺失。现在列表来自所选版本的构建。
+- `vfox search` 遇到不支持的 `USE_PREBUILT_OTP` 值（如 `ubuntu-99.04`）时仍会列出构建，而不是报错。现在与 `vfox install` 一样，给出支持的取值。
+- 空的 `USE_PREBUILT_OTP` 视为未设置，会从源码构建。
 
 ### 移除
 

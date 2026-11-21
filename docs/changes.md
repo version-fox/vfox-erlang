@@ -22,6 +22,7 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - The Windows installer runs without the PowerShell-only `-Wait -PassThru` arguments.
 - The README and the documentation are rewritten in English and Chinese.
 - The typo `Uinx` in the plugin description in `metadata.lua` is corrected to `Unix`.
+- With `USE_PREBUILT_OTP` set, the Windows version list no longer changes. Windows always uses the official installer.
 
 ### Fixed
 
@@ -36,6 +37,9 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - `get_all_otp_versions.py` checked the status code of only the last GitHub API response.
 - Source builds of `master` and `maint-<N>` downloaded the archive from `refs/tags/`, which returned 404. They now download from `refs/heads/`.
 - A source build of a version that already has the `OTP-` prefix, such as `OTP-26.2.3`, became `OTP-OTP-26.2.3` and returned 404. The prefix is no longer added twice.
+- On Linux, `vfox search` with `USE_PREBUILT_OTP` listed the ubuntu-20.04 builds for every Ubuntu release, so builds that exist only for newer releases, such as `OTP-29.1.2` on ubuntu-24.04, were missing. The list now comes from the builds of the release that the variable names.
+- `vfox search` with an unsupported `USE_PREBUILT_OTP` value, such as `ubuntu-99.04`, listed builds instead of failing. It now reports the supported values, as `vfox install` does.
+- An empty `USE_PREBUILT_OTP` counts as unset, so the source build runs.
 
 ### Removed
 
