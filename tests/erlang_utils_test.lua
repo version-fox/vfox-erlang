@@ -138,28 +138,51 @@ end
 
 local base_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/"
 responses[base_url .. "versions.txt"] = { status_code = 200, body = "26.2.3\n" }
-responses[base_url .. "macos_prebuilt_versions.txt"] = { status_code = 200, body = "25.3.2.12\n" }
+responses[base_url .. "macos_prebuilt_versions.txt"] = {
+    status_code = 200,
+    body = "master-latest\n25.3.2.12\nmaint-latest\n26.2.3\n",
+}
 
 check(search_on("linux", { USE_PREBUILT_OTP = "" })[1].version == "26.2.3", "an empty USE_PREBUILT_OTP is unset")
 check(
     search_on("windows", { USE_PREBUILT_OTP = "ubuntu-22.04" })[1].version == "26.2.3",
     "windows ignores the variable"
 )
-check(search_on("darwin", { USE_PREBUILT_OTP = "true" })[1].version == "25.3.2.12", "macOS uses its prebuilt list")
+local mac = search_on("darwin", { USE_PREBUILT_OTP = "true" })
+check(
+    #mac == 4
+        and mac[1].version == "26.2.3"
+        and mac[2].version == "25.3.2.12"
+        and mac[3].version == "master-latest"
+        and mac[4].version == "maint-latest",
+    "macOS lists the newest release first, then the branches"
+)
 
 -- Linux reads the builds.txt index of the release that USE_PREBUILT_OTP names, for the
--- architecture vfox runs on. Each line is a name, then the commit and the build time. The list
--- is in descending string order, as the generated lists were.
+-- architecture vfox runs on. Each line is a name, then the commit and the build time.
 local index_body =
     "OTP-28.4.2 0863bd30 2026-04-26T03:41:09Z\nmaster abc 2026-04-26T03:41:09Z\r\n\nOTP-29.1.2 9d37 2026-04-26T02:55:31Z\n"
 responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] = { status_code = 200, body = index_body }
 local noble = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
 check(
     #noble == 3
-        and noble[1].version == "master"
-        and noble[2].version == "OTP-29.1.2"
-        and noble[3].version == "OTP-28.4.2",
-    "ubuntu-24.04 lists its own index, in descending order"
+        and noble[1].version == "OTP-29.1.2"
+        and noble[2].version == "OTP-28.4.2"
+        and noble[3].version == "master",
+    "ubuntu-24.04 lists the newest release first, then the branches"
+)
+-- `latest` installs the first name, so the order matters: the newest final release, then the
+-- release candidates, then the branches. Numbers compare as numbers: 25.3.2.10 is newer than 25.3.2.9.
+local order_body = "maint-28\nOTP-29.0-rc3\nOTP-25.3.2.9\nOTP-25.3.2.10\nOTP-29.1.2\nmaster\nOTP-29.1\n"
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] = { status_code = 200, body = order_body }
+local ordered = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+local ordered_names = {}
+for i, entry in ipairs(ordered) do
+    ordered_names[i] = entry.version
+end
+check(
+    table.concat(ordered_names, " ") == "OTP-29.1.2 OTP-29.1 OTP-25.3.2.10 OTP-25.3.2.9 OTP-29.0-rc3 master maint-28",
+    "release order: " .. table.concat(ordered_names, " ")
 )
 responses["https://builds.hex.pm/builds/otp/arm64/ubuntu-24.04/builds.txt"] =
     { status_code = 200, body = "OTP-26.2.3 aaa 2026-01-01T00:00:00Z\n" }

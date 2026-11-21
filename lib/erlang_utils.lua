@@ -176,12 +176,70 @@ function erlang_utils.find_bin_dir(root)
     return erlang_utils.join(erlang_utils.join(root, "release"), "bin")
 end
 
+--- Splits a release name such as OTP-29.1.2, 29.1.2 or OTP-29.0-rc3 into its numbers. A release
+--- candidate also gives its number. Branch names such as master or maint-28 give nil.
+local function release_of(name)
+    local bare = string.gsub(name, "^OTP%-", "")
+    local base, candidate = string.match(bare, "^([%d%.]+)%-rc(%d+)$")
+    if base == nil then
+        base = string.match(bare, "^[%d%.]+$")
+        if base == nil then
+            return nil
+        end
+    end
+    local numbers = {}
+    for number in string.gmatch(base, "%d+") do
+        table.insert(numbers, tonumber(number))
+    end
+    return { numbers = numbers, candidate = candidate and tonumber(candidate) }
+end
+
+--- True when release a is newer than release b. Final releases come before release candidates;
+--- between releases of the same kind, the higher numbers come first.
+local function newer_release(a, b)
+    if (a.candidate == nil) ~= (b.candidate == nil) then
+        return a.candidate == nil
+    end
+    for i = 1, math.max(#a.numbers, #b.numbers) do
+        local x, y = a.numbers[i] or 0, b.numbers[i] or 0
+        if x ~= y then
+            return x > y
+        end
+    end
+    return (a.candidate or 0) > (b.candidate or 0)
+end
+
+--- Orders the names of a prebuilt list for `vfox install erlang@latest`, which installs the first
+--- name: the newest final release, then the release candidates, then the branches (master,
+--- maint-*) in descending string order.
+local function sort_prebuilt_names(names)
+    local releases = {}
+    for _, name in ipairs(names) do
+        releases[name] = release_of(name)
+    end
+    table.sort(names, function(a, b)
+        local ra, rb = releases[a], releases[b]
+        if ra and rb then
+            if newer_release(ra, rb) then
+                return true
+            end
+            if newer_release(rb, ra) then
+                return false
+            end
+        elseif ra or rb then
+            return ra ~= nil
+        end
+        return a > b
+    end)
+end
+
 function erlang_utils.get_erlang_release_versions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
     -- USE_PREBUILT_OTP selects the prebuilt list of the platform. Windows always uses the official
     -- installer, so its list does not change.
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+    local prebuilt_list = use_prebuilt ~= nil and (RUNTIME.osType == "darwin" or RUNTIME.osType == "linux")
     if use_prebuilt and RUNTIME.osType == "darwin" then
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
     elseif use_prebuilt and RUNTIME.osType == "linux" then
@@ -215,10 +273,14 @@ function erlang_utils.get_erlang_release_versions()
             table.insert(names, name)
         end
     end
-    -- Descending string order, the order the generated lists had.
-    table.sort(names, function(a, b)
-        return a > b
-    end)
+    if prebuilt_list then
+        sort_prebuilt_names(names)
+    else
+        -- The generated lists are already in descending string order.
+        table.sort(names, function(a, b)
+            return a > b
+        end)
+    end
     local result = {}
     for _, name in ipairs(names) do
         table.insert(result, {
