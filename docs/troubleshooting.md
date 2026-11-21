@@ -171,6 +171,18 @@ Fix:
 
 - Install the version with `vfox install erlang@26.2.3`, or link an installation that is already on the machine with `vfox link --detect erlang`. See [link.md](link.md).
 
+## The same release is installed twice
+
+Symptom: `vfox list erlang` shows two entries for one release, such as `OTP-29.1.2` and `29.1.2`. Or `vfox install erlang@29.1.2` downloads the build again after you installed `erlang@OTP-29.1.2`.
+
+Cause: vfox recognises an install by its exact name. Installs made before the Linux prebuilt list showed bare versions are named `OTP-29.1.2`. With the new plugin, installs are named `29.1.2`. vfox does not know that the two names are the same release, so it installs both.
+
+Fix:
+
+- Keep the copy you use. `vfox use` finds the release under either name.
+- To remove the other copy, run `vfox uninstall erlang@OTP-29.1.2` (or `erlang@29.1.2`). If you remove the current version, vfox switches to the other copy.
+- With the new plugin, installing the same release under either name later reports `already installed`, so the duplicate only comes from installs made before the change.
+
 ## erl is missing, or another erl runs
 
 Symptom: `erl` is not found after `vfox use`, or it runs a different Erlang/OTP.

@@ -171,6 +171,18 @@ vfox list erlang
 
 - 用 `vfox install erlang@26.2.3` 安装该版本，或用 `vfox link --detect erlang` 链接机器上已有的安装。见 [链接已安装的 Erlang/OTP](link.md)。
 
+## 同一个版本装了两份
+
+症状：`vfox list erlang` 里同一个正式版出现两项，例如 `OTP-29.1.2` 和 `29.1.2`。或者用 `erlang@OTP-29.1.2` 装过之后，`vfox install erlang@29.1.2` 又下载了一次。
+
+原因：vfox 按安装时的完整名字识别已安装的版本。Linux 预编译列表改为显示不带前缀的版本号之前，安装名是 `OTP-29.1.2`；新版插件的安装名是 `29.1.2`。vfox 不知道两者是同一个正式版，所以会装两份。
+
+处理：
+
+- 保留你在用的那一份。`vfox use` 两种名字都能找到这个版本。
+- 要删除另一份，运行 `vfox uninstall erlang@OTP-29.1.2`（或 `erlang@29.1.2`）。如果删的是当前版本，vfox 会切换到另一份。
+- 新版插件下，之后用任何一种名字安装同一版本，都会提示已安装，所以重复只来自改动之前的安装。
+
 ## 找不到 erl，或运行的是另一个 erl
 
 症状：`vfox use` 之后找不到 `erl`，或者运行的是另一套 Erlang/OTP。
