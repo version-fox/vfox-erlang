@@ -10,7 +10,7 @@ vfox 会调用 `hooks/` 中的钩子：
 
 | 钩子 | 文件 | 作用 |
 | --- | --- | --- |
-| `Available` | `hooks/available.lua` | 为 `vfox search` 返回版本列表：`assets/versions.txt`，或设置了 `USE_PREBUILT_OTP` 时的 Linux 或 macOS 预编译列表。列表通过 jsDelivr 读取。 |
+| `Available` | `hooks/available.lua` | 为 `vfox search` 返回版本列表：`assets/versions.txt`；设置了 `USE_PREBUILT_OTP` 时，返回所选 Ubuntu 发行版的列表（`assets/prebuilt/<发行版>.txt`）或 macOS 预编译列表。列表通过 jsDelivr 读取。 |
 | `PreInstall` | `hooks/pre_install.lua` | 检查是否给出了版本号，并返回下载地址。Windows 使用官方安装器。设置了 `USE_PREBUILT_OTP` 时，Linux 使用 Bob 的包，macOS 使用 erlef/otp_builds 的包。其他版本使用 GitHub 源码压缩包：正式版本取标签 `OTP-<版本号>`，`master`、`maint` 和 `maint-<数字>` 取对应的分支。 |
 | `PostInstall` | `hooks/post_install.lua` | 处理下载的内容。Windows 运行安装器；Linux 预编译包运行 OTP 自带的 `Install` 脚本；macOS 预编译包的文件被移入 `release/`；源码压缩包则依次配置、构建、安装，并构建、安装文档块。 |
 | `EnvKeys` | `hooks/env_keys.lua` | 把 `PATH` 设为 `release/bin`、`bin` 和 `lib/erlang/bin` 中第一个包含 `erl`（Windows 上为 `erl.exe`）的目录。目录是通过查找可执行文件找到的，所以源码构建、预编译安装和链接的安装都能工作。 |
@@ -73,7 +73,7 @@ vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/
 
 ## 版本列表
 
-`assets/versions.txt`、`assets/prebuilt_versions.txt` 和 `assets/macos_prebuilt_versions.txt` 由 `assets/get_all_otp_versions.py` 生成。脚本从 GitHub API 读取标签，从 Bob 的 `builds.txt` 读取 Linux 列表，从 erlef/otp_builds 的发布中读取 macOS 列表。`update_otp_versions` 工作流每周运行一次该脚本，并提交结果。
+`assets/versions.txt`、`assets/prebuilt/<发行版>.txt` 和 `assets/macos_prebuilt_versions.txt` 由 `assets/get_all_otp_versions.py` 生成，`assets/prebuilt_versions.txt` 也由它生成。脚本从 GitHub API 读取标签，从 Bob 的 `builds.txt` 为每个 Ubuntu 发行版生成一份 Linux 列表，从 erlef/otp_builds 的发布中读取 macOS 列表。`prebuilt_versions.txt` 是 ubuntu-20.04 的列表，供早于按发行版列表的插件版本使用。`update_otp_versions` 工作流每周运行一次该脚本，并提交结果。
 
 ## 网站
 

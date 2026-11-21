@@ -178,8 +178,9 @@ function erlang_utils.get_erlang_release_versions()
     if use_prebuilt and RUNTIME.osType == "darwin" then
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
     elseif use_prebuilt and RUNTIME.osType == "linux" then
-        erlang_utils.check_prebuilt_release(use_prebuilt)
-        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
+        -- Each Ubuntu release has its own list: the builds that builds.hex.pm publishes for it.
+        local release = erlang_utils.check_prebuilt_release(use_prebuilt)
+        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt/" .. release .. ".txt"
     end
 
     local resp, err = http.get({

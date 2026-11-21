@@ -147,6 +147,14 @@ check(
 )
 check(search_on("darwin", { USE_PREBUILT_OTP = "true" })[1].version == "25.3.2.12", "macOS uses its prebuilt list")
 
+-- Linux searches the list of the release that USE_PREBUILT_OTP names.
+responses[base_url .. "prebuilt/ubuntu-24.04.txt"] = { status_code = 200, body = "OTP-29.1.2\nOTP-28.4.2\n" }
+responses[base_url .. "prebuilt/ubuntu-20.04.txt"] = { status_code = 200, body = "OTP-20.0\n" }
+local noble = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+check(#noble == 2 and noble[1].version == "OTP-29.1.2", "ubuntu-24.04 lists its own builds")
+local focal = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-20.04" })
+check(#focal == 1 and focal[1].version == "OTP-20.0", "ubuntu-20.04 lists its own builds")
+
 local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
 check(
     not search_ok and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,

@@ -36,7 +36,7 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox install erlang@26.2.3
 - `ubuntu-22.04`
 - `ubuntu-24.04`
 
-选择与你的 Ubuntu 版本一致的值。只接受 Ubuntu 的取值，其他发行版请使用源码构建。
+选择与你的 Ubuntu 版本一致的值。只接受 Ubuntu 的取值，其他发行版请使用源码构建。`vfox search` 会列出 Bob 为所选发行版发布的版本。
 
 下载地址的格式如下：
 

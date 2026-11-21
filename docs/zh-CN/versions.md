@@ -27,7 +27,7 @@ vfox search erlang
 列表取决于当前模式：
 
 - 未设置 `USE_PREBUILT_OTP` 时，列表是插件自带的正式版本列表。
-- 设置了 `USE_PREBUILT_OTP` 时，列表是该平台的预编译列表：Linux 上是 Ubuntu 预编译列表，macOS 上是 macOS 预编译列表。见 [预编译](prebuilt.md)。
+- 设置了 `USE_PREBUILT_OTP` 时，列表是该平台的预编译列表：Linux 上是所选 Ubuntu 发行版的列表，macOS 上是 macOS 预编译列表。见 [预编译](prebuilt.md)。
 
 vfox 默认缓存搜索结果 12 小时。如果列表看起来过旧，见 [问题排查](troubleshooting.md)。
 

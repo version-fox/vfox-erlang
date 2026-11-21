@@ -27,7 +27,7 @@ vfox search erlang
 The list depends on the mode:
 
 - Without `USE_PREBUILT_OTP`, the list is the release list that ships with the plugin.
-- With `USE_PREBUILT_OTP` set, the list is the prebuilt list for the platform: the Ubuntu list on Linux and the macOS list on macOS. See [prebuilt.md](prebuilt.md).
+- With `USE_PREBUILT_OTP` set, the list is the prebuilt list for the platform: the list of the Ubuntu release it names on Linux, and the macOS list on macOS. See [prebuilt.md](prebuilt.md).
 
 vfox caches search results for 12 hours by default. If the list looks outdated, see [troubleshooting.md](troubleshooting.md).
 

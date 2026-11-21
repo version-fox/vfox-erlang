@@ -43,20 +43,44 @@ def update_all_version_from_github_api():
         json.dump(all_version, file, indent=4)
 
 
-def get_all_prebuilt_version_from_bob():
-    # ALLOW_OS_RELEASE = ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"]
-    ALLOW_OS_RELEASE = ["ubuntu-20.04"]
-    all_version_info = []
-    for release in ALLOW_OS_RELEASE:
-        url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
-        response = requests.get(url, timeout=REQUEST_TIMEOUT)
-        all_version_info.extend(response.text.split("\n"))
+# Ubuntu releases with prebuilt Erlang/OTP builds on builds.hex.pm. Each release has its own
+# builds.txt index, because Bob does not build the same versions for every release.
+PREBUILT_OS_RELEASES = [
+    "ubuntu-14.04",
+    "ubuntu-16.04",
+    "ubuntu-18.04",
+    "ubuntu-20.04",
+    "ubuntu-22.04",
+    "ubuntu-24.04",
+]
 
-    all_prebuilt_versions = []
-    for version in all_version_info:
-        if version.split(" ")[0]:
-            all_prebuilt_versions.append(version.split(" ")[0])
-    return all_prebuilt_versions
+
+def get_prebuilt_versions_from_bob(release):
+    """Returns the build names listed in the builds.txt index of one Ubuntu release."""
+    url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
+    response = requests.get(url, timeout=REQUEST_TIMEOUT)
+    # An error page is not an index: fail instead of writing its text as build names.
+    if response.status_code != 200:
+        raise RuntimeError(f"Failed to fetch {url}: HTTP {response.status_code}")
+    names = [line.split(" ")[0] for line in response.text.split("\n")]
+    return [name for name in names if name]
+
+
+def write_version_list(path, versions):
+    with open(path, "w") as file:
+        for version in sorted(versions, reverse=True):
+            file.write(version + "\n")
+
+
+def write_prebuilt_versions():
+    """Writes prebuilt/<release>.txt for every Ubuntu release, and prebuilt_versions.txt."""
+    lists = {release: get_prebuilt_versions_from_bob(release) for release in PREBUILT_OS_RELEASES}
+    os.makedirs("prebuilt", exist_ok=True)
+    for release, versions in lists.items():
+        write_version_list(os.path.join("prebuilt", f"{release}.txt"), versions)
+    # Plugin copies from before the per-release lists read prebuilt_versions.txt, which has always
+    # held the ubuntu-20.04 list. It is kept so that those copies keep working.
+    write_version_list("prebuilt_versions.txt", lists["ubuntu-20.04"])
 
 
 def get_macos_prebuilt_versions():
@@ -146,12 +170,8 @@ if __name__ == "__main__":
         for version in versions:
             file.write(version + "\n")
 
-    # Generate prebuilt versions for Linux
-    with open("prebuilt_versions.txt", "w") as file:
-        prebuilt_versions = get_all_prebuilt_version_from_bob()
-        prebuilt_versions.sort(reverse=True)
-        for version in prebuilt_versions:
-            file.write(version + "\n")
+    # Generate prebuilt versions for Linux, one list per Ubuntu release
+    write_prebuilt_versions()
 
     # Generate prebuilt versions for macOS
     print("\nFetching macOS prebuilt versions...")
