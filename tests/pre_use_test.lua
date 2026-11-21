@@ -36,4 +36,31 @@ check(not ok and string.find(err, "is not installed", 1, true) ~= nil, "missing 
 ok, err = pcall(plugin.PreUse, plugin, { version = "24.1" })
 check(not ok and string.find(err, "vfox install erlang@24.1", 1, true) ~= nil, "no installedSdks: " .. tostring(err))
 
+-- A release can be installed with or without the OTP- prefix. Either spelling finds it, and an
+-- exact match wins when both are installed.
+local prefixed = { ["OTP-29.1.2"] = { path = "/sdk/erlang/OTP-29.1.2", name = "erlang", version = "OTP-29.1.2" } }
+check(
+    plugin:PreUse({ version = "29.1.2", installedSdks = prefixed }).version == "OTP-29.1.2",
+    "a bare name finds the prefixed install"
+)
+local bare_only = { ["29.1.1"] = { path = "/sdk/erlang/29.1.1", name = "erlang", version = "29.1.1" } }
+check(
+    plugin:PreUse({ version = "OTP-29.1.1", installedSdks = bare_only }).version == "29.1.1",
+    "a prefixed name finds the bare install"
+)
+local both = {
+    ["29.1.2"] = { path = "/sdk/erlang/29.1.2", name = "erlang", version = "29.1.2" },
+    ["OTP-29.1.2"] = { path = "/sdk/erlang/OTP-29.1.2", name = "erlang", version = "OTP-29.1.2" },
+}
+check(plugin:PreUse({ version = "29.1.2", installedSdks = both }).version == "29.1.2", "an exact match wins")
+ok, err = pcall(
+    plugin.PreUse,
+    plugin,
+    { version = "master", installedSdks = { ["OTP-master"] = { version = "OTP-master" } } }
+)
+check(
+    not ok and string.find(err, "is not installed", 1, true) ~= nil,
+    "branches have no other spelling: " .. tostring(err)
+)
+
 print("pre_use_test: " .. counter.checks .. " checks passed")

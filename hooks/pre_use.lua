@@ -12,14 +12,21 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+local erlangUtils = require("erlang_utils")
+
 --- When user invoke `use` command, this function will be called to get the
 --- valid version information.
 --- @param ctx table Context information
 function PLUGIN:PreUse(ctx)
     --- user input version
     local input_version = ctx.version
-    --- installed sdks
-    local sdkInfo = (ctx.installedSdks or {})[input_version]
+    --- installed sdks, keyed by the name each one was installed with
+    local installed = ctx.installedSdks or {}
+    local sdkInfo = installed[input_version]
+    if sdkInfo == nil then
+        -- A release can be installed as 29.1.2 or as OTP-29.1.2, so the other spelling is tried too.
+        sdkInfo = installed[erlangUtils.other_release_spelling(input_version)]
+    end
     if sdkInfo == nil then
         error(
             "Erlang/OTP "

@@ -165,10 +165,7 @@ local index_body =
 responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] = { status_code = 200, body = index_body }
 local noble = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
 check(
-    #noble == 3
-        and noble[1].version == "OTP-29.1.2"
-        and noble[2].version == "OTP-28.4.2"
-        and noble[3].version == "master",
+    #noble == 3 and noble[1].version == "29.1.2" and noble[2].version == "28.4.2" and noble[3].version == "master",
     "ubuntu-24.04 lists the newest release first, then the branches"
 )
 -- `latest` installs the first name, so the order matters: the newest final release, then the
@@ -181,21 +178,29 @@ for i, entry in ipairs(ordered) do
     ordered_names[i] = entry.version
 end
 check(
-    table.concat(ordered_names, " ") == "OTP-29.1.2 OTP-29.1 OTP-25.3.2.10 OTP-25.3.2.9 OTP-29.0-rc3 master maint-28",
+    table.concat(ordered_names, " ") == "29.1.2 29.1 25.3.2.10 25.3.2.9 29.0-rc3 master maint-28",
     "release order: " .. table.concat(ordered_names, " ")
 )
+
+-- OTP- is only a spelling: 29.1.2 and OTP-29.1.2 name the same release, and branches have none.
+check(erlang_utils.other_release_spelling("29.1.2") == "OTP-29.1.2", "a bare name gets the prefix")
+check(erlang_utils.other_release_spelling("OTP-29.1.2") == "29.1.2", "a prefixed name loses it")
+check(erlang_utils.other_release_spelling("29.0-rc3") == "OTP-29.0-rc3", "release candidates too")
+check(erlang_utils.other_release_spelling("master") == nil, "branches have no other spelling")
+check(erlang_utils.bare_release_name("OTP-29.1.2") == "29.1.2", "the list shows release names bare")
+check(erlang_utils.bare_release_name("maint-28") == "maint-28", "branch names are unchanged")
 responses["https://builds.hex.pm/builds/otp/arm64/ubuntu-24.04/builds.txt"] =
     { status_code = 200, body = "OTP-26.2.3 aaa 2026-01-01T00:00:00Z\n" }
 local arm = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" }, "arm64")
-check(#arm == 1 and arm[1].version == "OTP-26.2.3", "arm64 reads the arm64 index")
+check(#arm == 1 and arm[1].version == "26.2.3", "arm64 reads the arm64 index")
 responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-20.04/builds.txt"] =
     { status_code = 200, body = "OTP-20.0 040bdce6 2020-10-29T08:19:13Z\n" }
 local focal = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-20.04" })
-check(#focal == 1 and focal[1].version == "OTP-20.0", "ubuntu-20.04 reads its own index")
+check(#focal == 1 and focal[1].version == "20.0", "ubuntu-20.04 reads its own index")
 responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-26.04/builds.txt"] =
     { status_code = 200, body = "OTP-26.0 8c0ea6bd 2026-04-24T21:11:44Z\n" }
 local resolute = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-26.04" })
-check(#resolute == 1 and resolute[1].version == "OTP-26.0", "ubuntu-26.04 reads its own index")
+check(#resolute == 1 and resolute[1].version == "26.0", "ubuntu-26.04 reads its own index")
 
 local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
 check(

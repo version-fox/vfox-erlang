@@ -86,6 +86,27 @@ function erlang_utils.check_prebuilt_release(release)
     return release
 end
 
+--- The other spelling of a release name: 29.1.2 for OTP-29.1.2, and OTP-29.1.2 for 29.1.2. Other
+--- names, such as branches, have none and give nil.
+function erlang_utils.other_release_spelling(version)
+    if type(version) ~= "string" then
+        return nil
+    end
+    if string.match(version, "^OTP%-%d") then
+        return string.sub(version, 5)
+    end
+    if string.match(version, "^%d") then
+        return "OTP-" .. version
+    end
+    return nil
+end
+
+--- The name a release has in the Linux prebuilt list: the OTP- prefix dropped, as the other lists
+--- show it. Branch names keep their names.
+function erlang_utils.bare_release_name(name)
+    return string.match(name, "^OTP%-(%d.*)$") or name
+end
+
 --- Returns the URL of the builds.hex.pm index that lists the builds of one Ubuntu release for the
 --- architecture vfox runs on. The install downloads from the same host and architecture.
 function erlang_utils.prebuilt_index_url(release)
@@ -240,6 +261,8 @@ function erlang_utils.get_erlang_release_versions()
     -- installer, so its list does not change.
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
     local prebuilt_list = use_prebuilt ~= nil and (RUNTIME.osType == "darwin" or RUNTIME.osType == "linux")
+    -- Bob's names carry the OTP- prefix; the Linux list shows release names without it.
+    local bob_names = use_prebuilt ~= nil and RUNTIME.osType == "linux"
     if use_prebuilt and RUNTIME.osType == "darwin" then
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
     elseif use_prebuilt and RUNTIME.osType == "linux" then
@@ -270,6 +293,9 @@ function erlang_utils.get_erlang_release_versions()
     for line in string.gmatch(resp.body, "[^\r\n]+") do
         local name = string.match(erlang_utils.trim(line), "^%S+")
         if name then
+            if bob_names then
+                name = erlang_utils.bare_release_name(name)
+            end
             table.insert(names, name)
         end
     end
