@@ -196,7 +196,7 @@ Symptom: `erl` runs, but `h(lists).` or `shell_docs:get_doc(lists)` shows nothin
 Check:
 
 ```shell
-erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "List processing functions"
+erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "functions for list processing"
 ```
 
 No output means the documentation chunks are missing.

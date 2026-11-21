@@ -62,7 +62,7 @@ jobs:
           $HOME/.local/bin/mise exec -- erl -noshell -s hello hello_world -s init stop
           docs=$($HOME/.local/bin/mise exec -- erl -eval \
             'erlang:display(shell_docs:get_doc(lists)), halt().' \
-            -noshell | grep "List processing functions")
+            -noshell | grep "functions for list processing")
           if [ -n "$docs" ]; then
               echo "erlang built with docs chunk"
           else

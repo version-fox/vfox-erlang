@@ -28,8 +28,8 @@ const (
 	// docChunksExpr renders the docs of the lists module through shell_docs,
 	// which needs the EEP-48 doc chunks.
 	docChunksExpr = "erlang:display(shell_docs:get_doc(lists))."
-	// docChunksMarker appears in the rendered lists docs.
-	docChunksMarker = "List processing functions"
+	// docChunksMarker appears in the rendered lists docs of both OTP 25 and 26.
+	docChunksMarker = "functions for list processing"
 	// helloMarker is printed by hello:hello_world/0.
 	helloMarker = "hello, world"
 )

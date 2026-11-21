@@ -87,10 +87,10 @@ vfox install erlang@26.2.3
 eval "$(vfox activate bash)"
 vfox use -g erlang@26.2.3
 erl -noshell -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().'
-erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "List processing functions"
+erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "functions for list processing"
 ```
 
-如果安装了文档块，第二条命令会输出包含 `List processing functions` 的一行。
+如果安装了文档块，第二条命令会输出包含 `functions for list processing` 的一行。
 
 ## 修改构建参数
 

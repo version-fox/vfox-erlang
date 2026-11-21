@@ -196,7 +196,7 @@ vfox doctor erlang
 检查：
 
 ```shell
-erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "List processing functions"
+erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "functions for list processing"
 ```
 
 没有输出说明文档块缺失。

@@ -87,10 +87,10 @@ Then check the install:
 eval "$(vfox activate bash)"
 vfox use -g erlang@26.2.3
 erl -noshell -eval 'erlang:display({otp_release, erlang:system_info(otp_release)}), halt().'
-erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "List processing functions"
+erl -noshell -eval 'erlang:display(shell_docs:get_doc(lists)), halt().' | grep "functions for list processing"
 ```
 
-The second command prints a line containing `List processing functions` when the documentation chunks are installed.
+The second command prints a line containing `functions for list processing` when the documentation chunks are installed.
 
 ## Changing the build
 
