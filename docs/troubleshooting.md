@@ -57,7 +57,7 @@ Fix:
 
 ## USE_PREBUILT_OTP has an unsupported value
 
-Symptom: on Linux, the install stops with `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04. Got: ...`.
+Symptom: on Linux, the install stops with `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`.
 
 Check:
 
@@ -68,7 +68,7 @@ uname -m     # on macOS, x86_64 (Intel) and arm64 (Apple silicon) are both suppo
 
 Fix:
 
-- Linux: use one of `ubuntu-14.04`, `ubuntu-16.04`, `ubuntu-18.04`, `ubuntu-20.04`, `ubuntu-22.04` or `ubuntu-24.04`. `true` is not valid on Linux.
+- Linux: use one of `ubuntu-14.04`, `ubuntu-16.04`, `ubuntu-18.04`, `ubuntu-20.04`, `ubuntu-22.04`, `ubuntu-24.04` or `ubuntu-26.04`. `true` is not valid on Linux.
 - macOS: set `USE_PREBUILT_OTP=true`. If the install reports an unsupported architecture, the Mac is not `amd64`, `x86_64`, `arm64` or `aarch64`.
 - Windows ignores the variable.
 

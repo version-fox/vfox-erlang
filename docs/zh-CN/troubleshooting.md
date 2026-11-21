@@ -57,7 +57,7 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
 
 ## USE_PREBUILT_OTP 取值不合法
 
-症状：在 Linux 上，安装在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04. Got: ...`。
+症状：在 Linux 上，安装在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`。
 
 检查：
 
@@ -68,7 +68,7 @@ uname -m     # macOS 上，x86_64（Intel）和 arm64（Apple 芯片）都受支
 
 修复：
 
-- Linux：使用 `ubuntu-14.04`、`ubuntu-16.04`、`ubuntu-18.04`、`ubuntu-20.04`、`ubuntu-22.04` 或 `ubuntu-24.04` 之一。`true` 在 Linux 上不合法。
+- Linux：使用 `ubuntu-14.04`、`ubuntu-16.04`、`ubuntu-18.04`、`ubuntu-20.04`、`ubuntu-22.04`、`ubuntu-24.04` 或 `ubuntu-26.04` 之一。`true` 在 Linux 上不合法。
 - macOS：设置 `USE_PREBUILT_OTP=true`。如果安装报告不支持该架构，说明这台 Mac 的架构不是 `amd64`、`x86_64`、`arm64` 或 `aarch64`。
 - Windows 会忽略这个变量。
 

@@ -16,6 +16,7 @@
 - `docs/` 与 `docs/zh-CN/` 下的双语文档。
 - `opencode.jsonc` 中的权限放行。
 - `.gitattributes`（统一使用 LF 换行）。
+- Linux 的 `USE_PREBUILT_OTP` 接受 `ubuntu-26.04`。Bob 为 amd64 和 arm64 发布了它的 OTP 构建。
 
 ### 变更
 

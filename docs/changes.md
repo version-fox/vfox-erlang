@@ -16,6 +16,7 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - Bilingual documentation in `docs/` and `docs/zh-CN/`.
 - Permissions allowed in `opencode.jsonc`.
 - `.gitattributes` to keep LF line endings.
+- `ubuntu-26.04` is accepted as a `USE_PREBUILT_OTP` value on Linux. Bob publishes its OTP builds for amd64 and arm64.
 
 ### Changed
 
