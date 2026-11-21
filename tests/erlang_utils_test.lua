@@ -169,12 +169,17 @@ responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-20.04/builds.txt"] =
     { status_code = 200, body = "OTP-20.0 040bdce6 2020-10-29T08:19:13Z\n" }
 local focal = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-20.04" })
 check(#focal == 1 and focal[1].version == "OTP-20.0", "ubuntu-20.04 reads its own index")
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-26.04/builds.txt"] =
+    { status_code = 200, body = "OTP-26.0 8c0ea6bd 2026-04-24T21:11:44Z\n" }
+local resolute = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-26.04" })
+check(#resolute == 1 and resolute[1].version == "OTP-26.0", "ubuntu-26.04 reads its own index")
 
 local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
 check(
     not search_ok and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
     "search rejects an unknown release: " .. tostring(search_err)
 )
+check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the error lists ubuntu-26.04")
 
 -- Available is the hook that vfox calls; it returns the same list.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }

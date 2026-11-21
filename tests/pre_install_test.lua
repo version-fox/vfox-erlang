@@ -78,6 +78,13 @@ check(
     "prebuilt maint branch: " .. result.url
 )
 
+-- Ubuntu 26.04 is published by Bob for amd64 and arm64.
+result = pre_install({ USE_PREBUILT_OTP = "ubuntu-26.04" }, "26.2.3", "linux", "amd64")
+check(
+    result.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-26.04/OTP-26.2.3.tar.gz",
+    "prebuilt ubuntu-26.04: " .. result.url
+)
+
 local ok, err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-99.04" }, "26.2.3", "linux", "amd64")
 check(
     not ok and string.find(err, "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,

@@ -69,6 +69,7 @@ erlang_utils.PREBUILT_OS_RELEASES = {
     "ubuntu-20.04",
     "ubuntu-22.04",
     "ubuntu-24.04",
+    "ubuntu-26.04",
 }
 
 --- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value
