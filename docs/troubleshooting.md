@@ -77,12 +77,14 @@ Symptom: `vfox install` stops before the download with `Erlang/OTP 28 is not in 
 Check:
 
 ```shell
-vfox search erlang              # the names this plugin can install, with your USE_PREBUILT_OTP setting
+vfox search erlang              # the names this plugin can install from source
+USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang   # the names it can install prebuilt, with USE_PREBUILT_OTP set on Linux or macOS
 ```
 
 Fix:
 
-- Use a full name from `vfox search erlang`, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not checked against the list, so they are installed as before.
+- The message names the command to run. With `USE_PREBUILT_OTP` set on Linux or macOS, it names `USE_PREBUILT_OTP=<value> vfox search erlang`, because the prebuilt list is the one the install checks. Run that command, not the plain one.
+- Use a full name from the list that the command shows, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not checked against the list, so they are installed as before.
 - The release and macOS lists are generated once a week. A release that came out after the last refresh is refused until the list includes it.
 - The Linux prebuilt list is read from Bob's index when you search, so the weekly refresh does not affect it. See [prebuilt.md](prebuilt.md).
 
