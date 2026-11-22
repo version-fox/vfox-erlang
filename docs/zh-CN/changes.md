@@ -2,12 +2,18 @@
 
 [中文](changes.md) | [English](../changes.md)
 
-本文件记录 1.2.0 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
+本文件记录 1.2.1 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
 
 ## 未发布
 
+暂无变更。
+
+## 1.2.1
+
 ### 新增
 
+- 双语文档网站，源文件位于 `website/`，通过 GitHub Pages 发布。见 [website/README.md](../../website/README.md)。
+- 面向 mise 用户的端到端工作流（Linux 和 macOS），通过 mise 的 vfox 后端安装。见 [mise](mise.md)。
 - 通过 `Detect` 钩子和 `vfox link --detect` 扫描系统中已安装的 Erlang/OTP，需要 vfox 1.1.0 或更高版本。见 [链接已安装的 Erlang/OTP](link.md)。
 - 用 Go 编写的 Ubuntu 与 Windows 端到端套件，以及 Linux 测试容器（`tests/e2e/linux/Dockerfile`）。见 [E2E 测试](e2e.md)。
 - Lua 离线单元测试（`tests/*_test.lua`）。
@@ -20,13 +26,14 @@
 
 ### 变更
 
+- 发布使用共享的插件工作流：在默认分支上打开 **Actions → Plugin → Run workflow**，或推送版本号与 `metadata.lua` 一致的 `v*` 标签。Pull Request 的标题不再触发发布。见 [发布](development.md#发布)。
 - Windows 安装器调用去掉了只属于 PowerShell 的 `-Wait -PassThru` 参数。
 - README 与文档重写为中英双语。
 - `metadata.lua` 插件描述中的拼写错误 `Uinx` 改为 `Unix`。
 - 设置 `USE_PREBUILT_OTP` 后，Windows 的版本列表不再变化；Windows 始终使用官方安装器。
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 在搜索时读取 Bob 为所选发行版和本机架构发布的 `builds.txt` 索引，不再使用每周生成的列表，因此 arm64 机器看到的是 arm64 的构建。
 - Linux 上设置 `USE_PREBUILT_OTP` 后，`vfox search` 像其他列表一样显示不带 `OTP-` 前缀的正式版，例如 `29.1.2`。两种写法安装的是同一个构建。
-- Linux 上设置 `USE_PREBUILT_OTP` 后，无论输入哪种写法，安装名都是 `29.1.2`，因此安装另一种写法时会提示已安装。本次改动之前以 `OTP-29.1.2` 安装的版本保留原名；`vfox install` 不认得它，会重新安装同一版本。
+- Linux 上设置 `USE_PREBUILT_OTP` 后，无论输入哪种写法，安装名都是 `29.1.2`，因此安装另一种写法时会提示已安装。以 1.2.0 或更早版本安装的 `OTP-29.1.2` 保留原名；`vfox install` 不认得它，会重新安装同一版本。
 
 ### 修复
 

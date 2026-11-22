@@ -87,7 +87,7 @@ See [docs/mise.md](docs/mise.md).
 - [Linking installed Erlang/OTP](docs/link.md): using an Erlang/OTP that is already on the machine
 - [mise](docs/mise.md): using the plugin through the vfox backend of mise
 - [Troubleshooting](docs/troubleshooting.md): common failures and the commands that diagnose them
-- [Changes](docs/changes.md): changes since 1.2.0
+- [Changes](docs/changes.md): what changed in 1.2.1, and after
 
 **Working on the plugin**
 

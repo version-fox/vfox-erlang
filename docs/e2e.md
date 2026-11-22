@@ -48,14 +48,14 @@ cd tests/e2e
 go test -v -timeout 90m -run TestWindows ./windows
 ```
 
-vfox is found on `PATH` unless `VFOX_BIN` names another binary. The system test installs Erlang/OTP into `%ProgramFiles%`. It refuses to run when Erlang/OTP directories already exist there, so it never installs over an existing installation.
+vfox is found on `PATH` unless `VFOX_BIN` names another binary. The system test installs Erlang/OTP into `%ProgramFiles%`. The test is skipped when Erlang/OTP directories already exist there, so it never installs over an existing installation.
 
 ## Environment variables
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `E2E_ERLANG_VERSION` | `26.2.3` | The version the Linux suites install. The Windows suites use fixed versions, 25.3.2.12 and 26.2.3 |
-| `E2E_PREBUILT_OS` | The `VERSION_ID` from `/etc/os-release`; the test is skipped on releases other than 22.04 and 24.04 | The Ubuntu release for the prebuilt suite, such as `ubuntu-22.04` |
+| `E2E_PREBUILT_OS` | The `VERSION_ID` from `/etc/os-release`; the test is skipped on releases other than 22.04, 24.04 and 26.04 | The Ubuntu release for the prebuilt suite, such as `ubuntu-22.04` |
 | `E2E_REQUIRE_SYSTEM_ERLANG` | unset | Set to `1` to fail the Linux system test when no system Erlang/OTP is found. Otherwise the test is skipped |
 | `E2E_REPO` | The plugin root, found by walking up from the current directory | The plugin root, which holds `metadata.lua` and `hooks/`. CI and the Docker image set it |
 | `VFOX_BIN` | `vfox` on `PATH` | The vfox binary under test |

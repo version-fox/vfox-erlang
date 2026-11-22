@@ -39,8 +39,8 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 # Linux：安装包是否存在？amd64 是 vfox 对 x86-64 使用的架构名
 curl -sI https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/OTP-26.2.3.tar.gz | head -n 1
 
-# Linux：Bob 为这个 Ubuntu 版本提供了哪些版本？
-curl -s https://builds.hex.pm/builds/otp/ubuntu-22.04/builds.txt | grep 26.2.3
+# Linux：Bob 为这个 Ubuntu 版本提供了哪些版本？在 arm64 机器上，把 amd64 换成 arm64
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/builds.txt | grep 26.2.3
 
 # 插件列出的是哪些名字？
 USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
@@ -134,7 +134,7 @@ vfox search erlang
 ```
 
 - 用完之后，用 `vfox config cache.availableHookDuration 12h` 恢复缓存。
-- 版本列表由工作流每周更新，并通过 jsDelivr 提供，jsDelivr 自己也有缓存。刚刚发布的版本可能要等到下一次更新才会出现。
+- 正式版本列表和 macOS 列表由工作流每周更新，并通过 jsDelivr 提供，jsDelivr 自己也有缓存。刚刚发布的版本可能要等到下一次更新才会出现。Linux 预编译列表直接读取 Bob 的 `builds.txt` 索引，只会被 vfox 自身的搜索缓存挡住。
 
 ## 下载失败或超时
 
@@ -175,13 +175,13 @@ vfox list erlang
 
 症状：`vfox list erlang` 里同一个正式版出现两项，例如 `OTP-29.1.2` 和 `29.1.2`。或者用 `erlang@OTP-29.1.2` 装过之后，`vfox install erlang@29.1.2` 又下载了一次。
 
-原因：vfox 按安装时的完整名字识别已安装的版本。Linux 预编译列表改为显示不带前缀的版本号之前，安装名是 `OTP-29.1.2`；新版插件的安装名是 `29.1.2`。vfox 不知道两者是同一个正式版，所以会装两份。
+原因：vfox 按安装时的完整名字识别已安装的版本。1.2.0 及更早版本的安装名是 `OTP-29.1.2`；从 1.2.1 起，安装名是 `29.1.2`。vfox 不知道两者是同一个正式版，所以会装两份。
 
 处理：
 
 - 保留你在用的那一份。`vfox use` 两种名字都能找到这个版本。
 - 要删除另一份，运行 `vfox uninstall erlang@OTP-29.1.2`（或 `erlang@29.1.2`）。如果删的是当前版本，vfox 会切换到另一份。
-- 新版插件下，之后用任何一种名字安装同一版本，都会提示已安装，所以重复只来自改动之前的安装。
+- 从 1.2.1 起，无论用哪种名字安装同一版本，都会提示已安装，所以重复只来自 1.2.0 及更早版本做的安装。
 
 ## 找不到 erl，或运行的是另一个 erl
 

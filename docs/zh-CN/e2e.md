@@ -48,14 +48,14 @@ cd tests/e2e
 go test -v -timeout 90m -run TestWindows ./windows
 ```
 
-除非 `VFOX_BIN` 指定了另一个可执行文件，否则 vfox 从 `PATH` 中查找。系统测试会把 Erlang/OTP 安装到 `%ProgramFiles%`。如果那里已经存在 Erlang/OTP 目录，它会拒绝运行，因此不会覆盖已有的安装。
+除非 `VFOX_BIN` 指定了另一个可执行文件，否则 vfox 从 `PATH` 中查找。系统测试会把 Erlang/OTP 安装到 `%ProgramFiles%`。如果那里已经存在 Erlang/OTP 目录，测试会被跳过，因此不会覆盖已有的安装。
 
 ## 环境变量
 
 | 变量 | 默认值 | 含义 |
 | --- | --- | --- |
 | `E2E_ERLANG_VERSION` | `26.2.3` | Linux 套件安装的版本。Windows 套件使用固定版本 25.3.2.12 和 26.2.3 |
-| `E2E_PREBUILT_OS` | `/etc/os-release` 中的 `VERSION_ID`；在 22.04 和 24.04 以外的版本上，测试会被跳过 | 预编译套件使用的 Ubuntu 版本，例如 `ubuntu-22.04` |
+| `E2E_PREBUILT_OS` | `/etc/os-release` 中的 `VERSION_ID`；在 22.04、24.04 和 26.04 以外的版本上，测试会被跳过 | 预编译套件使用的 Ubuntu 版本，例如 `ubuntu-22.04` |
 | `E2E_REQUIRE_SYSTEM_ERLANG` | 未设置 | 设为 `1` 时，找不到系统 Erlang/OTP 会让 Linux 系统测试失败；否则测试被跳过 |
 | `E2E_REPO` | 从当前目录向上查找得到的插件根目录 | 插件根目录，其中包含 `metadata.lua` 和 `hooks/`。CI 和 Docker 镜像会设置它 |
 | `VFOX_BIN` | `PATH` 中的 `vfox` | 被测试的 vfox 可执行文件 |

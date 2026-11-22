@@ -2,12 +2,18 @@
 
 [中文](zh-CN/changes.md) | [English](changes.md)
 
-Changes after 1.2.0 are recorded here. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference.
+Changes after 1.2.1 are recorded here. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference.
 
 ## Unreleased
 
+No changes yet.
+
+## 1.2.1
+
 ### Added
 
+- A bilingual documentation website, built from `website/` and published with GitHub Pages. See [website/README.md](../website/README.md).
+- End-to-end workflows for mise users on Linux and macOS, which install through the vfox backend of mise. See [mise.md](mise.md).
 - Scanning of Erlang/OTP installations already on the system, through the `Detect` hook and `vfox link --detect`. This needs vfox 1.1.0 or later. See [link.md](link.md).
 - End-to-end suites written in Go for Ubuntu and Windows, and a Linux test container (`tests/e2e/linux/Dockerfile`). See [e2e.md](e2e.md).
 - Offline Lua unit tests (`tests/*_test.lua`).
@@ -20,13 +26,14 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 
 ### Changed
 
+- Releases use the shared plugin workflow. Run **Actions → Plugin → Run workflow** on the default branch, or push a `v*` tag whose version matches `metadata.lua`. Pull request titles no longer trigger a release. See [Releasing](development.md#releasing).
 - The Windows installer runs without the PowerShell-only `-Wait -PassThru` arguments.
 - The README and the documentation are rewritten in English and Chinese.
 - The typo `Uinx` in the plugin description in `metadata.lua` is corrected to `Unix`.
 - With `USE_PREBUILT_OTP` set, the Windows version list no longer changes. Windows always uses the official installer.
 - On Linux, `vfox search` with `USE_PREBUILT_OTP` reads the `builds.txt` index that Bob publishes for the release and for the architecture vfox runs on, when you search. It no longer uses a list generated every week, so arm64 machines see arm64 builds.
 - On Linux, `vfox search` with `USE_PREBUILT_OTP` lists releases without the `OTP-` prefix, like the other lists, for example `29.1.2`. Both spellings install the same build.
-- On Linux with `USE_PREBUILT_OTP`, an install is recorded as `29.1.2` whichever spelling was typed, so installing the other spelling of an installed release reports it as already installed. A release installed as `OTP-29.1.2` before this change keeps that name; `vfox install` does not recognise it, so it installs the release again.
+- On Linux with `USE_PREBUILT_OTP`, an install is recorded as `29.1.2` whichever spelling was typed, so installing the other spelling of an installed release reports it as already installed. A release installed as `OTP-29.1.2` with 1.2.0 or earlier keeps that name; `vfox install` does not recognise it, so it installs the release again.
 
 ### Fixed
 
