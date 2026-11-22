@@ -21,7 +21,7 @@ vfox use erlang@26.2.3
 vfox list erlang               # 链接的版本会被标记，并显示路径
 ```
 
-- 某个位置被视为一个安装，需要它包含 `bin/erl`（Windows 上为 `bin\erl.exe`）和 `releases/<release>/OTP_VERSION` 文件。检查的位置包括它本身，以及它下面的 `lib/erlang` 子目录。
+- 某个位置被视为一个安装，需要它包含 `bin/erl`（Windows 上为 `bin\erl.exe`）和 `releases/<release>/OTP_VERSION` 文件。检查的位置包括它本身，以及它下面的 `lib/erlang` 子目录。在 Linux 和 macOS 上，`bin/erl` 还必须有可执行权限：不能运行的文件不会被列出。
 - 版本名取自 `OTP_VERSION` 文件，例如 `26.2.3`。不加任何前缀。
 - 多个安装报告了同一个版本时，只提供一个：按版本和路径排序后的第一个。
 - vfox 已经安装或链接过的版本会被跳过。

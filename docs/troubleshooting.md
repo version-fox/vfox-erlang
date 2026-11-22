@@ -29,6 +29,21 @@ Fix:
 - On macOS, if `configure` cannot find OpenSSL, point it at the Homebrew copy: `export OTP_CONFIGURE_ARGS="--with-ssl=$(brew --prefix openssl@3)"`.
 - If `OTP_CONFIGURE_ARGS` may be the cause, run `./configure --help` in the source directory, which is `<sdk>`. `vfox info erlang@26.2.3` shows the path.
 
+## The source build stops before configure, naming a character in the install path
+
+Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A double quote, a dollar sign or a backtick is reported in the same way.
+
+Check:
+
+```shell
+echo "$HOME" "$VFOX_HOME"             # the install path is under VFOX_HOME, or under ~/.vfox when VFOX_HOME is unset
+```
+
+Fix:
+
+- Set `VFOX_HOME` to a directory whose path has none of these characters, then install again, for example `export VFOX_HOME=/opt/vfox`. The directory must be writable.
+- The check applies to source builds only. The Windows installer and the prebuilt packages do not run `configure`.
+
 ## Prebuilt install fails with 404, or the version is not found
 
 Symptom: the download fails with HTTP 404, or the version you typed is not in `vfox search`.
@@ -54,6 +69,22 @@ Fix:
 - If `builds.txt` has no entry for the version, Bob has no build of it for that Ubuntu release. Use another version, or unset `USE_PREBUILT_OTP` to build from source.
 - On macOS, branch names end in `-latest`, for example `maint-27-latest`.
 - If the name is listed but the download still fails, the search list may be stale. See [The search list is outdated](#the-search-list-is-outdated).
+
+## The version name is not in the version list
+
+Symptom: `vfox install` stops before the download with `Erlang/OTP 28 is not in the version list, so it cannot be installed.`
+
+Check:
+
+```shell
+vfox search erlang              # the names this plugin can install, with your USE_PREBUILT_OTP setting
+```
+
+Fix:
+
+- Use a full name from `vfox search erlang`, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not in the list, and they are installed as before.
+- The source and macOS lists are generated once a week. A release that came out after the last refresh is refused until the list includes it.
+- The Linux prebuilt list is read from Bob's index when you search, so the weekly refresh does not affect it. See [prebuilt.md](prebuilt.md).
 
 ## USE_PREBUILT_OTP has an unsupported value
 
@@ -112,6 +143,7 @@ Fix:
 - Upgrade vfox to 1.1.0 or later with `vfox upgrade`. The [vfox quick start](https://vfox.dev/guides/quick-start.html) lists the other ways to install it.
 - If the installation is somewhere the scan does not look, link it by hand: `vfox link erlang@26.2.3 /path/to/otp`. See [link.md](link.md).
 - A path that contains a `.vfox` directory is never scanned.
+- If `bin/erl` is not executable, the installation is not listed. Set the execute bit with `chmod +x <installation>/bin/erl`, then run the command again.
 - If the `OTP_VERSION` check prints nothing, that directory is not an Erlang/OTP installation.
 
 ## The search list is outdated

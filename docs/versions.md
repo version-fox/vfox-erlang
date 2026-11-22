@@ -45,6 +45,8 @@ Branch names can also be installed as prebuilt builds, with `USE_PREBUILT_OTP` s
 
 How the install happens depends on the platform and on `USE_PREBUILT_OTP`. See [source-build.md](source-build.md), [prebuilt.md](prebuilt.md) and [windows.md](windows.md).
 
+A name that is not in the list from `vfox search erlang` is refused before the download, and the message points to that command. Partial names such as `28` are refused. Branches (`master`, `maint-27`, and the names that end in `-latest`) are not in the lists, so they are not checked. For the source and macOS lists, which are generated weekly, a release that came out after the last refresh is refused until the list includes it. See [troubleshooting.md](troubleshooting.md).
+
 ## Switch versions
 
 ```shell

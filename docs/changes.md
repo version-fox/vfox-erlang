@@ -6,7 +6,11 @@ Changes after 1.2.1 are recorded here. For published versions, the release notes
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+
+- `vfox install` refuses a version name that the version list does not show, such as `erlang@28` or `erlang@OTP-99.9`, before anything is downloaded. The message points to `vfox search erlang`. Branches (`master`, `maint-27`, and the names ending in `-latest`) are not in the lists and are not checked. When the list cannot be read, the install goes on without the check.
+- `vfox link --detect erlang` lists only an installation whose `bin/erl` can run. An installation whose `erl` is not executable was listed, and then it failed to link.
+- A source build stops before `configure` when the install path contains an apostrophe, a double quote, a dollar sign or a backtick. OTP's `configure` cannot take these characters. An apostrophe made the build fail about half a minute in. Set `VFOX_HOME` to another path.
 
 ## 1.2.1
 

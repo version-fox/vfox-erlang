@@ -21,7 +21,7 @@ vfox use erlang@26.2.3
 vfox list erlang               # linked versions are marked and show their path
 ```
 
-- A location counts as an installation when it contains `bin/erl` (`bin\erl.exe` on Windows) and a `releases/<release>/OTP_VERSION` file. The check looks in the location itself and in its `lib/erlang` subdirectory.
+- A location counts as an installation when it contains `bin/erl` (`bin\erl.exe` on Windows) and a `releases/<release>/OTP_VERSION` file. The check looks in the location itself and in its `lib/erlang` subdirectory. On Linux and macOS, `bin/erl` must also have the execute bit: a file that cannot run is not listed.
 - The version name comes from the `OTP_VERSION` file, for example `26.2.3`. No prefix is added.
 - When several installations report the same version, only one is offered: the first one in sorted order of version and path.
 - Versions that vfox has already installed or linked are skipped.

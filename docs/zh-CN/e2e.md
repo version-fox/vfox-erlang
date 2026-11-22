@@ -11,6 +11,7 @@
 | Linux 源码构建 | `tests/e2e/linux` 中的 `TestLinuxSourceInstall` | `ubuntu-22.04`、`ubuntu-24.04` | 用 `MAKEFLAGS` 设为使用全部 CPU，从源码构建 `E2E_ERLANG_VERSION`，运行 `erl`，用 `erlc` 编译并运行 `assets/hello.erl`，并检查文档块 |
 | Linux 预编译 | `tests/e2e/linux` 中的 `TestLinuxPrebuiltInstall` | `ubuntu-22.04`、`ubuntu-24.04` | 用 `USE_PREBUILT_OTP` 安装对应 Ubuntu 版本的 Bob 包，使用数字版本以覆盖 `OTP-` 前缀，并检查版本 |
 | Linux 系统 SDK | `tests/e2e/linux` 中的 `TestLinuxSystemDetect` | `ubuntu-22.04`、`ubuntu-24.04` | 用 `vfox link --detect` 链接 `erlang-base` 软件包安装在 `/usr/lib/erlang` 中的 Erlang/OTP，运行它，并检查卸载链接后系统安装仍然保留 |
+| Linux 链接检测 | `tests/e2e/linux` 中的 `TestLinuxDetectSkipsErlThatCannotRun` | `ubuntu-latest`（Test Plugin 工作流，`go test -short`） | 布置一个 `bin/erl` 不可执行的 mise 式安装，检查 `vfox link --detect` 不会列出它；然后设置可执行权限，检查它可以被链接 |
 | Windows 安装器 | `tests/e2e/windows` 中的 `TestWindowsOfficialInstaller` | `windows-2022`、`windows-2025` | 通过插件安装 25.3.2.12（插件会运行官方安装器），然后检查 `erl.exe`、`erlc.exe` 和文档块 |
 | Windows 系统 SDK | `tests/e2e/windows` 中的 `TestWindowsSystemDetect` | `windows-2022`、`windows-2025` | 把 26.2.3 的官方安装器安装到 `%ProgramFiles%`，用 `vfox link --detect` 链接它，并检查卸载链接后安装目录仍然保留 |
 | Darwin 源码构建 | `.github/workflows/e2e_test_darwin.yaml` | `macos-latest` | 在 macOS 上从源码构建，运行 `erlc` 和 `erl`，并显示 `lists` 的文档 |
