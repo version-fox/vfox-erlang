@@ -39,8 +39,8 @@ Check:
 # Linux: does the package exist? amd64 is the architecture name vfox uses on x86-64
 curl -sI https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/OTP-26.2.3.tar.gz | head -n 1
 
-# Linux: which versions does Bob have for this Ubuntu release?
-curl -s https://builds.hex.pm/builds/otp/ubuntu-22.04/builds.txt | grep 26.2.3
+# Linux: which versions does Bob have for this Ubuntu release? On arm64, use arm64 in place of amd64
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/builds.txt | grep 26.2.3
 
 # Which names does the plugin list?
 USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
@@ -134,7 +134,7 @@ vfox search erlang
 ```
 
 - When you are done, restore the cache with `vfox config cache.availableHookDuration 12h`.
-- The lists are updated once a week by a workflow and served through jsDelivr, which keeps its own cache. A release published very recently can be missing until the next update.
+- The release and macOS lists are updated once a week by a workflow and served through jsDelivr, which keeps its own cache. A release published very recently can be missing until the next update. The Linux prebuilt list is read from Bob's `builds.txt` index directly, so only vfox's own search cache can hold it back.
 
 ## Downloads fail or time out
 
@@ -175,13 +175,13 @@ Fix:
 
 Symptom: `vfox list erlang` shows two entries for one release, such as `OTP-29.1.2` and `29.1.2`. Or `vfox install erlang@29.1.2` downloads the build again after you installed `erlang@OTP-29.1.2`.
 
-Cause: vfox recognises an install by its exact name. Installs made before the Linux prebuilt list showed bare versions are named `OTP-29.1.2`. With the new plugin, installs are named `29.1.2`. vfox does not know that the two names are the same release, so it installs both.
+Cause: vfox recognises an install by its exact name. Installs made with 1.2.0 or earlier are named `OTP-29.1.2`. From 1.2.1 on, installs are named `29.1.2`. vfox does not know that the two names are the same release, so it installs both.
 
 Fix:
 
 - Keep the copy you use. `vfox use` finds the release under either name.
 - To remove the other copy, run `vfox uninstall erlang@OTP-29.1.2` (or `erlang@29.1.2`). If you remove the current version, vfox switches to the other copy.
-- With the new plugin, installing the same release under either name later reports `already installed`, so the duplicate only comes from installs made before the change.
+- From 1.2.1 on, installing the same release under either name reports `already installed`, so a duplicate only comes from an install made with 1.2.0 or earlier.
 
 ## erl is missing, or another erl runs
 

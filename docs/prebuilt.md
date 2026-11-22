@@ -37,7 +37,7 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox install erlang@26.2.3
 - `ubuntu-24.04`
 - `ubuntu-26.04`
 
-Choose the value that matches your Ubuntu release. Only Ubuntu values are accepted, so other distributions build from source. `vfox search` reads the `builds.txt` index that Bob publishes for the chosen release and for your architecture, so it lists the builds that the install can download.
+Choose the value that matches your Ubuntu release. Only Ubuntu values are accepted; on other distributions, leave `USE_PREBUILT_OTP` unset to build from source. `vfox search` reads the `builds.txt` index that Bob publishes for the chosen release and for your architecture, so it lists the builds that the install can download.
 
 The download URL has this form:
 

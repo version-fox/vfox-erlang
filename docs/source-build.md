@@ -21,7 +21,11 @@ Ubuntu 22.04:
 sudo apt-get -y install build-essential autoconf m4 libncurses5-dev libwxgtk3.0-gtk3-dev libwxgtk-webview3.0-gtk3-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
 ```
 
-Ubuntu 24.04 uses the same list, with `libwxgtk3.2-dev libwxgtk-webview3.2-dev` in place of the 3.0 wxWidgets packages.
+Ubuntu 24.04 uses the same list with two changes: `libwxgtk3.2-dev libwxgtk-webview3.2-dev` replace the 3.0 wxWidgets packages, and `libncurses5-dev` is left out, because Ubuntu 24.04 has no installation candidate for it:
+
+```shell
+sudo apt-get -y install build-essential autoconf m4 libwxgtk3.2-dev libwxgtk-webview3.2-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libssh-dev unixodbc-dev xsltproc fop libxml2-utils libncurses-dev openjdk-11-jdk
+```
 
 macOS, with Homebrew:
 
