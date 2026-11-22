@@ -21,12 +21,15 @@ local test = require("vfox.test")
 local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
 local detect = require("detect_erlang")
 
--- The real list_children, kept before the fake below replaces it, so that the Windows and Unix
--- command paths can be checked directly.
+-- The real list_children and is_runnable, kept before the fakes below replace them, so that the
+-- Windows and Unix command paths and the execute bit can be checked directly.
 local real_list_children = detect.list_children
+local real_is_runnable = detect.is_runnable
 
 local files = {}
 local dirs = {}
+-- runnable holds the erl paths that have the execute bit. The fake is_runnable reads it.
+local runnable = {}
 detect.file_exists = function(path)
     return files[path] ~= nil
 end
@@ -36,13 +39,17 @@ end
 detect.list_children = function(dir)
     return dirs[dir] or {}
 end
+detect.is_runnable = function(path)
+    return runnable[path] == true
+end
 
--- Writes a minimal OTP install under root: bin/<exe> plus releases/<rel>/OTP_VERSION.
+-- Writes a minimal OTP install under root: an executable bin/<exe>, plus releases/<rel>/OTP_VERSION.
 local function install(root, exe, version, rel, sep)
     local function join(...)
         return table.concat({ ... }, sep)
     end
     files[join(root, "bin", exe)] = ""
+    runnable[join(root, "bin", exe)] = true
     files[join(root, "releases", rel, "OTP_VERSION")] = version .. "\n"
     dirs[join(root, "releases")] = { join(root, "releases", rel), join(root, "releases", "start_erl.data") }
 end
@@ -50,6 +57,7 @@ end
 local function reset()
     files = {}
     dirs = {}
+    runnable = {}
 end
 
 local function describe(result)
@@ -130,6 +138,39 @@ install("/usr/lib/erlang", "erl", "24.2.1", "24", "/")
 result = detect_with("linux", unix_env)
 check(#result == 1, "duplicate versions are reported once: " .. describe(result))
 check(result[1].path == "/opt/homebrew/Cellar/erlang/24.2.1/lib/erlang", "first sorted path is kept")
+
+-- An erl without the execute bit is not offered, because vfox cannot link an installation whose erl cannot
+-- run. The layout is the one of a mise install: bin/erl, and releases/29/OTP_VERSION.
+reset()
+local mise_root = "/home/test/.local/share/mise/installs/erlang/29.1.2"
+dirs["/home/test/.local/share/mise/installs/erlang"] = { mise_root }
+install(mise_root, "erl", "29.1.2", "29", "/")
+runnable[mise_root .. "/bin/erl"] = nil
+result = detect_with("linux", unix_env)
+check(#result == 0, "a non-executable erl is not offered: " .. describe(result))
+runnable[mise_root .. "/bin/erl"] = true
+result = detect_with("linux", unix_env)
+check(
+    #result == 1 and result[1].note == "installed by mise",
+    "the same install is offered once erl can run: " .. describe(result)
+)
+
+-- The real is_runnable asks the shell with test -x. Plugin tests cannot run commands, so os.execute is
+-- replaced by a stub here: the command must be test -x on the quoted path, and its status decides.
+-- The real file check is in the end-to-end tests, which run vfox against a real erl.
+local original_execute = os.execute
+local asked = nil
+os.execute = function(command)
+    asked = command
+    return 0
+end
+check(real_is_runnable("/opt/erlang/bin/erl") == true, "a zero status from test -x means the file can run")
+check(asked == "test -x '/opt/erlang/bin/erl'", "the check runs test -x on the quoted path: " .. tostring(asked))
+os.execute = function()
+    return 1
+end
+check(real_is_runnable("/opt/erlang/bin/erl") == false, "a non-zero status from test -x means it cannot run")
+os.execute = original_execute
 
 -- Windows: Program Files children whose names start with "Erlang OTP" or "erl".
 reset()

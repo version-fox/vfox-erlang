@@ -154,17 +154,6 @@ function erlang_utils.file_exists(path)
     end
 end
 
-function erlang_utils.check_version_existence(url)
-    local resp, err = http.get({
-        url = url,
-    })
-    if err ~= nil or resp.status_code ~= 200 then
-        error(
-            "Please confirm whether the corresponding Erlang/OTP release version exists! visit: https://github.com/erlang/otp/releases"
-        )
-    end
-end
-
 function erlang_utils.directory_exists(path)
     return erlang_utils.file_exists(path)
 end
@@ -314,6 +303,78 @@ function erlang_utils.get_erlang_release_versions()
         })
     end
     return result
+end
+
+--- Returns true for the names of Erlang/OTP branches: master, maint, maint-<number>, and the names that end
+--- in latest, such as master-latest on macOS. The version lists hold releases, so branches are not looked up.
+function erlang_utils.is_branch_name(name)
+    return name == "master"
+        or name == "maint"
+        or string.match(name, "^maint%-") ~= nil
+        or string.match(name, "latest$") ~= nil
+end
+
+--- Returns true when name is one of the versions of a list from get_erlang_release_versions. Both
+--- spellings match: OTP-29.1.2 is the release that the list shows as 29.1.2.
+function erlang_utils.is_listed(name, versions)
+    local bare = erlang_utils.bare_release_name(name)
+    for _, item in ipairs(versions) do
+        if erlang_utils.bare_release_name(item.version) == bare then
+            return true
+        end
+    end
+    return false
+end
+
+--- Refuses a version name that the version list does not show, before anything is downloaded. Such a name
+--- would fail in the download with a generic message. When the list cannot be read, the check is skipped with
+--- a note: the download decides, as it did before the check existed.
+function erlang_utils.check_version_listed(name)
+    local ok, versions = pcall(erlang_utils.get_erlang_release_versions)
+    if not ok then
+        print("Could not read the version list, so " .. name .. " is not checked against it: " .. tostring(versions))
+        return
+    end
+    if not erlang_utils.is_listed(name, versions) then
+        error(
+            "Erlang/OTP "
+                .. name
+                .. " is not in the version list, so it cannot be installed. Run `vfox search erlang` to see the names"
+                .. " that can be installed. A partial name, such as 28, is not one of them."
+        )
+    end
+end
+
+-- The characters that OTP's configure cannot take in the install path, with their names for the error.
+-- configure runs the prefix, which is single-quoted, and the source directory, which is double-quoted,
+-- through eval. An apostrophe ends the single quotes; a double quote, a dollar sign or a backtick ends or
+-- changes the double quotes.
+local CONFIGURE_PATH_PROBLEMS = {
+    { "'", "an apostrophe" },
+    { '"', "a double quote" },
+    { "$", "a dollar sign" },
+    { "`", "a backtick" },
+}
+
+--- Refuses a source build whose install path holds one of the characters above, before configure starts.
+--- Without the check the build fails part way through, or it configures a different directory.
+function erlang_utils.check_configure_path(path)
+    local found = {}
+    for _, problem in ipairs(CONFIGURE_PATH_PROBLEMS) do
+        if string.find(path, problem[1], 1, true) ~= nil then
+            table.insert(found, problem[2])
+        end
+    end
+    if #found > 0 then
+        error(
+            "The Erlang/OTP install path "
+                .. path
+                .. " contains "
+                .. table.concat(found, " and ")
+                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without apostrophes, double quotes,"
+                .. " dollar signs or backticks, then install again."
+        )
+    end
 end
 
 return erlang_utils

@@ -29,6 +29,21 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 - 在 macOS 上，如果 `configure` 找不到 OpenSSL，把它指向 Homebrew 中的版本：`export OTP_CONFIGURE_ARGS="--with-ssl=$(brew --prefix openssl@3)"`。
 - 如果怀疑是 `OTP_CONFIGURE_ARGS` 的问题，在源码目录（即 `<sdk>`）中执行 `./configure --help`。`vfox info erlang@26.2.3` 会显示该路径。
 
+## 源码构建在 configure 之前停止，并指出安装路径中的字符
+
+症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。双引号、美元符号或反引号也会以同样的方式报告。
+
+检查：
+
+```shell
+echo "$HOME" "$VFOX_HOME"             # 安装路径位于 VFOX_HOME 下；未设置 VFOX_HOME 时位于 ~/.vfox 下
+```
+
+修复：
+
+- 把 `VFOX_HOME` 设为路径中不含这些字符的目录，然后重新安装，例如 `export VFOX_HOME=/opt/vfox`。该目录需要可写。
+- 这项检查只针对源码构建。Windows 安装器和预编译包不运行 `configure`，不受影响。
+
 ## 预编译安装返回 404，或找不到版本
 
 症状：下载返回 HTTP 404，或者你输入的版本不在 `vfox search` 的列表中。
@@ -54,6 +69,22 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
 - 如果 `builds.txt` 中没有该版本，说明 Bob 没有为这个 Ubuntu 版本构建它。换一个版本，或取消设置 `USE_PREBUILT_OTP`，改用源码构建。
 - 在 macOS 上，分支名以 `-latest` 结尾，例如 `maint-27-latest`。
 - 如果列表中有该名字但仍然下载失败，搜索列表可能已过期，见 [搜索列表过旧](#搜索列表过旧)。
+
+## 版本名不在版本列表中
+
+症状：`vfox install` 在下载之前停止，并报告 `Erlang/OTP 28 is not in the version list, so it cannot be installed.`。
+
+检查：
+
+```shell
+vfox search erlang              # 按你当前的设置（包括 USE_PREBUILT_OTP），插件可以安装的版本名
+```
+
+修复：
+
+- 使用 `vfox search erlang` 列出的完整版本名，例如 `26.2.3`。`28` 这类不完整的名字不在列表中，会被拒绝。`master`、`maint-27` 这类分支名不在列表中，仍按原来的方式安装。
+- 源码和 macOS 的列表每周生成一次。在上次更新之后发布的版本，列表包含它之前会被拒绝。
+- Linux 预编译列表在搜索时从 Bob 的索引读取，不受每周更新的影响。见 [预编译安装](prebuilt.md)。
 
 ## USE_PREBUILT_OTP 取值不合法
 
@@ -112,6 +143,7 @@ vfox list erlang                                # 已安装和已链接的版本
 - 用 `vfox upgrade` 把 vfox 升级到 1.1.0 或更高版本。其他安装方法见 [vfox 快速入门](https://vfox.dev/zh-hans/guides/quick-start.html)。
 - 如果安装位于扫描范围之外，手动链接：`vfox link erlang@26.2.3 /path/to/otp`。见 [链接已安装的 Erlang/OTP](link.md)。
 - 路径中含有 `.vfox` 目录的，永远不会被扫描。
+- 如果 `bin/erl` 不可执行，这个安装不会被列出。用 `chmod +x <安装目录>/bin/erl` 设置可执行权限，然后重新运行命令。
 - 如果上面的 `OTP_VERSION` 检查没有输出，说明该目录不是 Erlang/OTP 安装。
 
 ## 搜索列表过旧

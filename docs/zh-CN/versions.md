@@ -45,6 +45,8 @@ vfox install erlang@master        # 分支，在 Linux 或 macOS 上源码构建
 
 安装过程取决于平台和 `USE_PREBUILT_OTP`。见 [源码构建](source-build.md)、[预编译](prebuilt.md) 和 [Windows](windows.md)。
 
+安装时，如果版本名不在 `vfox search erlang` 的列表中，会在下载之前被拒绝，报错信息会指向这个命令。`28` 这类不完整的名字会被拒绝。分支（`master`、`maint-27`，以及以 `-latest` 结尾的名字）不在列表中，不做检查。源码和 macOS 的列表每周生成一次，在上次更新之后发布的版本，列表包含它之前会被拒绝。见 [问题排查](troubleshooting.md)。
+
 ## 切换版本
 
 ```shell

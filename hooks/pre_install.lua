@@ -25,7 +25,11 @@ function PLUGIN:PreInstall(ctx)
         error("You must provide a version number for Erlang/OTP, eg: vfox install erlang@26.2.3")
     end
     print("You will install the Erlang/OTP version is: " .. erlang_version)
-    -- erlangUtils.check_version_existence("https://github.com/erlang/otp/releases/tag/OTP-" .. erlang_version)
+    -- Branches are not in the version lists, so they are not checked. Any other name must be listed before the
+    -- download starts: a name that is not listed would fail in the download, with a generic message.
+    if not erlangUtils.is_branch_name(erlang_version) then
+        erlangUtils.check_version_listed(erlang_version)
+    end
 
     local download_url
     -- The name the install is recorded under. Linux prebuilt installs use the bare version (below).

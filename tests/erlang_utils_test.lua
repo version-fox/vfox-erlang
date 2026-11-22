@@ -189,6 +189,26 @@ check(erlang_utils.other_release_spelling("29.0-rc3") == "OTP-29.0-rc3", "releas
 check(erlang_utils.other_release_spelling("master") == nil, "branches have no other spelling")
 check(erlang_utils.bare_release_name("OTP-29.1.2") == "29.1.2", "the list shows release names bare")
 check(erlang_utils.bare_release_name("maint-28") == "maint-28", "branch names are unchanged")
+
+-- Branches are not looked up in a version list, and any other name must be listed. The lists hold release
+-- names, so both spellings of a release match, and a partial name matches nothing.
+check(erlang_utils.is_branch_name("master"), "master is a branch")
+check(erlang_utils.is_branch_name("maint") and erlang_utils.is_branch_name("maint-27"), "maint names are branches")
+check(
+    erlang_utils.is_branch_name("master-latest") and erlang_utils.is_branch_name("maint-28-latest"),
+    "latest names are branches"
+)
+check(
+    not erlang_utils.is_branch_name("29.1.2") and not erlang_utils.is_branch_name("OTP-99.9"),
+    "releases are not branches"
+)
+check(not erlang_utils.is_branch_name("28"), "a partial name is not a branch")
+local known = { { version = "29.1.2" }, { version = "29.0-rc3" } }
+check(erlang_utils.is_listed("29.1.2", known), "a listed name matches")
+check(erlang_utils.is_listed("OTP-29.1.2", known), "the OTP- spelling of a listed name matches")
+check(erlang_utils.is_listed("OTP-29.0-rc3", known), "a release candidate matches with the prefix")
+check(not erlang_utils.is_listed("28", known), "a partial name is not listed")
+check(not erlang_utils.is_listed("OTP-99.9", known), "an unknown release is not listed")
 responses["https://builds.hex.pm/builds/otp/arm64/ubuntu-24.04/builds.txt"] =
     { status_code = 200, body = "OTP-26.2.3 aaa 2026-01-01T00:00:00Z\n" }
 local arm = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" }, "arm64")
@@ -213,5 +233,17 @@ check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the er
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
 local available = plugin:Available({})
 check(#available == 1 and available[1].version == "26.2.3", "Available returns the list")
+
+-- check_version_listed refuses an unlisted name and names the command that shows the list. A listed name
+-- passes. When the list cannot be read, the check is skipped instead of blocking the install.
+responses[list_url] = { status_code = 200, body = "26.2.3\n" }
+erlang_utils.check_version_listed("26.2.3")
+local unlisted_ok, unlisted_err = pcall(erlang_utils.check_version_listed, "28")
+check(
+    not unlisted_ok and string.find(tostring(unlisted_err), "28 is not in the version list", 1, true) ~= nil,
+    "an unlisted name is refused: " .. tostring(unlisted_err)
+)
+responses[list_url] = nil
+check(pcall(erlang_utils.check_version_listed, "28"), "without the list the check is skipped")
 
 print("erlang_utils_test: " .. counter.checks .. " checks passed")

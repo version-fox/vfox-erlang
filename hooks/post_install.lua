@@ -66,6 +66,10 @@ function PLUGIN:PostInstall(ctx)
             end
         end
     else
+        -- OTP's configure takes the install path through eval, so some characters in it break the build.
+        -- Refuse such a path before configure starts.
+        erlangUtils.check_configure_path(path)
+
         -- use ENV OTP_CONFIGURE_ARGS to control configure behavior, e.g. "--enable-jit"
         local configure_args = os.getenv("OTP_CONFIGURE_ARGS") or ""
         print("Erlang/OTP compile configure args: " .. configure_args)

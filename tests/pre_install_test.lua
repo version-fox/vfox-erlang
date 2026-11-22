@@ -17,6 +17,24 @@ local test = require("vfox.test")
 -- test.load may run only once per file, so environment variables and the platform are
 -- swapped in around each call instead.
 local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
+local erlang_utils = require("erlang_utils")
+
+-- The version list is read over the network, so the checks use a fixed list. list_state counts the reads,
+-- and failure makes a read fail, as on a machine without a network. It is a table for the same reason as
+-- the counter below.
+local list_state = { reads = 0, failure = nil }
+erlang_utils.get_erlang_release_versions = function()
+    list_state.reads = list_state.reads + 1
+    if list_state.failure ~= nil then
+        error(list_state.failure, 0)
+    end
+    return {
+        { version = "29.1.2" },
+        { version = "29.0-rc3" },
+        { version = "26.2.3" },
+        { version = "25.3.2.12" },
+    }
+end
 
 local function with_env(env, fn)
     local original = os.getenv
@@ -148,5 +166,36 @@ check(
     not ok and string.find(err, "You must provide a version number", 1, true) ~= nil,
     "missing version: " .. tostring(err)
 )
+
+-- A name that the list does not show is refused before the download, on every platform, and the refusal says
+-- what to run. A partial name, such as 28, is one of them.
+local partial_ok, partial_err = pcall(pre_install, {}, "28", "linux", "amd64")
+check(
+    not partial_ok and string.find(tostring(partial_err), "28 is not in the version list", 1, true) ~= nil,
+    "a partial name is refused: " .. tostring(partial_err)
+)
+check(string.find(tostring(partial_err), "vfox search erlang", 1, true) ~= nil, "the refusal points to vfox search")
+local unknown_ok, unknown_err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-22.04" }, "OTP-99.9", "linux", "amd64")
+check(
+    not unknown_ok and string.find(tostring(unknown_err), "OTP-99.9 is not in the version list", 1, true) ~= nil,
+    "an unknown OTP- name is refused: " .. tostring(unknown_err)
+)
+check(not pcall(pre_install, {}, "28", "windows", "amd64"), "the check applies on Windows")
+check(not pcall(pre_install, { USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64"), "the check applies on macOS")
+
+-- Branches are not in the lists, so a branch never reaches the list.
+local reads_before = list_state.reads
+local branch = pre_install({}, "master", "linux", "amd64")
+check(branch.url == "https://github.com/erlang/otp/archive/refs/heads/master.tar.gz", "a branch still downloads")
+check(list_state.reads == reads_before, "a branch is not looked up in the list")
+
+-- When the list cannot be read, the check is skipped and the download decides, as it did before the check.
+list_state.failure = "Failed to download the Erlang/OTP version list: no network"
+local offline = pre_install({}, "28", "linux", "amd64")
+check(
+    offline.url == "https://github.com/erlang/otp/archive/refs/tags/OTP-28.tar.gz",
+    "without the list: " .. offline.url
+)
+list_state.failure = nil
 
 print("pre_install_test: " .. counter.checks .. " checks passed")
