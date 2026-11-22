@@ -111,6 +111,8 @@ for _, case in ipairs({
     { "/home/$USER/.vfox/cache/erlang/v-26.2.3", "a dollar sign" },
     { "/home/jane`x`/.vfox/cache/erlang/v-26.2.3", "a backtick" },
     { "/home/jane doe/.vfox/cache/erlang/v-26.2.3", "a space" },
+    { "/home/jane\tdoe/.vfox/cache/erlang/v-26.2.3", "a tab" },
+    { "/home/jane\ndoe/.vfox/cache/erlang/v-26.2.3", "a newline" },
 }) do
     local refused, reason = pcall(run_post_install, "linux", "amd64", {}, {
         sdkInfo = { erlang = { path = case[1], version = "26.2.3" } },

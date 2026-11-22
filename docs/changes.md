@@ -6,7 +6,10 @@ Changes after 1.2.3 are recorded here. For published versions, the release notes
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+
+- A name that ends in `latest` is refused before the download when the version list does not show it, as other names are. Only the macOS prebuilt branch names `master-latest`, `maint-latest` and `maint-<number>-latest` skip the list check, and only with `USE_PREBUILT_OTP` set on macOS. Before, `erlang@master-latest` and `erlang@maint-<number>-latest` also skipped the check on Linux and in a macOS source build, and then failed in the download.
+- A source build also refuses an install path that contains a tab or a newline, before `configure` starts. As with a space, the unquoted `cd ${PWD}` that `configure` runs splits the path at a tab or a newline. Before, a tab in the path made `configure` fail with `cannot find sources`. Set `VFOX_HOME` to a path without tabs or newlines.
 
 ## 1.2.3
 

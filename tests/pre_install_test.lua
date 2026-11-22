@@ -183,15 +183,28 @@ check(
 check(not pcall(pre_install, {}, "28", "windows", "amd64"), "the check applies on Windows")
 check(not pcall(pre_install, { USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64"), "the check applies on macOS")
 
--- Only the macOS branches end in latest. Any other such name is a release, and foo-latest is refused before the
--- download, as a name without latest is.
+-- Only the macOS prebuilt branches end in latest, and only with USE_PREBUILT_OTP on macOS. Any other such name is
+-- a release: foo-latest is refused before the download, as a name without latest is.
 local latest_ok, latest_err = pcall(pre_install, {}, "foo-latest", "linux", "amd64")
 check(
     not latest_ok and string.find(tostring(latest_err), "foo-latest is not in the version list", 1, true) ~= nil,
     "an unlisted name that ends in latest is refused: " .. tostring(latest_err)
 )
+-- These names are refused where they are not macOS prebuilt branches: in a Linux source build, in a Linux prebuilt
+-- install, and in a macOS source build. Before, they skipped the list and failed in the download.
+for _, case in ipairs({
+    { {}, "master-latest", "linux", "amd64" },
+    { { USE_PREBUILT_OTP = "ubuntu-24.04" }, "maint-27-latest", "linux", "amd64" },
+    { {}, "master-latest", "darwin", "arm64" },
+}) do
+    local refused, reason = pcall(pre_install, case[1], case[2], case[3], case[4])
+    check(
+        not refused and string.find(tostring(reason), case[2] .. " is not in the version list", 1, true) ~= nil,
+        case[2] .. " is refused on " .. case[3] .. ": " .. tostring(reason)
+    )
+end
 
--- The macOS branches come from otp_builds, and they are not looked up in the list.
+-- The macOS prebuilt branches come from otp_builds. With USE_PREBUILT_OTP on macOS they are not looked up in the list.
 local reads_before_mac = list_state.reads
 result = pre_install({ USE_PREBUILT_OTP = "true" }, "master-latest", "darwin", "arm64")
 local mac_url = "https://github.com/erlef/otp_builds/releases/download/master-latest/"
