@@ -6,7 +6,16 @@
 
 ## 未发布
 
-暂无变更。
+### 修复
+
+- 在 Linux 上把 `USE_PREBUILT_OTP` 设为不支持的值（例如 `ubuntu-99.04`）时，`vfox install` 只报告该值的错误。之前它先报告「无法读取版本列表」，然后 `PreInstall` 又报告一次相同的错误。
+- 名字以 `latest` 结尾、且版本列表中没有的版本，会在下载之前被拒绝，与其他不在列表中的名字相同。只有 macOS 分支名 `master-latest`、`maint-latest` 和 `maint-<number>-latest` 会跳过列表检查。之前 `erlang@foo-latest` 会先从 GitHub 下载，然后才失败。
+- 源码构建在安装路径包含空格时，会在 `configure` 启动之前停止。OTP 的 `configure` 会执行一条未加引号的 `cd ${PWD}`，空格会让它的时间戳检查失败。1.2.1 中「路径含空格时也能正常工作」的记录只对预编译安装成立。请把 `VFOX_HOME` 设为不含空格的路径。
+- 安装失败时的提示写作「required utilities」，之前拼写为「required utilties」。
+
+### 变更
+
+- 搜索缓存有效时，`vfox search` 会显示缓存的列表，无论 `USE_PREBUILT_OTP` 是什么值。缓存有效期间 vfox 不会调用插件，因此插件无法检查该值。在 Linux 上，`vfox install` 仍会检查它。见 [prebuilt.md](prebuilt.md)。
 
 ## 1.2.2
 

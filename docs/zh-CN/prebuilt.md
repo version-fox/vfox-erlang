@@ -12,7 +12,7 @@
 
 ## 安装之前
 
-使用预编译版本前，先关闭 vfox 的搜索缓存。vfox 每个插件只保存一份搜索缓存，而且这份缓存与 `USE_PREBUILT_OTP` 无关。如果之前缓存了正式版本列表，它会把预编译的名字挡住。
+使用预编译版本前，先关闭 vfox 的搜索缓存。vfox 每个插件只保存一份搜索缓存，而且这份缓存与 `USE_PREBUILT_OTP` 无关。如果之前缓存了正式版本列表，它会把预编译的名字挡住。vfox 只有在缓存过期时才会调用插件，因此缓存有效时，`vfox search` 会显示缓存的列表，无论 `USE_PREBUILT_OTP` 是什么值。在 Linux 上，`vfox install` 仍会检查该值。
 
 ```shell
 vfox config cache.availableHookDuration 0

@@ -24,11 +24,12 @@ local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
 local recorded = { commands = {} }
 local original_execute = os.execute
 local original_getenv = os.getenv
-local function run_post_install(os_name, arch, env, ctx)
+-- exit_status is what each command returns; 0 unless a test makes a command fail.
+local function run_post_install(os_name, arch, env, ctx, exit_status)
     recorded.commands = {}
     os.execute = function(command)
         table.insert(recorded.commands, command)
-        return 0
+        return exit_status or 0
     end
     os.getenv = function(name)
         return env[name]
@@ -109,6 +110,7 @@ for _, case in ipairs({
     { '/home/jane"x/.vfox/cache/erlang/v-26.2.3', "a double quote" },
     { "/home/$USER/.vfox/cache/erlang/v-26.2.3", "a dollar sign" },
     { "/home/jane`x`/.vfox/cache/erlang/v-26.2.3", "a backtick" },
+    { "/home/jane doe/.vfox/cache/erlang/v-26.2.3", "a space" },
 }) do
     local refused, reason = pcall(run_post_install, "linux", "amd64", {}, {
         sdkInfo = { erlang = { path = case[1], version = "26.2.3" } },
@@ -119,18 +121,27 @@ for _, case in ipairs({
     )
 end
 
--- A space in the install path is quoted for the shell and for configure, so the configure command still runs.
-run_post_install("linux", "amd64", {}, {
+-- A prebuilt install runs its Install script in a path with a space, and that works. Only source builds refuse one.
+run_post_install("linux", "amd64", { USE_PREBUILT_OTP = "ubuntu-22.04" }, {
     sdkInfo = { erlang = { path = "/home/jane doe/.vfox/cache/erlang/v-26.2.3", version = "26.2.3" } },
 })
 check(
-    string.find(
-        recorded.commands[1],
-        "./configure --prefix='/home/jane doe/.vfox/cache/erlang/v-26.2.3/release'",
-        1,
-        true
-    ) ~= nil,
-    "a space in the path is quoted: " .. recorded.commands[1]
+    recorded.commands[1] == "cd '/home/jane doe/.vfox/cache/erlang/v-26.2.3' && ./Install -cross -sasl",
+    "prebuilt install with a space: " .. tostring(recorded.commands[1])
 )
+
+-- A failed install names the required utilities, spelled as in OTP's documentation, for a prebuilt install and
+-- for a source build.
+local utilities_hint = "Make sure you have the required utilities: "
+    .. "https://www.erlang.org/doc/installation_guide/install#required-utilities"
+for _, env in ipairs({ { USE_PREBUILT_OTP = "ubuntu-22.04" }, {} }) do
+    local failed, reason = pcall(run_post_install, "linux", "amd64", env, {
+        sdkInfo = { erlang = { path = "/home/jane/.vfox/erlang/v-26.2.3", version = "26.2.3" } },
+    }, 1)
+    check(
+        not failed and string.find(tostring(reason), utilities_hint, 1, true) ~= nil,
+        "a failed install names the utilities: " .. tostring(reason)
+    )
+end
 
 print("post_install_test: " .. counter.checks .. " checks passed")

@@ -183,6 +183,21 @@ check(
 check(not pcall(pre_install, {}, "28", "windows", "amd64"), "the check applies on Windows")
 check(not pcall(pre_install, { USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64"), "the check applies on macOS")
 
+-- Only the macOS branches end in latest. Any other such name is a release, and foo-latest is refused before the
+-- download, as a name without latest is.
+local latest_ok, latest_err = pcall(pre_install, {}, "foo-latest", "linux", "amd64")
+check(
+    not latest_ok and string.find(tostring(latest_err), "foo-latest is not in the version list", 1, true) ~= nil,
+    "an unlisted name that ends in latest is refused: " .. tostring(latest_err)
+)
+
+-- The macOS branches come from otp_builds, and they are not looked up in the list.
+local reads_before_mac = list_state.reads
+result = pre_install({ USE_PREBUILT_OTP = "true" }, "master-latest", "darwin", "arm64")
+local mac_url = "https://github.com/erlef/otp_builds/releases/download/master-latest/"
+check(result.url == mac_url .. "otp-aarch64-apple-darwin.tar.gz", "macOS branch master-latest: " .. result.url)
+check(list_state.reads == reads_before_mac, "a macOS branch is not looked up in the list")
+
 -- Branches are not in the lists, so a branch never reaches the list.
 local reads_before = list_state.reads
 local branch = pre_install({}, "master", "linux", "amd64")
@@ -197,5 +212,28 @@ check(
     "without the list: " .. offline.url
 )
 list_state.failure = nil
+
+-- An unsupported USE_PREBUILT_OTP is reported as the value, once, even when the version list cannot be read. The
+-- value is checked before the list is read, so the failed read is not reported as a skipped check.
+list_state.failure = "Failed to download the Erlang/OTP version list: no network"
+local printed = {}
+local original_print = print
+print = function(...)
+    table.insert(printed, table.concat({ ... }, "\t"))
+end
+local value_ok, value_err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-99.04" }, "28", "linux", "amd64")
+print = original_print
+list_state.failure = nil
+local skipped = false
+for _, line in ipairs(printed) do
+    if string.find(line, "Could not read the version list", 1, true) ~= nil then
+        skipped = true
+    end
+end
+local names_value = string.find(tostring(value_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil
+check(
+    not value_ok and names_value and not skipped,
+    "an unsupported value is reported as the value: " .. tostring(value_err)
+)
 
 print("pre_install_test: " .. counter.checks .. " checks passed")

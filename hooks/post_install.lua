@@ -61,7 +61,7 @@ function PLUGIN:PostInstall(ctx)
             local status = os.execute(install_cmd)
             if status ~= 0 then
                 error(
-                    "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities"
+                    "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilities: https://www.erlang.org/doc/installation_guide/install#required-utilities"
                 )
             end
         end
@@ -96,7 +96,7 @@ function PLUGIN:PostInstall(ctx)
         local status = os.execute(configure_cmd .. " && " .. install_erlang_cmd .. " && " .. install_erlang_docs_cmd)
         if status ~= 0 then
             error(
-                "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilties: https://www.erlang.org/doc/installation_guide/install#required-utilities"
+                "Erlang/OTP install failed, please check the stdout for details. Make sure you have the required utilities: https://www.erlang.org/doc/installation_guide/install#required-utilities"
             )
         end
     end

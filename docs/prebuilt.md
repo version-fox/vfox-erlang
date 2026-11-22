@@ -12,7 +12,7 @@ Prebuilt releases skip compilation. Setting `USE_PREBUILT_OTP` selects the prebu
 
 ## Before you install
 
-Turn off vfox's search cache before you use prebuilt releases. vfox keeps one search cache per plugin, and the cache does not depend on `USE_PREBUILT_OTP`. A list cached from the release list can hide the prebuilt names.
+Turn off vfox's search cache before you use prebuilt releases. vfox keeps one search cache per plugin, and the cache does not depend on `USE_PREBUILT_OTP`. A list cached from the release list can hide the prebuilt names. vfox calls the plugin only when this cache is stale, so with a warm cache `vfox search` shows the cached list for any `USE_PREBUILT_OTP` value. On Linux, `vfox install` still checks the value.
 
 ```shell
 vfox config cache.availableHookDuration 0
