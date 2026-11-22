@@ -6,7 +6,9 @@
 
 ## 未发布
 
-暂无变更。
+### 修复
+
+- 版本列表中没有某个版本名时，拒绝提示之前总是给出 `vfox search erlang`，它列出的是源码版本。现在如果设置了 `USE_PREBUILT_OTP`（Linux 或 macOS），提示会给出 `USE_PREBUILT_OTP=<取值> vfox search erlang`，即列出预编译版本的命令。源码版本列表中有预编译安装会拒绝的名字，例如 Ubuntu 24.04 上的 `17.0`。
 
 ## 1.2.4（2026-11-22）
 
