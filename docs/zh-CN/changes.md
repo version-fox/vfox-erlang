@@ -2,13 +2,17 @@
 
 [中文](changes.md) | [English](../changes.md)
 
-本文件记录 1.2.1 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
+本文件记录 1.2.2 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
 
 ## 未发布
 
+暂无变更。
+
+## 1.2.2
+
 ### 修复
 
-- `vfox install` 在下载之前拒绝版本列表中没有的版本名，例如 `erlang@28` 或 `erlang@OTP-99.9`。报错信息会指向 `vfox search erlang`。分支（`master`、`maint-27` 以及以 `-latest` 结尾的名字）不在列表中，不做检查。无法读取列表时，安装会在没有检查的情况下继续。
+- `vfox install` 在下载之前拒绝版本列表中没有的版本名，例如 `erlang@28` 或 `erlang@OTP-99.9`。报错信息会指向 `vfox search erlang`。分支（`master`、`maint-27` 以及以 `-latest` 结尾的名字）不在列表中，不做检查。无法读取列表时，安装会在没有检查的情况下继续。正式版本列表和 macOS 列表每周更新一次，在上次更新之后发布的版本，列表包含它之前会被拒绝。
 - `vfox link --detect erlang` 只列出 `bin/erl` 能够运行的安装。之前 `erl` 不可执行的安装会被列出，然后链接失败。
 - 源码构建在安装路径包含单引号、双引号、美元符号或反引号时，会在 `configure` 之前停止。OTP 的 `configure` 无法处理这些字符；单引号会让构建在约半分钟后失败。请把 `VFOX_HOME` 设为其他路径。
 

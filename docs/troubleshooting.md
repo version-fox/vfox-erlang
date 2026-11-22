@@ -83,7 +83,7 @@ vfox search erlang              # the names this plugin can install, with your U
 Fix:
 
 - Use a full name from `vfox search erlang`, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not in the list, and they are installed as before.
-- The source and macOS lists are generated once a week. A release that came out after the last refresh is refused until the list includes it.
+- The release and macOS lists are generated once a week. A release that came out after the last refresh is refused until the list includes it.
 - The Linux prebuilt list is read from Bob's index when you search, so the weekly refresh does not affect it. See [prebuilt.md](prebuilt.md).
 
 ## USE_PREBUILT_OTP has an unsupported value
@@ -207,13 +207,16 @@ Fix:
 
 Symptom: `vfox list erlang` shows two entries for one release, such as `OTP-29.1.2` and `29.1.2`. Or `vfox install erlang@29.1.2` downloads the build again after you installed `erlang@OTP-29.1.2`.
 
-Cause: vfox recognises an install by its exact name. Installs made with 1.2.0 or earlier are named `OTP-29.1.2`. From 1.2.1 on, installs are named `29.1.2`. vfox does not know that the two names are the same release, so it installs both.
+Cause: vfox recognises an install by the name the plugin records for it, and it does not know that two names are the same release. The recorded name depends on the platform and the install method:
+
+- On Linux with `USE_PREBUILT_OTP`, from 1.2.1 on, both spellings are recorded as `29.1.2`, so installing the other spelling reports `already installed`. A release installed as `OTP-29.1.2` with 1.2.0 or earlier keeps that name, and `vfox install erlang@29.1.2` installs it again.
+- Source builds, macOS and Windows record the name as you typed it, so `OTP-29.1.2` and `29.1.2` are two installs.
 
 Fix:
 
 - Keep the copy you use. `vfox use` finds the release under either name.
 - To remove the other copy, run `vfox uninstall erlang@OTP-29.1.2` (or `erlang@29.1.2`). If you remove the current version, vfox switches to the other copy.
-- From 1.2.1 on, installing the same release under either name reports `already installed`, so a duplicate only comes from an install made with 1.2.0 or earlier.
+- Install with the name that `vfox search erlang` shows, such as `29.1.2`, so that each release has one name.
 
 ## erl is missing, or another erl runs
 
