@@ -2,9 +2,13 @@
 
 [中文](changes.md) | [English](../changes.md)
 
-本文件记录 1.2.3 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
+本文件记录 1.2.4 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
 
 ## 未发布
+
+暂无变更。
+
+## 1.2.4
 
 ### 修复
 

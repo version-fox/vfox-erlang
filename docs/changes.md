@@ -2,9 +2,13 @@
 
 [中文](zh-CN/changes.md) | [English](changes.md)
 
-Changes after 1.2.3 are recorded here. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference.
+Changes after 1.2.4 are recorded here. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference.
 
 ## Unreleased
+
+No changes yet.
+
+## 1.2.4
 
 ### Fixed
 
