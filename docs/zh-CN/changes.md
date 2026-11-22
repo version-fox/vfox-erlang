@@ -8,14 +8,14 @@
 
 暂无变更。
 
-## 1.2.4
+## 1.2.4（2026-11-22）
 
 ### 修复
 
 - 名字以 `latest` 结尾、且版本列表中没有的版本，会在下载之前被拒绝，与其他不在列表中的名字相同。只有 macOS 预编译的分支名 `master-latest`、`maint-latest` 和 `maint-<number>-latest` 会跳过列表检查，且需要设置 `USE_PREBUILT_OTP`。之前在 Linux 上以及 macOS 源码构建中，`erlang@master-latest` 和 `erlang@maint-<number>-latest` 也会跳过检查，然后在下载时失败。
 - 源码构建在安装路径包含制表符或换行符时，也会在 `configure` 启动之前停止。与空格一样，`configure` 中未加引号的 `cd ${PWD}` 会在制表符或换行符处把路径切开。之前路径中的制表符会让 `configure` 报 `cannot find sources` 并失败。请把 `VFOX_HOME` 设为不含制表符或换行符的路径。
 
-## 1.2.3
+## 1.2.3（2026-11-22）
 
 ### 修复
 
@@ -28,7 +28,7 @@
 
 - 搜索缓存有效时，`vfox search` 会显示缓存的列表，无论 `USE_PREBUILT_OTP` 是什么值。缓存有效期间 vfox 不会调用插件，因此插件无法检查该值。在 Linux 上，`vfox install` 仍会检查它。见 [prebuilt.md](prebuilt.md)。
 
-## 1.2.2
+## 1.2.2（2026-11-22）
 
 ### 修复
 
@@ -36,7 +36,7 @@
 - `vfox link --detect erlang` 只列出 `bin/erl` 能够运行的安装。之前 `erl` 不可执行的安装会被列出，然后链接失败。
 - 源码构建在安装路径包含单引号、双引号、美元符号或反引号时，会在 `configure` 之前停止。OTP 的 `configure` 无法处理这些字符；单引号会让构建在约半分钟后失败。请把 `VFOX_HOME` 设为其他路径。
 
-## 1.2.1
+## 1.2.1（2026-11-22）
 
 ### 新增
 

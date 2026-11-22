@@ -8,14 +8,14 @@ Changes after 1.2.4 are recorded here. For published versions, the release notes
 
 No changes yet.
 
-## 1.2.4
+## 1.2.4 (2026-11-22)
 
 ### Fixed
 
 - A name that ends in `latest` is refused before the download when the version list does not show it, as other names are. Only the macOS prebuilt branch names `master-latest`, `maint-latest` and `maint-<number>-latest` skip the list check, and only with `USE_PREBUILT_OTP` set on macOS. Before, `erlang@master-latest` and `erlang@maint-<number>-latest` also skipped the check on Linux and in a macOS source build, and then failed in the download.
 - A source build also refuses an install path that contains a tab or a newline, before `configure` starts. As with a space, the unquoted `cd ${PWD}` that `configure` runs splits the path at a tab or a newline. Before, a tab in the path made `configure` fail with `cannot find sources`. Set `VFOX_HOME` to a path without tabs or newlines.
 
-## 1.2.3
+## 1.2.3 (2026-11-22)
 
 ### Fixed
 
@@ -28,7 +28,7 @@ No changes yet.
 
 - With a warm search cache, `vfox search` shows the cached list for any `USE_PREBUILT_OTP` value. vfox does not call the plugin while its cache is fresh, so the plugin cannot check the value then. `vfox install` still checks it on Linux. See [prebuilt.md](prebuilt.md).
 
-## 1.2.2
+## 1.2.2 (2026-11-22)
 
 ### Fixed
 
@@ -36,7 +36,7 @@ No changes yet.
 - `vfox link --detect erlang` lists only an installation whose `bin/erl` can run. An installation whose `erl` is not executable was listed, and then it failed to link.
 - A source build stops before `configure` when the install path contains an apostrophe, a double quote, a dollar sign or a backtick. OTP's `configure` cannot take these characters. An apostrophe made the build fail about half a minute in. Set `VFOX_HOME` to another path.
 
-## 1.2.1
+## 1.2.1 (2026-11-22)
 
 ### Added
 
