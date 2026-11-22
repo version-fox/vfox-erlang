@@ -19,7 +19,7 @@ PLUGIN = {}
 --- Plugin name
 PLUGIN.name = "erlang"
 --- Plugin version
-PLUGIN.version = "1.2.1"
+PLUGIN.version = "1.2.2"
 --- Plugin homepage
 PLUGIN.homepage = "https://github.com/version-fox/vfox-erlang"
 --- Plugin license, please choose a correct license according to your needs.
