@@ -16,7 +16,7 @@ An [Erlang/OTP](https://www.erlang.org/) plugin for [vfox](https://github.com/ve
 
 ```shell
 # 1. Add the plugin
-vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
+vfox add erlang
 
 # 2. Find a version and install it
 vfox search erlang
@@ -87,7 +87,7 @@ See [docs/mise.md](docs/mise.md).
 - [Linking installed Erlang/OTP](docs/link.md): using an Erlang/OTP that is already on the machine
 - [mise](docs/mise.md): using the plugin through the vfox backend of mise
 - [Troubleshooting](docs/troubleshooting.md): common failures and the commands that diagnose them
-- [Changes](docs/changes.md): what changed in 1.2.3, and after
+- [Changes](docs/changes.md): what changed in each release
 
 **Working on the plugin**
 

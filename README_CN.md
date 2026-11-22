@@ -16,7 +16,7 @@
 
 ```shell
 # 1. 添加插件
-vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
+vfox add erlang
 
 # 2. 查找版本并安装
 vfox search erlang
@@ -87,7 +87,7 @@ mise exec -- erl -version
 - [链接已安装的 Erlang/OTP](docs/zh-CN/link.md)：使用机器上已经存在的 Erlang/OTP
 - [mise](docs/zh-CN/mise.md)：通过 mise 的 vfox 后端使用本插件
 - [问题排查](docs/zh-CN/troubleshooting.md)：常见失败及排查命令
-- [变更记录](docs/zh-CN/changes.md)：1.2.3 及之后的变化
+- [变更记录](docs/zh-CN/changes.md)：每个版本的变化
 
 **参与开发**
 
