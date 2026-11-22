@@ -82,7 +82,7 @@ vfox search erlang              # the names this plugin can install, with your U
 
 Fix:
 
-- Use a full name from `vfox search erlang`, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not in the list, and they are installed as before.
+- Use a full name from `vfox search erlang`, such as `26.2.3`. A partial name such as `28` is not in the list, so it is refused. Branch names such as `master` and `maint-27` are not checked against the list, so they are installed as before.
 - The release and macOS lists are generated once a week. A release that came out after the last refresh is refused until the list includes it.
 - The Linux prebuilt list is read from Bob's index when you search, so the weekly refresh does not affect it. See [prebuilt.md](prebuilt.md).
 
