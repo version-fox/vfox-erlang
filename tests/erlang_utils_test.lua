@@ -195,18 +195,25 @@ check(erlang_utils.bare_release_name("maint-28") == "maint-28", "branch names ar
 check(erlang_utils.is_branch_name("master"), "master is a branch")
 check(erlang_utils.is_branch_name("maint") and erlang_utils.is_branch_name("maint-27"), "maint names are branches")
 check(
-    erlang_utils.is_branch_name("master-latest") and erlang_utils.is_branch_name("maint-28-latest"),
-    "latest names are branches"
-)
-check(
     not erlang_utils.is_branch_name("29.1.2") and not erlang_utils.is_branch_name("OTP-99.9"),
     "releases are not branches"
 )
 check(not erlang_utils.is_branch_name("28"), "a partial name is not a branch")
--- Only the macOS branches end in latest. Any other name that ends in latest is a release that must be listed.
+check(not erlang_utils.is_branch_name("master-latest"), "a latest name is not a source branch")
+-- The macOS prebuilt branches end in latest. They are branches only with USE_PREBUILT_OTP on macOS, which
+-- pre_install_test covers. Any other name that ends in latest is a release, such as foo-latest, and must be listed.
 check(
-    not erlang_utils.is_branch_name("foo-latest") and not erlang_utils.is_branch_name("28-latest"),
-    "other names that end in latest are not branches"
+    erlang_utils.is_macos_prebuilt_branch("master-latest")
+        and erlang_utils.is_macos_prebuilt_branch("maint-latest")
+        and erlang_utils.is_macos_prebuilt_branch("maint-28-latest"),
+    "the macOS prebuilt branches end in latest"
+)
+check(
+    not erlang_utils.is_macos_prebuilt_branch("foo-latest")
+        and not erlang_utils.is_macos_prebuilt_branch("28-latest")
+        and not erlang_utils.is_macos_prebuilt_branch("maint-foo-latest")
+        and not erlang_utils.is_macos_prebuilt_branch("master"),
+    "other names are not macOS prebuilt branches"
 )
 check(not erlang_utils.is_branch_name("maint-foo"), "a maint name that is not a number is not a branch")
 check(not erlang_utils.is_branch_name("maint-28-foo"), "maint names with a suffix other than latest are not branches")

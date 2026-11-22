@@ -31,7 +31,7 @@ Fix:
 
 ## The source build stops before configure, naming a character in the install path
 
-Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a double quote, a dollar sign or a backtick is reported in the same way.
+Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a tab, a newline, a double quote, a dollar sign or a backtick is reported in the same way.
 
 Check:
 

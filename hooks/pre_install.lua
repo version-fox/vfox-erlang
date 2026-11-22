@@ -25,16 +25,19 @@ function PLUGIN:PreInstall(ctx)
         error("You must provide a version number for Erlang/OTP, eg: vfox install erlang@26.2.3")
     end
     print("You will install the Erlang/OTP version is: " .. erlang_version)
-    -- Branches are not in the version lists, so they are not checked. Any other name must be listed before the
-    -- download starts: a name that is not listed would fail in the download, with a generic message.
-    if not erlangUtils.is_branch_name(erlang_version) then
+    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
+    -- Branches are not looked up in a version list. Any other name must be listed before the download starts: a name
+    -- that is not listed would fail in the download, with a generic message.
+    local macos_prebuilt_branch = RUNTIME.osType == "darwin"
+        and PRE_BUILT_OS_RELEASE ~= nil
+        and erlangUtils.is_macos_prebuilt_branch(erlang_version)
+    if not (erlangUtils.is_branch_name(erlang_version) or macos_prebuilt_branch) then
         erlangUtils.check_version_listed(erlang_version)
     end
 
     local download_url
     -- The name the install is recorded under. Linux prebuilt installs use the bare version (below).
     local installed_version = erlang_version
-    local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
     if RUNTIME.osType == "windows" then
         -- For Windows, always use OTP- prefix for regular versions
         local win_tag = erlang_version

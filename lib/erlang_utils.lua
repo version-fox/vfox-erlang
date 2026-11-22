@@ -315,16 +315,17 @@ function erlang_utils.get_erlang_release_versions()
     return result
 end
 
---- Returns true for the names of Erlang/OTP branches that the version lists do not hold: master, maint,
---- maint-<number>, and the macOS prebuilt branches master-latest, maint-latest and maint-<number>-latest.
---- Branches are not looked up in a list. Any other name, such as foo-latest, is a release and must be listed.
+--- Returns true for the names of the Erlang/OTP branches master, maint and maint-<number>. A branch is fetched by
+--- its name, so it is not looked up in a version list.
 function erlang_utils.is_branch_name(name)
-    return name == "master"
-        or name == "maint"
-        or name == "master-latest"
-        or name == "maint-latest"
-        or string.match(name, "^maint%-%d+$") ~= nil
-        or string.match(name, "^maint%-%d+%-latest$") ~= nil
+    return name == "master" or name == "maint" or string.match(name, "^maint%-%d+$") ~= nil
+end
+
+--- Returns true for the macOS prebuilt branches, whose names end in latest: master-latest, maint-latest and
+--- maint-<number>-latest. They are branches only when USE_PREBUILT_OTP is set on macOS, where erlef/otp_builds
+--- provides them. Elsewhere such a name is a release, and it must be listed.
+function erlang_utils.is_macos_prebuilt_branch(name)
+    return name == "master-latest" or name == "maint-latest" or string.match(name, "^maint%-%d+%-latest$") ~= nil
 end
 
 --- Returns true when name is one of the versions of a list from get_erlang_release_versions. Both
@@ -363,14 +364,16 @@ end
 -- The characters that OTP's configure cannot take in the install path, with their names for the error.
 -- configure runs the prefix, which is single-quoted, and the source directory, which is double-quoted,
 -- through eval. An apostrophe ends the single quotes; a double quote, a dollar sign or a backtick ends or
--- changes the double quotes. configure also runs `cd ${PWD}` without quotes, so a space splits the path there
--- and the timestamp check fails.
+-- changes the double quotes. configure also runs `cd ${PWD}` without quotes, so the shell splits the path at a
+-- space, a tab or a newline there, and the timestamp check fails.
 local CONFIGURE_PATH_PROBLEMS = {
     { "'", "an apostrophe" },
     { '"', "a double quote" },
     { "$", "a dollar sign" },
     { "`", "a backtick" },
     { " ", "a space" },
+    { "\t", "a tab" },
+    { "\n", "a newline" },
 }
 
 --- Refuses a source build whose install path holds one of the characters above, before configure starts.
@@ -388,8 +391,8 @@ function erlang_utils.check_configure_path(path)
                 .. path
                 .. " contains "
                 .. table.concat(found, " and ")
-                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without spaces, apostrophes,"
-                .. " double quotes, dollar signs or backticks, then install again."
+                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without spaces, tabs, newlines,"
+                .. " apostrophes, double quotes, dollar signs or backticks, then install again."
         )
     end
 end

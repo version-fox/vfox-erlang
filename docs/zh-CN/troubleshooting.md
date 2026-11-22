@@ -31,7 +31,7 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 
 ## 源码构建在 configure 之前停止，并指出安装路径中的字符
 
-症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、双引号、美元符号或反引号也会以同样的方式报告。
+症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、制表符、换行符、双引号、美元符号或反引号也会以同样的方式报告。
 
 检查：
 
