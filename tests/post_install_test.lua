@@ -19,13 +19,15 @@ local test = require("vfox.test")
 -- of executed.
 local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
 
-local commands = {}
+-- The recorded commands live in a table field, not in a local that the closures assign: after an error
+-- unwinds through pcall, gopher-lua can show a stale value for such a local.
+local recorded = { commands = {} }
 local original_execute = os.execute
 local original_getenv = os.getenv
 local function run_post_install(os_name, arch, env, ctx)
-    commands = {}
+    recorded.commands = {}
     os.execute = function(command)
-        table.insert(commands, command)
+        table.insert(recorded.commands, command)
         return 0
     end
     os.getenv = function(name)
@@ -54,21 +56,21 @@ end
 run_post_install("windows", "amd64", {}, {
     sdkInfo = { erlang = { path = "C:\\Users\\Jane Doe\\.vfox\\erlang", version = "25.3.2.12" } },
 })
-check(#commands == 1, "one installer command")
+check(#recorded.commands == 1, "one installer command")
 check(
-    commands[1]
+    recorded.commands[1]
         == '"C:\\Users\\Jane Doe\\.vfox\\erlang\\otp_win64_25.3.2.12.exe" /S /D=C:\\Users\\Jane Doe\\.vfox\\erlang\\release',
-    "windows installer command: " .. commands[1]
+    "windows installer command: " .. recorded.commands[1]
 )
-check(string.find(commands[1], "-Wait", 1, true) == nil, "no PowerShell-only flags")
+check(string.find(recorded.commands[1], "-Wait", 1, true) == nil, "no PowerShell-only flags")
 
 -- Linux source build: paths are quoted, OTP_CONFIGURE_ARGS is passed to configure, and the
 -- docs chunks are built and installed.
 run_post_install("linux", "amd64", { OTP_CONFIGURE_ARGS = "--enable-jit" }, {
     sdkInfo = { erlang = { path = "/home/jane/.vfox/erlang/v-26.2.3", version = "26.2.3" } },
 })
-check(#commands == 1, "one build command")
-local build = commands[1]
+check(#recorded.commands == 1, "one build command")
+local build = recorded.commands[1]
 check(
     string.find(
         build,
@@ -87,14 +89,48 @@ run_post_install("linux", "amd64", { USE_PREBUILT_OTP = "ubuntu-22.04" }, {
     sdkInfo = { erlang = { path = "/home/jane/.vfox/erlang/v-26.2.3", version = "26.2.3" } },
 })
 check(
-    commands[1] == "cd '/home/jane/.vfox/erlang/v-26.2.3' && ./Install -cross -sasl",
-    "prebuilt install command: " .. commands[1]
+    recorded.commands[1] == "cd '/home/jane/.vfox/erlang/v-26.2.3' && ./Install -cross -sasl",
+    "prebuilt install command: " .. recorded.commands[1]
 )
 
 -- An empty USE_PREBUILT_OTP is unset: the source build runs.
 run_post_install("linux", "amd64", { USE_PREBUILT_OTP = "" }, {
     sdkInfo = { erlang = { path = "/home/jane/.vfox/erlang/v-26.2.3", version = "26.2.3" } },
 })
-check(string.find(commands[1], "./configure", 1, true) ~= nil, "empty USE_PREBUILT_OTP builds: " .. commands[1])
+check(
+    string.find(recorded.commands[1], "./configure", 1, true) ~= nil,
+    "empty USE_PREBUILT_OTP builds: " .. recorded.commands[1]
+)
+
+-- A source build refuses an install path with a character that OTP's configure cannot take, before configure
+-- runs, so nothing is executed. The error names the character.
+for _, case in ipairs({
+    { "/home/jane's/.vfox/cache/erlang/v-26.2.3", "an apostrophe" },
+    { '/home/jane"x/.vfox/cache/erlang/v-26.2.3', "a double quote" },
+    { "/home/$USER/.vfox/cache/erlang/v-26.2.3", "a dollar sign" },
+    { "/home/jane`x`/.vfox/cache/erlang/v-26.2.3", "a backtick" },
+}) do
+    local refused, reason = pcall(run_post_install, "linux", "amd64", {}, {
+        sdkInfo = { erlang = { path = case[1], version = "26.2.3" } },
+    })
+    check(
+        not refused and string.find(tostring(reason), case[2], 1, true) ~= nil and #recorded.commands == 0,
+        "install path refused for " .. case[2] .. ": " .. tostring(reason)
+    )
+end
+
+-- A space in the install path is quoted for the shell and for configure, so the configure command still runs.
+run_post_install("linux", "amd64", {}, {
+    sdkInfo = { erlang = { path = "/home/jane doe/.vfox/cache/erlang/v-26.2.3", version = "26.2.3" } },
+})
+check(
+    string.find(
+        recorded.commands[1],
+        "./configure --prefix='/home/jane doe/.vfox/cache/erlang/v-26.2.3/release'",
+        1,
+        true
+    ) ~= nil,
+    "a space in the path is quoted: " .. recorded.commands[1]
+)
 
 print("post_install_test: " .. counter.checks .. " checks passed")

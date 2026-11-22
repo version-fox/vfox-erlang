@@ -345,4 +345,36 @@ function erlang_utils.check_version_listed(name)
     end
 end
 
+-- The characters that OTP's configure cannot take in the install path, with their names for the error.
+-- configure runs the prefix, which is single-quoted, and the source directory, which is double-quoted,
+-- through eval. An apostrophe ends the single quotes; a double quote, a dollar sign or a backtick ends or
+-- changes the double quotes.
+local CONFIGURE_PATH_PROBLEMS = {
+    { "'", "an apostrophe" },
+    { '"', "a double quote" },
+    { "$", "a dollar sign" },
+    { "`", "a backtick" },
+}
+
+--- Refuses a source build whose install path holds one of the characters above, before configure starts.
+--- Without the check the build fails part way through, or it configures a different directory.
+function erlang_utils.check_configure_path(path)
+    local found = {}
+    for _, problem in ipairs(CONFIGURE_PATH_PROBLEMS) do
+        if string.find(path, problem[1], 1, true) ~= nil then
+            table.insert(found, problem[2])
+        end
+    end
+    if #found > 0 then
+        error(
+            "The Erlang/OTP install path "
+                .. path
+                .. " contains "
+                .. table.concat(found, " and ")
+                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without apostrophes, double quotes,"
+                .. " dollar signs or backticks, then install again."
+        )
+    end
+end
+
 return erlang_utils
