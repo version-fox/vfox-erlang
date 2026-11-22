@@ -28,7 +28,7 @@ jobs:
         os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: install mise and Erlang/OTP via vfox-erlang plugin (Darwin)
         if: runner.os == 'MacOS'

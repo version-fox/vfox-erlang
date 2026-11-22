@@ -28,7 +28,7 @@ jobs:
         os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: prepare Erlang/OTP deps (Linux)
         run: |
           sudo apt update
