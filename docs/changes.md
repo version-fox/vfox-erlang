@@ -6,7 +6,16 @@ Changes after 1.2.2 are recorded here. For published versions, the release notes
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+
+- `vfox install` with an unsupported `USE_PREBUILT_OTP` value on Linux, such as `ubuntu-99.04`, reports the value only. It used to report "Could not read the version list" first, then the same message again from `PreInstall`.
+- A name that ends in `latest` is refused before the download when the version list does not show it, as other names are. Only the macOS branch names `master-latest`, `maint-latest` and `maint-<number>-latest` skip the list check. Before, `erlang@foo-latest` downloaded from GitHub and then failed.
+- A source build refuses an install path that contains a space, before `configure` starts. OTP's `configure` runs `cd ${PWD}` without quotes, so a space makes its timestamp check fail. The note under 1.2.1 that a path with spaces works is true for prebuilt installs only. Set `VFOX_HOME` to a path without spaces.
+- The messages of a failed install say "required utilities", not "required utilties".
+
+### Changed
+
+- With a warm search cache, `vfox search` shows the cached list for any `USE_PREBUILT_OTP` value. vfox does not call the plugin while its cache is fresh, so the plugin cannot check the value then. `vfox install` still checks it on Linux. See [prebuilt.md](prebuilt.md).
 
 ## 1.2.2
 

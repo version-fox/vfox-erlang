@@ -86,6 +86,16 @@ function erlang_utils.check_prebuilt_release(release)
     return release
 end
 
+--- Refuses a USE_PREBUILT_OTP value that names no supported Linux release, as get_erlang_release_versions does.
+--- check_version_listed runs it before it reads the list, so a bad value is reported as such, and not as a list
+--- that could not be read.
+function erlang_utils.check_prebuilt_config()
+    local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+    if use_prebuilt ~= nil and RUNTIME.osType == "linux" then
+        erlang_utils.check_prebuilt_release(use_prebuilt)
+    end
+end
+
 --- The other spelling of a release name: 29.1.2 for OTP-29.1.2, and OTP-29.1.2 for 29.1.2. Other
 --- names, such as branches, have none and give nil.
 function erlang_utils.other_release_spelling(version)
@@ -305,13 +315,16 @@ function erlang_utils.get_erlang_release_versions()
     return result
 end
 
---- Returns true for the names of Erlang/OTP branches: master, maint, maint-<number>, and the names that end
---- in latest, such as master-latest on macOS. The version lists hold releases, so branches are not looked up.
+--- Returns true for the names of Erlang/OTP branches that the version lists do not hold: master, maint,
+--- maint-<number>, and the macOS prebuilt branches master-latest, maint-latest and maint-<number>-latest.
+--- Branches are not looked up in a list. Any other name, such as foo-latest, is a release and must be listed.
 function erlang_utils.is_branch_name(name)
     return name == "master"
         or name == "maint"
-        or string.match(name, "^maint%-") ~= nil
-        or string.match(name, "latest$") ~= nil
+        or name == "master-latest"
+        or name == "maint-latest"
+        or string.match(name, "^maint%-%d+$") ~= nil
+        or string.match(name, "^maint%-%d+%-latest$") ~= nil
 end
 
 --- Returns true when name is one of the versions of a list from get_erlang_release_versions. Both
@@ -330,6 +343,8 @@ end
 --- would fail in the download with a generic message. When the list cannot be read, the check is skipped with
 --- a note: the download decides, as it did before the check existed.
 function erlang_utils.check_version_listed(name)
+    -- The value check comes first. Without it, a bad USE_PREBUILT_OTP would read as a list that could not be read.
+    erlang_utils.check_prebuilt_config()
     local ok, versions = pcall(erlang_utils.get_erlang_release_versions)
     if not ok then
         print("Could not read the version list, so " .. name .. " is not checked against it: " .. tostring(versions))
@@ -348,12 +363,14 @@ end
 -- The characters that OTP's configure cannot take in the install path, with their names for the error.
 -- configure runs the prefix, which is single-quoted, and the source directory, which is double-quoted,
 -- through eval. An apostrophe ends the single quotes; a double quote, a dollar sign or a backtick ends or
--- changes the double quotes.
+-- changes the double quotes. configure also runs `cd ${PWD}` without quotes, so a space splits the path there
+-- and the timestamp check fails.
 local CONFIGURE_PATH_PROBLEMS = {
     { "'", "an apostrophe" },
     { '"', "a double quote" },
     { "$", "a dollar sign" },
     { "`", "a backtick" },
+    { " ", "a space" },
 }
 
 --- Refuses a source build whose install path holds one of the characters above, before configure starts.
@@ -371,8 +388,8 @@ function erlang_utils.check_configure_path(path)
                 .. path
                 .. " contains "
                 .. table.concat(found, " and ")
-                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without apostrophes, double quotes,"
-                .. " dollar signs or backticks, then install again."
+                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without spaces, apostrophes,"
+                .. " double quotes, dollar signs or backticks, then install again."
         )
     end
 end

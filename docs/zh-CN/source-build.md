@@ -13,7 +13,7 @@
 
 `<sdk>` 是 vfox 为该版本管理的目录。vfox 默认把 SDK 放在 `~/.vfox/cache` 下，见 [vfox 配置文档](https://vfox.dev/zh-hans/guides/configuration.html)。构建产物位于 `<sdk>/release`，插件会把 `<sdk>/release/bin` 加入 `PATH`。
 
-安装路径（即 `<sdk>`）不能包含单引号（`'`）、双引号（`"`）、美元符号（`$`）或反引号。OTP 的 `configure` 无法处理这些字符：单引号会破坏它的引号，其他字符会被展开。插件会在 `configure` 启动之前停止，并指出是哪个字符。请把 `VFOX_HOME` 设为不含这些字符的路径。见 [问题排查](troubleshooting.md)。
+安装路径（即 `<sdk>`）不能包含空格、单引号（`'`）、双引号（`"`）、美元符号（`$`）或反引号。OTP 的 `configure` 无法处理这些字符：单引号会破坏它的引号，其他字符会被展开，空格则会让 `configure` 中一条未加引号的 `cd` 把路径切开。插件会在 `configure` 启动之前停止，并指出是哪个字符。请把 `VFOX_HOME` 设为不含这些字符的路径。见 [问题排查](troubleshooting.md)。
 
 ## 依赖
 

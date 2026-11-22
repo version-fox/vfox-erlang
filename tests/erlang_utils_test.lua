@@ -203,6 +203,13 @@ check(
     "releases are not branches"
 )
 check(not erlang_utils.is_branch_name("28"), "a partial name is not a branch")
+-- Only the macOS branches end in latest. Any other name that ends in latest is a release that must be listed.
+check(
+    not erlang_utils.is_branch_name("foo-latest") and not erlang_utils.is_branch_name("28-latest"),
+    "other names that end in latest are not branches"
+)
+check(not erlang_utils.is_branch_name("maint-foo"), "a maint name that is not a number is not a branch")
+check(not erlang_utils.is_branch_name("maint-28-foo"), "maint names with a suffix other than latest are not branches")
 local known = { { version = "29.1.2" }, { version = "29.0-rc3" } }
 check(erlang_utils.is_listed("29.1.2", known), "a listed name matches")
 check(erlang_utils.is_listed("OTP-29.1.2", known), "the OTP- spelling of a listed name matches")
@@ -245,5 +252,38 @@ check(
 )
 responses[list_url] = nil
 check(pcall(erlang_utils.check_version_listed, "28"), "without the list the check is skipped")
+
+-- check_prebuilt_config refuses an unsupported Linux release. An unset value, and any value on macOS, pass.
+check(pcall(with_env, {}, erlang_utils.check_prebuilt_config), "an unset USE_PREBUILT_OTP is not checked")
+check(
+    not pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.check_prebuilt_config),
+    "an unsupported Linux release is refused"
+)
+RUNTIME.osType = "darwin"
+check(
+    pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.check_prebuilt_config),
+    "macOS takes any USE_PREBUILT_OTP value"
+)
+RUNTIME.osType = "linux"
+
+-- A bad USE_PREBUILT_OTP is refused by check_version_listed, whether or not the list can be read. It is not
+-- skipped as a list that could not be read.
+responses[list_url] = nil
+local unread_ok, unread_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
+    erlang_utils.check_version_listed("26.2.3")
+end)
+check(
+    not unread_ok and string.find(tostring(unread_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "a bad value is refused when the list cannot be read: " .. tostring(unread_err)
+)
+responses[list_url] = { status_code = 200, body = "26.2.3\n" }
+local read_ok, read_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
+    erlang_utils.check_version_listed("26.2.3")
+end)
+check(
+    not read_ok and string.find(tostring(read_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "a bad value is refused when the list can be read: " .. tostring(read_err)
+)
+responses[list_url] = nil
 
 print("erlang_utils_test: " .. counter.checks .. " checks passed")
