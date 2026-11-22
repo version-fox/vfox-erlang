@@ -47,6 +47,16 @@ function detect.file_exists(path)
     return erlangUtils.file_exists(path)
 end
 
+--- Returns true when the file can run. On Windows that is the file itself. Elsewhere the execute bit
+--- must be set for the user vfox runs as, which `test -x` checks. vfox links an installation only when
+--- one of the PATH directories holds a command, so a file that cannot run would fail to link.
+function detect.is_runnable(path)
+    if erlangUtils.is_windows() then
+        return detect.file_exists(path)
+    end
+    return os.execute("test -x " .. erlangUtils.shell_quote(path)) == 0
+end
+
 --- Lists the immediate children of dir as full paths, or {} when dir cannot be listed.
 function detect.list_children(dir)
     if dir == nil or dir == "" or io.popen == nil then
@@ -122,7 +132,7 @@ end
 local function otp_root(dir)
     local exe = erlangUtils.is_windows() and "erl.exe" or "erl"
     for _, root in ipairs({ dir, under(dir, "lib", "erlang") }) do
-        if detect.file_exists(under(root, "bin", exe)) then
+        if detect.is_runnable(under(root, "bin", exe)) then
             local version = release_version(root)
             if version ~= nil then
                 return root, version
