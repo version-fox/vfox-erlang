@@ -37,7 +37,7 @@ func erlangVersion() string {
 // prebuiltOSRelease returns the USE_PREBUILT_OTP value for the prebuilt test.
 //
 // E2E_PREBUILT_OS overrides the detected release. Without it, the test reads
-// VERSION_ID from /etc/os-release and runs only on Ubuntu 22.04 or 24.04, the
+// VERSION_ID from /etc/os-release and runs only on Ubuntu 22.04, 24.04 or 26.04, the
 // releases that builds.hex.pm provides.
 func prebuiltOSRelease(t *testing.T) string {
 	t.Helper()
@@ -50,10 +50,10 @@ func prebuiltOSRelease(t *testing.T) string {
 	}
 	versionID := osReleaseValue(string(content), "VERSION_ID")
 	switch versionID {
-	case "22.04", "24.04":
+	case "22.04", "24.04", "26.04":
 		return "ubuntu-" + versionID
 	}
-	t.Skipf("the prebuilt test needs Ubuntu 22.04 or 24.04, this system has VERSION_ID=%q; set E2E_PREBUILT_OS to override", versionID)
+	t.Skipf("the prebuilt test needs Ubuntu 22.04, 24.04 or 26.04, this system has VERSION_ID=%q; set E2E_PREBUILT_OS to override", versionID)
 	return ""
 }
 

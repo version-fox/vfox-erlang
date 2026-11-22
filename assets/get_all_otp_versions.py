@@ -43,20 +43,29 @@ def update_all_version_from_github_api():
         json.dump(all_version, file, indent=4)
 
 
-def get_all_prebuilt_version_from_bob():
-    # ALLOW_OS_RELEASE = ["ubuntu-14.04", "ubuntu-16.04", "ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"]
-    ALLOW_OS_RELEASE = ["ubuntu-20.04"]
-    all_version_info = []
-    for release in ALLOW_OS_RELEASE:
-        url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
-        response = requests.get(url, timeout=REQUEST_TIMEOUT)
-        all_version_info.extend(response.text.split("\n"))
+def get_prebuilt_versions_from_bob(release):
+    """Returns the build names listed in the builds.txt index of one Ubuntu release."""
+    url = f"https://builds.hex.pm/builds/otp/{release}/builds.txt"
+    response = requests.get(url, timeout=REQUEST_TIMEOUT)
+    # An error page is not an index: fail instead of writing its text as build names.
+    if response.status_code != 200:
+        raise RuntimeError(f"Failed to fetch {url}: HTTP {response.status_code}")
+    names = [line.split(" ")[0] for line in response.text.split("\n")]
+    return [name for name in names if name]
 
-    all_prebuilt_versions = []
-    for version in all_version_info:
-        if version.split(" ")[0]:
-            all_prebuilt_versions.append(version.split(" ")[0])
-    return all_prebuilt_versions
+
+def write_version_list(path, versions):
+    with open(path, "w") as file:
+        for version in sorted(versions, reverse=True):
+            file.write(version + "\n")
+
+
+def write_legacy_prebuilt_versions():
+    """Writes prebuilt_versions.txt, the ubuntu-20.04 index, for plugin copies that predate the live index.
+
+    Linux prebuilt searches read the builds.txt index of the chosen release directly (erlang_utils.lua).
+    """
+    write_version_list("prebuilt_versions.txt", get_prebuilt_versions_from_bob("ubuntu-20.04"))
 
 
 def get_macos_prebuilt_versions():
@@ -146,12 +155,8 @@ if __name__ == "__main__":
         for version in versions:
             file.write(version + "\n")
 
-    # Generate prebuilt versions for Linux
-    with open("prebuilt_versions.txt", "w") as file:
-        prebuilt_versions = get_all_prebuilt_version_from_bob()
-        prebuilt_versions.sort(reverse=True)
-        for version in prebuilt_versions:
-            file.write(version + "\n")
+    # Generate the Linux list that plugin copies from before the live index read
+    write_legacy_prebuilt_versions()
 
     # Generate prebuilt versions for macOS
     print("\nFetching macOS prebuilt versions...")

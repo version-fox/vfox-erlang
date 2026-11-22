@@ -35,8 +35,9 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox install erlang@26.2.3
 - `ubuntu-20.04`
 - `ubuntu-22.04`
 - `ubuntu-24.04`
+- `ubuntu-26.04`
 
-选择与你的 Ubuntu 版本一致的值。只接受 Ubuntu 的取值，其他发行版请使用源码构建。
+选择与你的 Ubuntu 版本一致的值。只接受 Ubuntu 的取值，其他发行版请使用源码构建。`vfox search` 会读取 Bob 为所选发行版和本机架构发布的 `builds.txt` 索引，列出安装时可以下载的构建。
 
 下载地址的格式如下：
 
@@ -45,7 +46,7 @@ https://builds.hex.pm/builds/otp/<arch>/<USE_PREBUILT_OTP>/<name>.tar.gz
 ```
 
 - `<arch>` 是 vfox 报告的架构，x86-64 上为 `amd64`。
-- 正式版本会自动加上 `OTP-` 前缀：`26.2.3` 下载的是 `OTP-26.2.3.tar.gz`。已经带前缀的名字，例如 `OTP-26.2.3`，按原样使用。
+- 正式版本会自动加上 `OTP-` 前缀：`26.2.3` 下载的是 `OTP-26.2.3.tar.gz`。已经带前缀的名字，例如 `OTP-26.2.3`，下载的是同一个文件。两种名字安装的都是 `26.2.3`。
 - 分支名按原样使用，例如 `maint-27` 和 `master`。
 
 压缩包解压后，插件会在安装目录中执行 OTP 自带的 `Install` 脚本（`./Install -cross -sasl`）。

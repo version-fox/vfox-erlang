@@ -89,10 +89,10 @@ RUNTIME.osType = "linux"
 
 -- The version list is parsed line by line and HTTP failures are reported.
 local list_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
-responses[list_url] = { status_code = 200, body = "26.2.3\r\n25.3.2.12\n\n" }
+responses[list_url] = { status_code = 200, body = "25.3.2.12\r\n26.2.3\n\n" }
 local list = erlang_utils.get_erlang_release_versions()
 check(#list == 2, "blank lines are skipped")
-check(list[1].version == "26.2.3" and list[2].version == "25.3.2.12", "versions keep their order")
+check(list[1].version == "26.2.3" and list[2].version == "25.3.2.12", "versions are listed in descending order")
 
 responses[list_url] = { status_code = 503, body = "" }
 local http_ok, http_failure = pcall(erlang_utils.get_erlang_release_versions)
@@ -109,6 +109,105 @@ check(
     not net_ok and string.find(net_reason, "version list", 1, true) ~= nil,
     "download errors name the version list: " .. net_reason
 )
+
+-- USE_PREBUILT_OTP only changes the list on macOS and Linux. An empty value is unset, and an
+-- unknown Linux release is an error instead of a list of other builds.
+local function with_env(env, fn)
+    local original = os.getenv
+    os.getenv = function(name)
+        return env[name]
+    end
+    local ok, result = pcall(fn)
+    os.getenv = original
+    if not ok then
+        error(result, 0)
+    end
+    return result
+end
+
+local function search_on(os_name, env, arch)
+    local saved_os, saved_arch = RUNTIME.osType, RUNTIME.archType
+    RUNTIME.osType, RUNTIME.archType = os_name, arch or "amd64"
+    local ok, result = pcall(with_env, env, erlang_utils.get_erlang_release_versions)
+    RUNTIME.osType, RUNTIME.archType = saved_os, saved_arch
+    if not ok then
+        error(result, 0)
+    end
+    return result
+end
+
+local base_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/"
+responses[base_url .. "versions.txt"] = { status_code = 200, body = "26.2.3\n" }
+responses[base_url .. "macos_prebuilt_versions.txt"] = {
+    status_code = 200,
+    body = "master-latest\n25.3.2.12\nmaint-latest\n26.2.3\n",
+}
+
+check(search_on("linux", { USE_PREBUILT_OTP = "" })[1].version == "26.2.3", "an empty USE_PREBUILT_OTP is unset")
+check(
+    search_on("windows", { USE_PREBUILT_OTP = "ubuntu-22.04" })[1].version == "26.2.3",
+    "windows ignores the variable"
+)
+local mac = search_on("darwin", { USE_PREBUILT_OTP = "true" })
+check(
+    #mac == 4
+        and mac[1].version == "26.2.3"
+        and mac[2].version == "25.3.2.12"
+        and mac[3].version == "master-latest"
+        and mac[4].version == "maint-latest",
+    "macOS lists the newest release first, then the branches"
+)
+
+-- Linux reads the builds.txt index of the release that USE_PREBUILT_OTP names, for the
+-- architecture vfox runs on. Each line is a name, then the commit and the build time.
+local index_body =
+    "OTP-28.4.2 0863bd30 2026-04-26T03:41:09Z\nmaster abc 2026-04-26T03:41:09Z\r\n\nOTP-29.1.2 9d37 2026-04-26T02:55:31Z\n"
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] = { status_code = 200, body = index_body }
+local noble = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+check(
+    #noble == 3 and noble[1].version == "29.1.2" and noble[2].version == "28.4.2" and noble[3].version == "master",
+    "ubuntu-24.04 lists the newest release first, then the branches"
+)
+-- `latest` installs the first name, so the order matters: the newest final release, then the
+-- release candidates, then the branches. Numbers compare as numbers: 25.3.2.10 is newer than 25.3.2.9.
+local order_body = "maint-28\nOTP-29.0-rc3\nOTP-25.3.2.9\nOTP-25.3.2.10\nOTP-29.1.2\nmaster\nOTP-29.1\n"
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] = { status_code = 200, body = order_body }
+local ordered = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+local ordered_names = {}
+for i, entry in ipairs(ordered) do
+    ordered_names[i] = entry.version
+end
+check(
+    table.concat(ordered_names, " ") == "29.1.2 29.1 25.3.2.10 25.3.2.9 29.0-rc3 master maint-28",
+    "release order: " .. table.concat(ordered_names, " ")
+)
+
+-- OTP- is only a spelling: 29.1.2 and OTP-29.1.2 name the same release, and branches have none.
+check(erlang_utils.other_release_spelling("29.1.2") == "OTP-29.1.2", "a bare name gets the prefix")
+check(erlang_utils.other_release_spelling("OTP-29.1.2") == "29.1.2", "a prefixed name loses it")
+check(erlang_utils.other_release_spelling("29.0-rc3") == "OTP-29.0-rc3", "release candidates too")
+check(erlang_utils.other_release_spelling("master") == nil, "branches have no other spelling")
+check(erlang_utils.bare_release_name("OTP-29.1.2") == "29.1.2", "the list shows release names bare")
+check(erlang_utils.bare_release_name("maint-28") == "maint-28", "branch names are unchanged")
+responses["https://builds.hex.pm/builds/otp/arm64/ubuntu-24.04/builds.txt"] =
+    { status_code = 200, body = "OTP-26.2.3 aaa 2026-01-01T00:00:00Z\n" }
+local arm = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" }, "arm64")
+check(#arm == 1 and arm[1].version == "26.2.3", "arm64 reads the arm64 index")
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-20.04/builds.txt"] =
+    { status_code = 200, body = "OTP-20.0 040bdce6 2020-10-29T08:19:13Z\n" }
+local focal = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-20.04" })
+check(#focal == 1 and focal[1].version == "20.0", "ubuntu-20.04 reads its own index")
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-26.04/builds.txt"] =
+    { status_code = 200, body = "OTP-26.0 8c0ea6bd 2026-04-24T21:11:44Z\n" }
+local resolute = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-26.04" })
+check(#resolute == 1 and resolute[1].version == "26.0", "ubuntu-26.04 reads its own index")
+
+local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
+check(
+    not search_ok and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "search rejects an unknown release: " .. tostring(search_err)
+)
+check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the error lists ubuntu-26.04")
 
 -- Available is the hook that vfox calls; it returns the same list.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }

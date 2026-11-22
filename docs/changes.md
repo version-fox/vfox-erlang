@@ -16,12 +16,17 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - Bilingual documentation in `docs/` and `docs/zh-CN/`.
 - Permissions allowed in `opencode.jsonc`.
 - `.gitattributes` to keep LF line endings.
+- `ubuntu-26.04` is accepted as a `USE_PREBUILT_OTP` value on Linux. Bob publishes its OTP builds for amd64 and arm64.
 
 ### Changed
 
 - The Windows installer runs without the PowerShell-only `-Wait -PassThru` arguments.
 - The README and the documentation are rewritten in English and Chinese.
 - The typo `Uinx` in the plugin description in `metadata.lua` is corrected to `Unix`.
+- With `USE_PREBUILT_OTP` set, the Windows version list no longer changes. Windows always uses the official installer.
+- On Linux, `vfox search` with `USE_PREBUILT_OTP` reads the `builds.txt` index that Bob publishes for the release and for the architecture vfox runs on, when you search. It no longer uses a list generated every week, so arm64 machines see arm64 builds.
+- On Linux, `vfox search` with `USE_PREBUILT_OTP` lists releases without the `OTP-` prefix, like the other lists, for example `29.1.2`. Both spellings install the same build.
+- On Linux with `USE_PREBUILT_OTP`, an install is recorded as `29.1.2` whichever spelling was typed, so installing the other spelling of an installed release reports it as already installed. A release installed as `OTP-29.1.2` before this change keeps that name; `vfox install` does not recognise it, so it installs the release again.
 
 ### Fixed
 
@@ -36,6 +41,11 @@ Changes after 1.2.0 are recorded here. For published versions, the release notes
 - `get_all_otp_versions.py` checked the status code of only the last GitHub API response.
 - Source builds of `master` and `maint-<N>` downloaded the archive from `refs/tags/`, which returned 404. They now download from `refs/heads/`.
 - A source build of a version that already has the `OTP-` prefix, such as `OTP-26.2.3`, became `OTP-OTP-26.2.3` and returned 404. The prefix is no longer added twice.
+- On Linux, `vfox search` with `USE_PREBUILT_OTP` listed the ubuntu-20.04 builds for every Ubuntu release, so builds that exist only for newer releases, such as `OTP-29.1.2` on ubuntu-24.04, were missing. The list now comes from the builds of the release that the variable names.
+- `vfox search` with an unsupported `USE_PREBUILT_OTP` value, such as `ubuntu-99.04`, listed builds instead of failing. It now reports the supported values, as `vfox install` does.
+- An empty `USE_PREBUILT_OTP` counts as unset, so the source build runs.
+- With `USE_PREBUILT_OTP` set on macOS or Linux, `vfox install erlang@latest` installed a branch (`master`, or `master-latest` on macOS), because branch names came first in the list. The newest final release is first now, then the release candidates, then the branches.
+- `vfox use` accepts the other spelling of an installed release. A release installed as `OTP-29.1.2` can be used as `29.1.2`, and the reverse, instead of reporting that it is not installed.
 
 ### Removed
 

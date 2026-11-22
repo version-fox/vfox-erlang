@@ -51,9 +51,66 @@ function erlang_utils.array_contains(array, value)
     return false
 end
 
--- load configuration from environment variables
+-- Loads a setting from an environment variable. An empty value counts as unset, so that
+-- USE_PREBUILT_OTP= turns prebuilt mode off.
 function erlang_utils.get_config_from_env(env_name, default_value)
-    return os.getenv(env_name) or default_value
+    local value = os.getenv(env_name)
+    if value == nil or value == "" then
+        return default_value
+    end
+    return value
+end
+
+--- Ubuntu releases that have prebuilt Erlang/OTP builds on builds.hex.pm (Bob).
+erlang_utils.PREBUILT_OS_RELEASES = {
+    "ubuntu-14.04",
+    "ubuntu-16.04",
+    "ubuntu-18.04",
+    "ubuntu-20.04",
+    "ubuntu-22.04",
+    "ubuntu-24.04",
+    "ubuntu-26.04",
+}
+
+--- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value
+--- is an error that lists the supported values.
+function erlang_utils.check_prebuilt_release(release)
+    if not erlang_utils.array_contains(erlang_utils.PREBUILT_OS_RELEASES, release) then
+        error(
+            "USE_PREBUILT_OTP must be one of: "
+                .. table.concat(erlang_utils.PREBUILT_OS_RELEASES, ", ")
+                .. ". Got: "
+                .. release
+        )
+    end
+    return release
+end
+
+--- The other spelling of a release name: 29.1.2 for OTP-29.1.2, and OTP-29.1.2 for 29.1.2. Other
+--- names, such as branches, have none and give nil.
+function erlang_utils.other_release_spelling(version)
+    if type(version) ~= "string" then
+        return nil
+    end
+    if string.match(version, "^OTP%-%d") then
+        return string.sub(version, 5)
+    end
+    if string.match(version, "^%d") then
+        return "OTP-" .. version
+    end
+    return nil
+end
+
+--- The name a release has in the Linux prebuilt list: the OTP- prefix dropped, as the other lists
+--- show it. Branch names keep their names.
+function erlang_utils.bare_release_name(name)
+    return string.match(name, "^OTP%-(%d.*)$") or name
+end
+
+--- Returns the URL of the builds.hex.pm index that lists the builds of one Ubuntu release for the
+--- architecture vfox runs on. The install downloads from the same host and architecture.
+function erlang_utils.prebuilt_index_url(release)
+    return "https://builds.hex.pm/builds/otp/" .. RUNTIME.archType .. "/" .. release .. "/builds.txt"
 end
 
 --- Returns true when vfox runs the plugin on Windows.
@@ -140,21 +197,79 @@ function erlang_utils.find_bin_dir(root)
     return erlang_utils.join(erlang_utils.join(root, "release"), "bin")
 end
 
+--- Splits a release name such as OTP-29.1.2, 29.1.2 or OTP-29.0-rc3 into its numbers. A release
+--- candidate also gives its number. Branch names such as master or maint-28 give nil.
+local function release_of(name)
+    local bare = string.gsub(name, "^OTP%-", "")
+    local base, candidate = string.match(bare, "^([%d%.]+)%-rc(%d+)$")
+    if base == nil then
+        base = string.match(bare, "^[%d%.]+$")
+        if base == nil then
+            return nil
+        end
+    end
+    local numbers = {}
+    for number in string.gmatch(base, "%d+") do
+        table.insert(numbers, tonumber(number))
+    end
+    return { numbers = numbers, candidate = candidate and tonumber(candidate) }
+end
+
+--- True when release a is newer than release b. Final releases come before release candidates;
+--- between releases of the same kind, the higher numbers come first.
+local function newer_release(a, b)
+    if (a.candidate == nil) ~= (b.candidate == nil) then
+        return a.candidate == nil
+    end
+    for i = 1, math.max(#a.numbers, #b.numbers) do
+        local x, y = a.numbers[i] or 0, b.numbers[i] or 0
+        if x ~= y then
+            return x > y
+        end
+    end
+    return (a.candidate or 0) > (b.candidate or 0)
+end
+
+--- Orders the names of a prebuilt list for `vfox install erlang@latest`, which installs the first
+--- name: the newest final release, then the release candidates, then the branches (master,
+--- maint-*) in descending string order.
+local function sort_prebuilt_names(names)
+    local releases = {}
+    for _, name in ipairs(names) do
+        releases[name] = release_of(name)
+    end
+    table.sort(names, function(a, b)
+        local ra, rb = releases[a], releases[b]
+        if ra and rb then
+            if newer_release(ra, rb) then
+                return true
+            end
+            if newer_release(rb, ra) then
+                return false
+            end
+        elseif ra or rb then
+            return ra ~= nil
+        end
+        return a > b
+    end)
+end
+
 function erlang_utils.get_erlang_release_versions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
-    -- Use prebuilt versions when USE_PREBUILT_OTP is explicitly set
+    -- USE_PREBUILT_OTP selects the prebuilt list of the platform. Windows always uses the official
+    -- installer, so its list does not change.
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
-    if use_prebuilt then
-        -- Choose different prebuilt version lists based on platform
-        if RUNTIME.osType == "darwin" then
-            -- Use macOS specific prebuilt versions
-            search_url =
-                "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
-        else
-            -- Use Ubuntu prebuilt versions for Linux
-            search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/prebuilt_versions.txt"
-        end
+    local prebuilt_list = use_prebuilt ~= nil and (RUNTIME.osType == "darwin" or RUNTIME.osType == "linux")
+    -- Bob's names carry the OTP- prefix; the Linux list shows release names without it.
+    local bob_names = use_prebuilt ~= nil and RUNTIME.osType == "linux"
+    if use_prebuilt and RUNTIME.osType == "darwin" then
+        search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
+    elseif use_prebuilt and RUNTIME.osType == "linux" then
+        -- Bob lists the builds of each Ubuntu release in its own index. Read that index, so the list
+        -- is the one the install downloads from.
+        local release = erlang_utils.check_prebuilt_release(use_prebuilt)
+        search_url = erlang_utils.prebuilt_index_url(release)
     end
 
     local resp, err = http.get({
@@ -172,14 +287,31 @@ function erlang_utils.get_erlang_release_versions()
         )
     end
 
-    local result = {}
+    -- The first column is the name. The jsDelivr lists hold one name per line; builds.txt adds the
+    -- commit and the build time after it.
+    local names = {}
     for line in string.gmatch(resp.body, "[^\r\n]+") do
-        local version = erlang_utils.trim(line)
-        if version ~= "" then
-            table.insert(result, {
-                version = version,
-            })
+        local name = string.match(erlang_utils.trim(line), "^%S+")
+        if name then
+            if bob_names then
+                name = erlang_utils.bare_release_name(name)
+            end
+            table.insert(names, name)
         end
+    end
+    if prebuilt_list then
+        sort_prebuilt_names(names)
+    else
+        -- The generated lists are already in descending string order.
+        table.sort(names, function(a, b)
+            return a > b
+        end)
+    end
+    local result = {}
+    for _, name in ipairs(names) do
+        table.insert(result, {
+            version = name,
+        })
     end
     return result
 end

@@ -14,7 +14,7 @@ A version name is the Erlang/OTP version without the `OTP-` prefix. When it down
 | Windows release | `25.3.2.12` | Windows, the four-part numbers of the Windows installers |
 | Branch or maintenance | `master`, `maint-27` | Linux and macOS (source or prebuilt), not Windows |
 
-- On Linux, the prebuilt list also shows releases with the prefix, as `OTP-26.2.3`. Both spellings work with `vfox install`.
+- On Linux, the prebuilt list shows releases without the prefix, as `26.2.3`, like the other lists. Both spellings download the same build and are installed as `26.2.3`. A release installed as `OTP-26.2.3` before this change keeps that name: `vfox use` finds it under either spelling, but `vfox install` does not recognise it, so it installs the release again.
 - Prebuilt branch names on macOS end in `-latest`: `master-latest`, `maint-latest` and `maint-27-latest`.
 - On Windows, a release installs from the installer that is published under its `OTP-<version>` tag on the [Erlang/OTP releases](https://github.com/erlang/otp/releases) page.
 
@@ -27,7 +27,9 @@ vfox search erlang
 The list depends on the mode:
 
 - Without `USE_PREBUILT_OTP`, the list is the release list that ships with the plugin.
-- With `USE_PREBUILT_OTP` set, the list is the prebuilt list for the platform: the Ubuntu list on Linux and the macOS list on macOS. See [prebuilt.md](prebuilt.md).
+- With `USE_PREBUILT_OTP` set, the list is the prebuilt list for the platform: the list of the Ubuntu release it names on Linux, and the macOS list on macOS. See [prebuilt.md](prebuilt.md).
+
+`vfox install erlang@latest` installs the first name in the list. With `USE_PREBUILT_OTP` set, that is the newest final release, then the release candidates, then the branches.
 
 vfox caches search results for 12 hours by default. If the list looks outdated, see [troubleshooting.md](troubleshooting.md).
 
@@ -81,7 +83,7 @@ A linked version, see [link.md](link.md), is removed from the list by `vfox unin
 A branch name such as `master` or `maint-27` installs what the branch contains at install time, so two installs with the same name can get different builds.
 
 - A source build (Linux and macOS, the default) downloads the branch from the Erlang/OTP repository. The accepted names are `master`, `maint` and `maint-<number>`, such as `maint-27`.
-- A prebuilt build uses the name as the prebuilt server lists it. On Linux that is the same name. On macOS it ends in `-latest`.
+- A prebuilt build downloads the release under the name that the prebuilt server uses. On Linux that name has the `OTP-` prefix, which the plugin adds. On macOS it ends in `-latest`.
 
 ```shell
 # Source build on Linux or macOS

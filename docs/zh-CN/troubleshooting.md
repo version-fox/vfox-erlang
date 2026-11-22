@@ -57,7 +57,7 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
 
 ## USE_PREBUILT_OTP 取值不合法
 
-症状：在 Linux 上，安装在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04. Got: ...`。
+症状：在 Linux 上，安装在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`。
 
 检查：
 
@@ -68,7 +68,7 @@ uname -m     # macOS 上，x86_64（Intel）和 arm64（Apple 芯片）都受支
 
 修复：
 
-- Linux：使用 `ubuntu-14.04`、`ubuntu-16.04`、`ubuntu-18.04`、`ubuntu-20.04`、`ubuntu-22.04` 或 `ubuntu-24.04` 之一。`true` 在 Linux 上不合法。
+- Linux：使用 `ubuntu-14.04`、`ubuntu-16.04`、`ubuntu-18.04`、`ubuntu-20.04`、`ubuntu-22.04`、`ubuntu-24.04` 或 `ubuntu-26.04` 之一。`true` 在 Linux 上不合法。
 - macOS：设置 `USE_PREBUILT_OTP=true`。如果安装报告不支持该架构，说明这台 Mac 的架构不是 `amd64`、`x86_64`、`arm64` 或 `aarch64`。
 - Windows 会忽略这个变量。
 
@@ -170,6 +170,18 @@ vfox list erlang
 修复：
 
 - 用 `vfox install erlang@26.2.3` 安装该版本，或用 `vfox link --detect erlang` 链接机器上已有的安装。见 [链接已安装的 Erlang/OTP](link.md)。
+
+## 同一个版本装了两份
+
+症状：`vfox list erlang` 里同一个正式版出现两项，例如 `OTP-29.1.2` 和 `29.1.2`。或者用 `erlang@OTP-29.1.2` 装过之后，`vfox install erlang@29.1.2` 又下载了一次。
+
+原因：vfox 按安装时的完整名字识别已安装的版本。Linux 预编译列表改为显示不带前缀的版本号之前，安装名是 `OTP-29.1.2`；新版插件的安装名是 `29.1.2`。vfox 不知道两者是同一个正式版，所以会装两份。
+
+处理：
+
+- 保留你在用的那一份。`vfox use` 两种名字都能找到这个版本。
+- 要删除另一份，运行 `vfox uninstall erlang@OTP-29.1.2`（或 `erlang@29.1.2`）。如果删的是当前版本，vfox 会切换到另一份。
+- 新版插件下，之后用任何一种名字安装同一版本，都会提示已安装，所以重复只来自改动之前的安装。
 
 ## 找不到 erl，或运行的是另一个 erl
 

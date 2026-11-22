@@ -91,4 +91,10 @@ check(
     "prebuilt install command: " .. commands[1]
 )
 
+-- An empty USE_PREBUILT_OTP is unset: the source build runs.
+run_post_install("linux", "amd64", { USE_PREBUILT_OTP = "" }, {
+    sdkInfo = { erlang = { path = "/home/jane/.vfox/erlang/v-26.2.3", version = "26.2.3" } },
+})
+check(string.find(commands[1], "./configure", 1, true) ~= nil, "empty USE_PREBUILT_OTP builds: " .. commands[1])
+
 print("post_install_test: " .. counter.checks .. " checks passed")

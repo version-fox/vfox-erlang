@@ -14,15 +14,6 @@
 
 local erlangUtils = require("erlang_utils")
 
-local SUPPORT_OS_RELEASE = {
-    "ubuntu-14.04",
-    "ubuntu-16.04",
-    "ubuntu-18.04",
-    "ubuntu-20.04",
-    "ubuntu-22.04",
-    "ubuntu-24.04",
-}
-
 --- Returns some pre-installed information, such as version number, download address, local files, etc.
 --- If checksum is provided, vfox will automatically check it for you.
 --- ctx.version is the version the user typed.
@@ -37,6 +28,8 @@ function PLUGIN:PreInstall(ctx)
     -- erlangUtils.check_version_existence("https://github.com/erlang/otp/releases/tag/OTP-" .. erlang_version)
 
     local download_url
+    -- The name the install is recorded under. Linux prebuilt installs use the bare version (below).
+    local installed_version = erlang_version
     local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
     if RUNTIME.osType == "windows" then
         -- For Windows, always use OTP- prefix for regular versions
@@ -59,22 +52,18 @@ function PLUGIN:PreInstall(ctx)
                 .. ".exe"
         end
     elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE then
-        if not erlangUtils.array_contains(SUPPORT_OS_RELEASE, PRE_BUILT_OS_RELEASE) then
-            error(
-                "USE_PREBUILT_OTP must be one of: "
-                    .. table.concat(SUPPORT_OS_RELEASE, ", ")
-                    .. ". Got: "
-                    .. PRE_BUILT_OS_RELEASE
-            )
-        end
+        local release = erlangUtils.check_prebuilt_release(PRE_BUILT_OS_RELEASE)
         -- builds.hex.pm names numeric releases with the OTP- prefix, e.g. OTP-26.2.3.tar.gz
         download_url = "https://builds.hex.pm/builds/otp/"
             .. RUNTIME.archType
             .. "/"
-            .. PRE_BUILT_OS_RELEASE
+            .. release
             .. "/"
             .. erlangUtils.bob_build_name(erlang_version)
             .. ".tar.gz"
+        -- The install is recorded under the bare version, the name the lists show, whichever spelling was
+        -- typed. vfox checks the returned name again before it downloads, so OTP-26.2.3 and 26.2.3 are one install.
+        installed_version = erlangUtils.bare_release_name(erlang_version)
     elseif RUNTIME.osType == "darwin" and PRE_BUILT_OS_RELEASE then
         -- Use @erlef/otp_builds for MacOS prebuilt binaries
         local arch_mapping = {
@@ -162,7 +151,7 @@ function PLUGIN:PreInstall(ctx)
     print("Download Erlang/OTP from " .. download_url)
 
     return {
-        version = erlang_version,
+        version = installed_version,
         url = download_url,
     }
 end

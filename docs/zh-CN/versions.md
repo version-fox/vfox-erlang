@@ -14,7 +14,7 @@
 | Windows 正式版本 | `25.3.2.12` | Windows，使用 Windows 安装器的四段版本号 |
 | 分支或维护版本 | `master`、`maint-27` | Linux 和 macOS（源码构建或预编译），不支持 Windows |
 
-- Linux 预编译列表中，正式版本也会以 `OTP-26.2.3` 的形式出现。两种写法在 `vfox install` 中都可以使用。
+- Linux 预编译列表中，正式版本和其他列表一样不带前缀，例如 `26.2.3`。两种写法下载的是同一个构建，安装名都是 `26.2.3`。本次改动之前以 `OTP-26.2.3` 安装的版本保留原名：`vfox use` 两种名字都能找到，但 `vfox install` 不认得它，会重新安装同一版本。
 - macOS 预编译的分支名以 `-latest` 结尾：`master-latest`、`maint-latest` 和 `maint-27-latest`。
 - Windows 上，正式版本从 [Erlang/OTP releases](https://github.com/erlang/otp/releases) 页面上 `OTP-<版本号>` 标签下发布的安装器安装。
 
@@ -27,7 +27,9 @@ vfox search erlang
 列表取决于当前模式：
 
 - 未设置 `USE_PREBUILT_OTP` 时，列表是插件自带的正式版本列表。
-- 设置了 `USE_PREBUILT_OTP` 时，列表是该平台的预编译列表：Linux 上是 Ubuntu 预编译列表，macOS 上是 macOS 预编译列表。见 [预编译](prebuilt.md)。
+- 设置了 `USE_PREBUILT_OTP` 时，列表是该平台的预编译列表：Linux 上是所选 Ubuntu 发行版的列表，macOS 上是 macOS 预编译列表。见 [预编译](prebuilt.md)。
+
+`vfox install erlang@latest` 安装列表中的第一个名字。设置了 `USE_PREBUILT_OTP` 时，它是最新的正式版，其次是候选版，最后是分支。
 
 vfox 默认缓存搜索结果 12 小时。如果列表看起来过旧，见 [问题排查](troubleshooting.md)。
 
@@ -81,7 +83,7 @@ vfox uninstall erlang@26.2.3
 `master`、`maint-27` 这样的分支名，安装时得到的是该分支当时的内容。因此同一个名字在不同时间安装，得到的构建可能不同。
 
 - 源码构建（Linux 和 macOS 的默认方式）从 Erlang/OTP 仓库下载该分支。可用的名字是 `master`、`maint` 和 `maint-<数字>`，例如 `maint-27`。
-- 预编译使用预编译服务器列出的名字。Linux 上就是同一个名字；macOS 上以 `-latest` 结尾。
+- 预编译使用预编译服务器的名字下载。Linux 上服务器的名字带 `OTP-` 前缀，由插件加上；macOS 上以 `-latest` 结尾。
 
 ```shell
 # Linux 或 macOS 上的源码构建
