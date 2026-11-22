@@ -132,7 +132,7 @@
 
 ### 新增
 
-- `DOC_TARGETS` 选择要构建的文档目标，默认为 `chunks`，因此 Erlang Shell 中的 `h(list).` 能工作。
+- `DOC_TARGETS` 选择要构建的文档目标。默认仍为 `chunks`，因此默认构建不变。
 - README 说明了默认的文档构建，以及如何用 `OTP_CONFIGURE_ARGS` 传入 configure 参数。
 
 ### 变更

@@ -132,7 +132,7 @@ No changes yet.
 
 ### Added
 
-- `DOC_TARGETS` selects the documentation that is built. It defaults to `chunks`, which makes `h(list).` work in the Erlang shell.
+- `DOC_TARGETS` selects the documentation that is built. It defaults to `chunks`, as before, so the default build does not change.
 - The README explains the default documentation build, and how to pass configure options with `OTP_CONFIGURE_ARGS`.
 
 ### Changed
