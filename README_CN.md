@@ -16,7 +16,7 @@
 
 ```shell
 # 1. 添加插件
-vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
+vfox add erlang
 
 # 2. 查找版本并安装
 vfox search erlang

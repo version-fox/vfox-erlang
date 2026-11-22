@@ -16,7 +16,7 @@ An [Erlang/OTP](https://www.erlang.org/) plugin for [vfox](https://github.com/ve
 
 ```shell
 # 1. Add the plugin
-vfox add --source https://github.com/version-fox/vfox-erlang/archive/refs/heads/main.zip erlang
+vfox add erlang
 
 # 2. Find a version and install it
 vfox search erlang
