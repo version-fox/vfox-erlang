@@ -2,7 +2,7 @@
 
 [中文](zh-CN/changes.md) | [English](changes.md)
 
-Changes after 1.2.4 are recorded here. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference.
+What changed in each release, as a user notices it. For published versions, the release notes on [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) are the reference. The date after each version is the date of its GitHub Release, in UTC.
 
 ## Unreleased
 
@@ -86,3 +86,76 @@ No changes yet.
 
 - The root `DEVELOPMENT.md`, whose content is now in [development.md](development.md).
 - `e2e_test_linux.yaml`, `e2e_test_linux_prebuilt.yaml` and `e2e_test_windows.yaml`, replaced by `e2e.yml`.
+
+## 1.2.0 (2025-07-14)
+
+### Added
+
+- macOS prebuilt installs. With `USE_PREBUILT_OTP` set on macOS, the plugin installs the build that [erlef/otp_builds](https://github.com/erlef/otp_builds) publishes for the Mac's architecture (#13). `vfox search erlang` lists the macOS prebuilt versions. See [prebuilt.md](prebuilt.md).
+- The README describes the macOS prebuilt install and shows the CI badges of the prebuilt workflows.
+
+### Removed
+
+- The `.tool-versions` file, which pinned Erlang/OTP 25.3.2.10 for the development of the plugin.
+
+## 1.1.0 (2025-01-26)
+
+### Added
+
+- Linux prebuilt installs. With `USE_PREBUILT_OTP` set to an Ubuntu release, from `ubuntu-14.04` to `ubuntu-24.04`, the plugin downloads the build that [Bob](https://builds.hex.pm) publishes for that release, and runs OTP's `Install` script instead of compiling (#8). `vfox search erlang` lists the prebuilt versions. Before 1.2.1, numeric versions such as `26.2.3` returned 404 from the download server; 1.2.1 fixed it.
+- The README has a section on the prebuilt install, and tips for faster source builds such as `MAKEFLAGS=-j8`.
+
+## 1.0.1 (2024-05-14)
+
+### Fixed
+
+- The Erlang/OTP documentation chunks are built and installed, so `h(list).` shows the documentation in the Erlang shell (issue #4).
+
+## 1.0.0 (2024-05-12)
+
+### Added
+
+- Windows installs. `vfox install erlang@25.3.2.12` runs the official Erlang/OTP installer (`otp_win64_<version>.exe` or `otp_win32_<version>.exe`) from the [Erlang/OTP releases](https://github.com/erlang/otp/releases), silently, into the `release` directory of the version (#3).
+- The version list includes the four-part Windows versions, such as `25.3.2.12`. `vfox search erlang` lists 438 names in descending order; before, it listed 98.
+
+### Changed
+
+- The README has a logo and the Windows install steps.
+
+## 0.4.1 (2024-04-25)
+
+### Fixed
+
+- `metadata.lua` records version 0.4.1. Version 0.4.0 still recorded 0.3.0.
+
+## 0.4.0 (2024-04-25)
+
+### Added
+
+- `DOC_TARGETS` selects the documentation that is built. It defaults to `chunks`, which makes `h(list).` work in the Erlang shell.
+- The README explains the default documentation build, and how to pass configure options with `OTP_CONFIGURE_ARGS`.
+
+### Changed
+
+- `OTP_COMPILE_ARGS` is renamed to `OTP_CONFIGURE_ARGS`. The old name is no longer read.
+- `vfox search erlang` lists 98 names instead of 28.
+- The repository moved to the `version-fox` organization (#1). The install command, the version list and the update manifest point to `version-fox/vfox-erlang`.
+
+## 0.3.0 (2024-04-03)
+
+### Changed
+
+- `metadata.lua` records version 0.3.0. Versions 0.1 and 0.2 recorded 0.0.1.
+- The update manifest points to this plugin's release manifest, not to the plugin template's.
+
+## 0.2 (2024-04-03)
+
+The plugin code is the same as 0.1. The tag points to the same commit.
+
+## 0.1 (2024-04-01)
+
+### Added
+
+- The first release. On Linux and macOS, the plugin installs Erlang/OTP from the source archive of the `OTP-<version>` tag, with `vfox install erlang@<version>`, and builds the documentation chunks.
+- `vfox search erlang` lists the versions in `assets/versions.txt`.
+- `OTP_COMPILE_ARGS` passes options to `./configure`.

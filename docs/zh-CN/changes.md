@@ -2,7 +2,7 @@
 
 [中文](changes.md) | [English](../changes.md)
 
-本文件记录 1.2.4 之后的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。
+本文件按发布版本记录用户能察觉到的变化。已发布版本的发布说明以 [GitHub Releases](https://github.com/version-fox/vfox-erlang/releases) 为准。版本号后的日期是对应 GitHub Release 的发布日期（UTC）。
 
 ## 未发布
 
@@ -86,3 +86,76 @@
 
 - 根目录的 `DEVELOPMENT.md`，内容已并入 [开发](development.md)。
 - `e2e_test_linux.yaml`、`e2e_test_linux_prebuilt.yaml` 和 `e2e_test_windows.yaml`，由 `e2e.yml` 取代。
+
+## 1.2.0（2025-07-14）
+
+### 新增
+
+- macOS 预编译安装。在 macOS 上设置 `USE_PREBUILT_OTP` 时，插件安装 [erlef/otp_builds](https://github.com/erlef/otp_builds) 为本机架构发布的构建（#13）。`vfox search erlang` 列出 macOS 预编译版本。见 [预编译](prebuilt.md)。
+- README 增加了 macOS 预编译安装的说明，并显示预编译工作流的 CI 徽章。
+
+### 移除
+
+- `.tool-versions` 文件。它把本插件开发用的 Erlang/OTP 固定为 25.3.2.10。
+
+## 1.1.0（2025-01-26）
+
+### 新增
+
+- Linux 预编译安装。把 `USE_PREBUILT_OTP` 设为 Ubuntu 版本（从 `ubuntu-14.04` 到 `ubuntu-24.04`）时，插件下载 [Bob](https://builds.hex.pm) 为该版本发布的构建，并运行 OTP 自带的 `Install` 脚本，而不再编译（#8）。`vfox search erlang` 列出预编译版本。1.2.1 之前，数字版本（如 `26.2.3`）的下载返回 404，1.2.1 修复了这个问题。
+- README 增加了预编译安装的说明，以及加快源码构建的提示（如 `MAKEFLAGS=-j8`）。
+
+## 1.0.1（2024-05-14）
+
+### 修复
+
+- 构建并安装 Erlang/OTP 的文档块，因此 Erlang Shell 中的 `h(list).` 能显示文档（问题 #4）。
+
+## 1.0.0（2024-05-12）
+
+### 新增
+
+- Windows 安装。`vfox install erlang@25.3.2.12` 会从 [Erlang/OTP 发布页](https://github.com/erlang/otp/releases)下载官方安装器（`otp_win64_<版本号>.exe` 或 `otp_win32_<版本号>.exe`），静默安装到该版本的 `release` 目录（#3）。
+- 版本列表包含 `25.3.2.12` 这类四段式 Windows 版本。`vfox search erlang` 按降序列出 438 个名字；之前为 98 个。
+
+### 变更
+
+- README 增加了 logo 和 Windows 安装步骤。
+
+## 0.4.1（2024-04-25）
+
+### 修复
+
+- `metadata.lua` 中的版本号为 0.4.1。0.4.0 仍记录为 0.3.0。
+
+## 0.4.0（2024-04-25）
+
+### 新增
+
+- `DOC_TARGETS` 选择要构建的文档目标，默认为 `chunks`，因此 Erlang Shell 中的 `h(list).` 能工作。
+- README 说明了默认的文档构建，以及如何用 `OTP_CONFIGURE_ARGS` 传入 configure 参数。
+
+### 变更
+
+- 环境变量 `OTP_COMPILE_ARGS` 改名为 `OTP_CONFIGURE_ARGS`，旧名不再读取。
+- `vfox search erlang` 列出 98 个名字，之前为 28 个。
+- 仓库迁移到 `version-fox` 组织（#1）。安装命令、版本列表和更新清单都指向 `version-fox/vfox-erlang`。
+
+## 0.3.0（2024-04-03）
+
+### 变更
+
+- `metadata.lua` 中的版本号为 0.3.0；0.1 和 0.2 记录为 0.0.1。
+- 更新清单指向本插件的发布清单，不再指向插件模板的清单。
+
+## 0.2（2024-04-03）
+
+插件代码与 0.1 相同，标签指向同一个提交。
+
+## 0.1（2024-04-01）
+
+### 新增
+
+- 首个版本。在 Linux 和 macOS 上，插件从 `OTP-<版本号>` 标签的源码压缩包安装 Erlang/OTP，命令为 `vfox install erlang@<版本号>`，并构建文档块。
+- `vfox search erlang` 列出 `assets/versions.txt` 中的版本。
+- `OTP_COMPILE_ARGS` 把参数传给 `./configure`。
