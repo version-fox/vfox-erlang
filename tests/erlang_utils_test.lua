@@ -243,6 +243,79 @@ check(
 )
 check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the error lists ubuntu-26.04")
 
+-- builds.txt publishes the SHA-256 of an archive in its fourth column. vfox compares it as lowercase hex, so the
+-- value is lowercased here. A column that is not 64 hexadecimal digits is not a checksum.
+local sha_release = "2cfca446976fc61962585a1c77e5d11ddb6f5fed83e84668a2c4acfaad60d22e"
+local sha_master = "8056bde342fe5792125ffd25c3199789b42a2dd0447a3d6951f70f97a84bdda0"
+local index_url = "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"
+responses[index_url] = {
+    status_code = 200,
+    body = "OTP-29.1.2 d199a49a01a2079afb6f2c5c9ae047cd4555e68d 2026-10-14T14:58:01Z "
+        .. string.upper(sha_release)
+        .. "\n"
+        .. "OTP-28.4.2 0863bd30 2026-04-26T03:41:09Z\n"
+        .. "master 3f73c77c 2026-11-22T17:08:17Z "
+        .. sha_master
+        .. "\n"
+        .. "maint-27 abc 2026-04-26T03:41:09Z 1234\n"
+        .. "OTP-27.3 def 2026-04-26T03:41:09Z "
+        .. string.rep("g", 64)
+        .. "\n",
+}
+local sums = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+local sum_of = {}
+for _, entry in ipairs(sums) do
+    sum_of[entry.version] = entry.sha256
+end
+check(sum_of["29.1.2"] == sha_release, "the published SHA-256 is kept, in lowercase: " .. tostring(sum_of["29.1.2"]))
+check(sum_of["28.4.2"] == nil, "a line without a SHA-256 has none")
+check(sum_of["master"] == sha_master, "a branch build keeps its published SHA-256")
+check(sum_of["maint-27"] == nil, "a value that is not 64 digits is not a checksum")
+check(sum_of["27.3"] == nil, "a value that is not hexadecimal is not a checksum")
+
+-- A build is found under either spelling of its name. A name without a value has none, and so does a missing list.
+local with_sums = { { version = "29.1.2", sha256 = sha_release }, { version = "maint-27" } }
+check(erlang_utils.published_sha256(with_sums, "29.1.2") == sha_release, "a bare name finds its SHA-256")
+check(erlang_utils.published_sha256(with_sums, "OTP-29.1.2") == sha_release, "the OTP- spelling finds it too")
+check(erlang_utils.published_sha256(with_sums, "maint-27") == nil, "a build without a value has none")
+check(erlang_utils.published_sha256(with_sums, "28") == nil, "a name the list does not show has none")
+check(erlang_utils.published_sha256(nil, "29.1.2") == nil, "without a list there is no SHA-256")
+
+-- PreInstall hands the SHA-256 to vfox from the index it reads for the list, so there is one request. A Linux branch
+-- gets its value from the same index. A build without a value gets none, and vfox then warns.
+local function prebuilt_install(version)
+    return with_env({ USE_PREBUILT_OTP = "ubuntu-24.04" }, function()
+        return plugin:PreInstall({ version = version })
+    end)
+end
+local installed = prebuilt_install("29.1.2")
+check(installed.sha256 == sha_release, "PreInstall returns the published SHA-256: " .. tostring(installed.sha256))
+check(
+    installed.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-29.1.2.tar.gz",
+    "the archive is still the OTP- name: " .. installed.url
+)
+check(installed.version == "29.1.2", "the install is recorded under the bare version")
+check(prebuilt_install("OTP-29.1.2").sha256 == sha_release, "the OTP- spelling gets the same SHA-256")
+check(prebuilt_install("28.4.2").sha256 == nil, "a build without a published value has no SHA-256")
+local branch = prebuilt_install("master")
+check(
+    branch.sha256 == sha_master and branch.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/master.tar.gz",
+    "a Linux branch gets its SHA-256 from the index: " .. branch.url
+)
+
+-- When the index cannot be read, a listed name is still installed without a SHA-256, and the install is not refused.
+responses[index_url] = nil
+local unread = prebuilt_install("29.1.2")
+check(
+    unread.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-29.1.2.tar.gz" and unread.sha256 == nil,
+    "without the index a listed name is installed without a SHA-256"
+)
+local unread_branch = prebuilt_install("master")
+check(
+    unread_branch.sha256 == nil and unread_branch.version == "master",
+    "without the index a branch is installed without a SHA-256"
+)
+
 -- Available is the hook that vfox calls; it returns the same list.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
 local available = plugin:Available({})
