@@ -45,7 +45,7 @@ vfox install erlang@master        # 分支，在 Linux 或 macOS 上源码构建
 
 安装过程取决于平台和 `USE_PREBUILT_OTP`。见 [源码构建](source-build.md)、[预编译](prebuilt.md) 和 [Windows](windows.md)。
 
-安装时，如果版本名不在 `vfox search erlang` 的列表中，会在下载之前被拒绝，报错信息会指向这个命令。`28` 这类不完整的名字会被拒绝。检查会跳过分支名：`master`、`maint` 和 `maint-<number>`；设置了 `USE_PREBUILT_OTP` 的 macOS 上，还会跳过 `master-latest`、`maint-latest` 和 `maint-<number>-latest`。正式版本列表没有分支，但预编译列表可能包含其中一些，例如 Linux 上的 `master`，或 macOS 上的 `maint-27-latest`。检查从不拒绝分支名，即使列表中没有它。其他以 `-latest` 结尾的名字（如 `foo-latest`，或 Linux 上的 `master-latest`）必须在列表中。正式版本列表和 macOS 列表每周生成一次，在上次更新之后发布的版本，列表包含它之前会被拒绝。见 [问题排查](troubleshooting.md)。
+安装时，如果版本名不在版本列表中，会在下载之前被拒绝。列表是 `vfox search erlang` 显示的列表；在 Linux 或 macOS 上设置了 `USE_PREBUILT_OTP` 时，列表是 `USE_PREBUILT_OTP=<取值> vfox search erlang` 显示的预编译列表。报错信息会指向对应列表的命令。`28` 这类不完整的名字会被拒绝。检查会跳过分支名：`master`、`maint` 和 `maint-<number>`；设置了 `USE_PREBUILT_OTP` 的 macOS 上，还会跳过 `master-latest`、`maint-latest` 和 `maint-<number>-latest`。正式版本列表没有分支，但预编译列表可能包含其中一些，例如 Linux 上的 `master`，或 macOS 上的 `maint-27-latest`。检查从不拒绝分支名，即使列表中没有它。其他以 `-latest` 结尾的名字（如 `foo-latest`，或 Linux 上的 `master-latest`）必须在列表中。正式版本列表和 macOS 列表每周生成一次，在上次更新之后发布的版本，列表包含它之前会被拒绝。见 [问题排查](troubleshooting.md)。
 
 ## 切换版本
 
