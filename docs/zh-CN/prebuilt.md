@@ -49,6 +49,12 @@ https://builds.hex.pm/builds/otp/<arch>/<USE_PREBUILT_OTP>/<name>.tar.gz
 - 正式版本会自动加上 `OTP-` 前缀：`26.2.3` 下载的是 `OTP-26.2.3.tar.gz`。已经带前缀的名字，例如 `OTP-26.2.3`，下载的是同一个文件。两种名字安装的都是 `26.2.3`。
 - 分支名按原样使用，例如 `maint-27` 和 `master`。
 
+压缩包解压之前会先核对校验和。Bob 的 `builds.txt` 为大多数构建发布了 SHA-256，插件把它交给 vfox。vfox 会打印 `Verifying checksum <sha256>...`；压缩包与之不符时，安装以校验错误停止。
+
+- `builds.txt` 中该构建那一行没有 SHA-256 时，安装不做这项校验，vfox 会打印 `WARNING: Checksum is not provided, skip verify...`。
+- 如果安装开始时读不到 `builds.txt`，插件会打印一条说明，然后不做校验继续安装。
+- 分支构建（如 `maint-27`、`master`）会以同一个名字反复重新构建，因此它在 `builds.txt` 中的那一行会随每次重建而变化。刚重新构建后校验失败，可能是索引和压缩包还没有对齐，等几分钟再安装即可。
+
 压缩包解压后，插件会在安装目录中执行 OTP 自带的 `Install` 脚本（`./Install -cross -sasl`）。
 
 分支版本：

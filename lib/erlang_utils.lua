@@ -253,6 +253,15 @@ local function sort_prebuilt_names(names)
     end)
 end
 
+--- The SHA-256 that builds.txt publishes for a build, in lowercase, which is how vfox compares it. A column that is
+--- not 64 hexadecimal digits is not a checksum, so the result is nil and vfox skips the check for that build.
+local function checksum_of(value)
+    if value ~= nil and #value == 64 and string.match(value, "^%x+$") then
+        return string.lower(value)
+    end
+    return nil
+end
+
 function erlang_utils.get_erlang_release_versions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
@@ -286,14 +295,20 @@ function erlang_utils.get_erlang_release_versions()
         )
     end
 
-    -- The first column is the name. The jsDelivr lists hold one name per line; builds.txt adds the
-    -- commit and the build time after it.
+    -- The first column is the name. The jsDelivr lists hold one name per line. builds.txt adds the commit and
+    -- the build time, and for most builds the SHA-256 of the archive, which PreInstall passes to vfox.
     local names = {}
+    local checksums = {}
     for line in string.gmatch(resp.body, "[^\r\n]+") do
-        local name = string.match(erlang_utils.trim(line), "^%S+")
+        local fields = {}
+        for field in string.gmatch(line, "%S+") do
+            table.insert(fields, field)
+        end
+        local name = fields[1]
         if name then
             if bob_names then
                 name = erlang_utils.bare_release_name(name)
+                checksums[name] = checksum_of(fields[4])
             end
             table.insert(names, name)
         end
@@ -310,6 +325,7 @@ function erlang_utils.get_erlang_release_versions()
     for _, name in ipairs(names) do
         table.insert(result, {
             version = name,
+            sha256 = checksums[name],
         })
     end
     return result
@@ -340,6 +356,22 @@ function erlang_utils.is_listed(name, versions)
     return false
 end
 
+--- Returns the SHA-256 that builds.txt publishes for the build called name, from a list that
+--- get_erlang_release_versions read. Both spellings match, as in is_listed. nil when the index has no value for
+--- the build, or when there is no list.
+function erlang_utils.published_sha256(versions, name)
+    if versions == nil then
+        return nil
+    end
+    local bare = erlang_utils.bare_release_name(name)
+    for _, item in ipairs(versions) do
+        if item.sha256 ~= nil and erlang_utils.bare_release_name(item.version) == bare then
+            return item.sha256
+        end
+    end
+    return nil
+end
+
 --- Returns the command that lists the names this plugin can install with the current settings. With
 --- USE_PREBUILT_OTP set on Linux or macOS, get_erlang_release_versions reads the prebuilt list, so the command
 --- carries the variable. Otherwise it is the plain command: Windows always uses its official installers, so its
@@ -356,16 +388,25 @@ function erlang_utils.search_command()
     return "vfox search erlang"
 end
 
+--- Reads the version list. The value of USE_PREBUILT_OTP is checked first, so a bad value is an error and not a
+--- list that could not be read. Returns the list, or nil and the reason when the list cannot be read.
+function erlang_utils.read_version_list()
+    erlang_utils.check_prebuilt_config()
+    local ok, result = pcall(erlang_utils.get_erlang_release_versions)
+    if not ok then
+        return nil, tostring(result)
+    end
+    return result, nil
+end
+
 --- Refuses a version name that the version list does not show, before anything is downloaded. Such a name
 --- would fail in the download with a generic message. When the list cannot be read, the check is skipped with
---- a note: the download decides, as it did before the check existed.
+--- a note: the download decides, as it did before the check existed. Returns the list it checked, or nil.
 function erlang_utils.check_version_listed(name)
-    -- The value check comes first. Without it, a bad USE_PREBUILT_OTP would read as a list that could not be read.
-    erlang_utils.check_prebuilt_config()
-    local ok, versions = pcall(erlang_utils.get_erlang_release_versions)
-    if not ok then
-        print("Could not read the version list, so " .. name .. " is not checked against it: " .. tostring(versions))
-        return
+    local versions, reason = erlang_utils.read_version_list()
+    if versions == nil then
+        print("Could not read the version list, so " .. name .. " is not checked against it: " .. reason)
+        return nil
     end
     if not erlang_utils.is_listed(name, versions) then
         error(
@@ -376,6 +417,7 @@ function erlang_utils.check_version_listed(name)
                 .. "` to see the names that can be installed. A partial name, such as 28, is not one of them."
         )
     end
+    return versions
 end
 
 -- The characters that OTP's configure cannot take in the install path, with their names for the error.

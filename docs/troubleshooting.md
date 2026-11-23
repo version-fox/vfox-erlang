@@ -70,6 +70,25 @@ Fix:
 - On macOS, branch names end in `-latest`, for example `maint-27-latest`.
 - If the name is listed but the download still fails, the search list may be stale. See [The search list is outdated](#the-search-list-is-outdated).
 
+## The archive fails its checksum
+
+Symptom: the install prints `Verifying checksum <sha256>...`, then a checksum error, and it stops before the archive is unpacked.
+
+Check:
+
+```shell
+# Linux: the SHA-256 that Bob publishes for the build, in the fourth column
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt | grep '^OTP-29.1.2 '
+
+# The hash of the archive itself, which must be the same value. This is a large download.
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-29.1.2.tar.gz | sha256sum
+```
+
+Fix:
+
+- For a release, `OTP-<version>`, the published value does not change. A mismatch then means the download was damaged or changed on the way. Install again. If it fails again, report it with the output.
+- For a branch, such as `master` or `maint-27`, the archive was probably rebuilt after the index was read, or the index is stale. Wait a few minutes, then install again.
+
 ## The version name is not in the version list
 
 Symptom: `vfox install` stops before the download with `Erlang/OTP 28 is not in the version list, so it cannot be installed.`

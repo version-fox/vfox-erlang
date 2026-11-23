@@ -31,13 +31,26 @@ function PLUGIN:PreInstall(ctx)
     local macos_prebuilt_branch = RUNTIME.osType == "darwin"
         and PRE_BUILT_OS_RELEASE ~= nil
         and erlangUtils.is_macos_prebuilt_branch(erlang_version)
+    -- The version list, read once. A listed name is checked against it. On Linux, a prebuilt branch is not
+    -- checked against it, but the same index publishes its SHA-256, so it is read for that.
+    local versions = nil
     if not (erlangUtils.is_branch_name(erlang_version) or macos_prebuilt_branch) then
-        erlangUtils.check_version_listed(erlang_version)
+        versions = erlangUtils.check_version_listed(erlang_version)
+    elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE ~= nil then
+        local reason
+        versions, reason = erlangUtils.read_version_list()
+        if versions == nil then
+            print(
+                "Could not read the version list, so the SHA-256 of " .. erlang_version .. " is not checked: " .. reason
+            )
+        end
     end
 
     local download_url
     -- The name the install is recorded under. Linux prebuilt installs use the bare version (below).
     local installed_version = erlang_version
+    -- The SHA-256 that builds.txt publishes for a Linux prebuilt build. nil: vfox skips the check and warns.
+    local sha256 = nil
     if RUNTIME.osType == "windows" then
         -- For Windows, always use OTP- prefix for regular versions
         local win_tag = erlang_version
@@ -71,6 +84,7 @@ function PLUGIN:PreInstall(ctx)
         -- The install is recorded under the bare version, the name the lists show, whichever spelling was
         -- typed. vfox checks the returned name again before it downloads, so OTP-26.2.3 and 26.2.3 are one install.
         installed_version = erlangUtils.bare_release_name(erlang_version)
+        sha256 = erlangUtils.published_sha256(versions, erlang_version)
     elseif RUNTIME.osType == "darwin" and PRE_BUILT_OS_RELEASE then
         -- Use @erlef/otp_builds for MacOS prebuilt binaries
         local arch_mapping = {
@@ -160,5 +174,6 @@ function PLUGIN:PreInstall(ctx)
     return {
         version = installed_version,
         url = download_url,
+        sha256 = sha256,
     }
 end

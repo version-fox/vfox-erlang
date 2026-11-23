@@ -49,6 +49,12 @@ https://builds.hex.pm/builds/otp/<arch>/<USE_PREBUILT_OTP>/<name>.tar.gz
 - A release version gets the `OTP-` prefix added. `26.2.3` downloads `OTP-26.2.3.tar.gz`. A name that already has the prefix, such as `OTP-26.2.3`, downloads the same file. Either name installs the release as `26.2.3`.
 - A branch name is used as typed, for example `maint-27` or `master`.
 
+The archive is checked before it is unpacked. Bob's `builds.txt` publishes the SHA-256 of most builds, and the plugin passes it to vfox. vfox prints `Verifying checksum <sha256>...`, and an archive that does not match stops the install with a checksum error.
+
+- A build whose line in `builds.txt` has no SHA-256 is installed without this check. vfox prints `WARNING: Checksum is not provided, skip verify...` for it.
+- If `builds.txt` cannot be read when the install starts, the plugin prints a note and installs without the check.
+- A branch build, such as `master` or `maint-27`, is rebuilt under the same name, so its line in `builds.txt` changes with each rebuild. If the check fails right after a rebuild, the index and the archive may not match yet. Wait a few minutes, then install again.
+
 After the archive is unpacked, the plugin runs the `Install` script that comes with OTP (`./Install -cross -sasl`) in the install directory.
 
 Branch versions:

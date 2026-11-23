@@ -11,7 +11,7 @@ vfox 会调用 `hooks/` 中的钩子：
 | 钩子 | 文件 | 作用 |
 | --- | --- | --- |
 | `Available` | `hooks/available.lua` | 为 `vfox search` 返回版本列表：`assets/versions.txt`；设置了 `USE_PREBUILT_OTP` 时，返回 Bob 为所选 Ubuntu 发行版列出的构建（读取本机架构的 `builds.txt` 索引），或 macOS 预编译列表。`versions.txt` 与 macOS 列表通过 jsDelivr 读取。 |
-| `PreInstall` | `hooks/pre_install.lua` | 检查是否给出了版本号；除分支名（`master`、`maint`、`maint-<数字>`，以及在 macOS 上设置了 `USE_PREBUILT_OTP` 时的 `-latest` 分支名，如 `master-latest`）外，还检查版本列表中是否有该版本。然后返回下载地址。Windows 使用官方安装器。设置了 `USE_PREBUILT_OTP` 时，Linux 使用 Bob 的包，macOS 使用 erlef/otp_builds 的包。其他版本使用 GitHub 源码压缩包：正式版本取标签 `OTP-<版本号>`，`master`、`maint` 和 `maint-<数字>` 取对应的分支。 |
+| `PreInstall` | `hooks/pre_install.lua` | 检查是否给出了版本号；除分支名（`master`、`maint`、`maint-<数字>`，以及在 macOS 上设置了 `USE_PREBUILT_OTP` 时的 `-latest` 分支名，如 `master-latest`）外，还检查版本列表中是否有该版本。然后返回下载地址；对于 Linux 预编译构建，还返回 `builds.txt` 为它列出的 SHA-256（如果有）。Windows 使用官方安装器。设置了 `USE_PREBUILT_OTP` 时，Linux 使用 Bob 的包，macOS 使用 erlef/otp_builds 的包。其他版本使用 GitHub 源码压缩包：正式版本取标签 `OTP-<版本号>`，`master`、`maint` 和 `maint-<数字>` 取对应的分支。 |
 | `PostInstall` | `hooks/post_install.lua` | 处理下载的内容。Windows 运行安装器；Linux 预编译包运行 OTP 自带的 `Install` 脚本；macOS 预编译包的文件被移入 `release/`；源码压缩包会先检查安装路径：路径中含有空格、制表符、换行符、单引号、双引号、美元符号或反引号时拒绝安装。否则依次配置、构建、安装，并构建、安装文档块。 |
 | `EnvKeys` | `hooks/env_keys.lua` | 把 `PATH` 设为 `release/bin`、`bin` 和 `lib/erlang/bin` 中第一个包含 `erl`（Windows 上为 `erl.exe`）的目录。目录是通过查找可执行文件找到的，所以源码构建、预编译安装和链接的安装都能工作。 |
 | `PreUse` | `hooks/pre_use.lua` | 检查要使用的版本已经安装，并返回该版本。否则报错，并提示使用 `vfox install` 或 `vfox link --detect`。 |

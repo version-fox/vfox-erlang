@@ -6,7 +6,9 @@
 
 ## 未发布
 
-暂无变更。
+### 修复
+
+- Linux 预编译安装会在解压前，用 Bob 的 `builds.txt` 为该构建发布的 SHA-256 校验压缩包（`Verifying checksum ...`）。之前插件只读取索引的名字列，没有把校验和交给 vfox，因此即使索引中有值，安装也会打印 `Checksum is not provided`。索引行没有 SHA-256 的构建仍然会安装，并打印该警告。参见 [prebuilt.md](prebuilt.md)。
 
 ## 1.2.5（2026-11-23）
 

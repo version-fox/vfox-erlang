@@ -70,6 +70,25 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
 - 在 macOS 上，分支名以 `-latest` 结尾，例如 `maint-27-latest`。
 - 如果列表中有该名字但仍然下载失败，搜索列表可能已过期，见 [搜索列表过旧](#搜索列表过旧)。
 
+## 压缩包校验和不符
+
+症状：安装打印 `Verifying checksum <sha256>...` 之后报校验错误，并在解压之前停止。
+
+检查：
+
+```shell
+# Linux：Bob 为该构建发布的 SHA-256，即第四列
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt | grep '^OTP-29.1.2 '
+
+# 压缩包本身的哈希，两者应当相同。这是一个大文件下载
+curl -s https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-29.1.2.tar.gz | sha256sum
+```
+
+修复：
+
+- 对于正式版本 `OTP-<version>`，发布的值不会变化。校验不符说明下载过程中文件损坏或被改动。重新安装；仍然失败时，附上输出提交问题。
+- 对于分支，如 `master` 或 `maint-27`，多半是在读取索引之后压缩包被重新构建了，或者索引过旧。等几分钟后重新安装。
+
 ## 版本名不在版本列表中
 
 症状：`vfox install` 在下载之前停止，并报告 `Erlang/OTP 28 is not in the version list, so it cannot be installed.`。
