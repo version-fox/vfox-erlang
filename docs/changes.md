@@ -6,6 +6,10 @@ What changed in each release, as a user notices it. For published versions, the 
 
 ## Unreleased
 
+No changes yet.
+
+## 1.2.5 (2026-11-23)
+
 ### Fixed
 
 - When a version name is not in the version list, the refusal now names `USE_PREBUILT_OTP=<value> vfox search erlang` if `USE_PREBUILT_OTP` is set on Linux or macOS. That is the command that lists the prebuilt names. Before, it always named `vfox search erlang`, which lists the source releases. The source list holds names that the prebuilt install refuses, such as `17.0` on Ubuntu 24.04.
