@@ -293,4 +293,63 @@ check(
 )
 responses[list_url] = nil
 
+-- The refusal names the command that lists the names this install accepts. With USE_PREBUILT_OTP set on Linux or
+-- macOS, that list is the prebuilt one, so the command carries the variable. Otherwise it is the plain command.
+local function search_command_on(os_name, env)
+    local saved_os = RUNTIME.osType
+    RUNTIME.osType = os_name
+    local ok, result = pcall(with_env, env, erlang_utils.search_command)
+    RUNTIME.osType = saved_os
+    if not ok then
+        error(result, 0)
+    end
+    return result
+end
+
+check(search_command_on("linux", {}) == "vfox search erlang", "unset: the plain command")
+check(
+    search_command_on("linux", { USE_PREBUILT_OTP = "" }) == "vfox search erlang",
+    "an empty value: the plain command"
+)
+check(
+    search_command_on("linux", { USE_PREBUILT_OTP = "ubuntu-24.04" })
+        == "USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang",
+    "linux prebuilt: the command carries the variable"
+)
+check(
+    search_command_on("darwin", { USE_PREBUILT_OTP = "true" }) == "USE_PREBUILT_OTP=true vfox search erlang",
+    "macOS prebuilt: the command carries the variable"
+)
+check(
+    search_command_on("darwin", { USE_PREBUILT_OTP = "my value" }) == "USE_PREBUILT_OTP='my value' vfox search erlang",
+    "a value with a space is quoted for the shell"
+)
+check(
+    search_command_on("windows", { USE_PREBUILT_OTP = "ubuntu-22.04" }) == "vfox search erlang",
+    "windows: the plain command, as the list does not change"
+)
+
+-- A refused name gets that command in its message. 17.0 is not in the Ubuntu 24.04 prebuilt index.
+responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] =
+    { status_code = 200, body = "OTP-29.1.2 9d37 2026-04-26T02:55:31Z\n" }
+local hinted_ok, hinted_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-24.04" }, function()
+    erlang_utils.check_version_listed("17.0")
+end)
+local prebuilt_hint = "Run `USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang` to see the names that can be installed"
+check(
+    not hinted_ok and string.find(tostring(hinted_err), prebuilt_hint, 1, true) ~= nil,
+    "the refusal names the prebuilt search command: " .. tostring(hinted_err)
+)
+
+responses[list_url] = { status_code = 200, body = "26.2.3\n" }
+local plain_ok, plain_err = pcall(with_env, {}, function()
+    erlang_utils.check_version_listed("28")
+end)
+responses[list_url] = nil
+local plain_hint = "Run `vfox search erlang` to see the names that can be installed"
+check(
+    not plain_ok and string.find(tostring(plain_err), plain_hint, 1, true) ~= nil,
+    "the refusal without USE_PREBUILT_OTP names the plain command: " .. tostring(plain_err)
+)
+
 print("erlang_utils_test: " .. counter.checks .. " checks passed")

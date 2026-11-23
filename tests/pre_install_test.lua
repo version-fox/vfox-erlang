@@ -182,6 +182,20 @@ check(
 )
 check(not pcall(pre_install, {}, "28", "windows", "amd64"), "the check applies on Windows")
 check(not pcall(pre_install, { USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64"), "the check applies on macOS")
+-- With USE_PREBUILT_OTP set, the refusal names the prebuilt search command: the list that the install checks.
+local prebuilt_refused, prebuilt_reason =
+    pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-24.04" }, "17.0", "linux", "amd64")
+check(
+    not prebuilt_refused
+        and string.find(
+                tostring(prebuilt_reason),
+                "Run `USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang` to see",
+                1,
+                true
+            )
+            ~= nil,
+    "the PreInstall refusal names the prebuilt search command: " .. tostring(prebuilt_reason)
+)
 
 -- Only the macOS prebuilt branches end in latest, and only with USE_PREBUILT_OTP on macOS. Any other such name is
 -- a release: foo-latest is refused before the download, as a name without latest is.

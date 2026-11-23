@@ -340,6 +340,22 @@ function erlang_utils.is_listed(name, versions)
     return false
 end
 
+--- Returns the command that lists the names this plugin can install with the current settings. With
+--- USE_PREBUILT_OTP set on Linux or macOS, get_erlang_release_versions reads the prebuilt list, so the command
+--- carries the variable. Otherwise it is the plain command: Windows always uses its official installers, so its
+--- list does not change with the variable.
+function erlang_utils.search_command()
+    local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
+    if use_prebuilt ~= nil and (RUNTIME.osType == "darwin" or RUNTIME.osType == "linux") then
+        local value = use_prebuilt
+        if not string.match(value, "^[%w%._%-]+$") then
+            value = erlang_utils.shell_quote(value)
+        end
+        return "USE_PREBUILT_OTP=" .. value .. " vfox search erlang"
+    end
+    return "vfox search erlang"
+end
+
 --- Refuses a version name that the version list does not show, before anything is downloaded. Such a name
 --- would fail in the download with a generic message. When the list cannot be read, the check is skipped with
 --- a note: the download decides, as it did before the check existed.
@@ -355,8 +371,9 @@ function erlang_utils.check_version_listed(name)
         error(
             "Erlang/OTP "
                 .. name
-                .. " is not in the version list, so it cannot be installed. Run `vfox search erlang` to see the names"
-                .. " that can be installed. A partial name, such as 28, is not one of them."
+                .. " is not in the version list, so it cannot be installed. Run `"
+                .. erlang_utils.search_command()
+                .. "` to see the names that can be installed. A partial name, such as 28, is not one of them."
         )
     end
 end

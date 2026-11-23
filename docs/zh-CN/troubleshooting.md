@@ -77,12 +77,14 @@ USE_PREBUILT_OTP=ubuntu-22.04 vfox search erlang | grep 26.2.3
 检查：
 
 ```shell
-vfox search erlang              # 按你当前的设置（包括 USE_PREBUILT_OTP），插件可以安装的版本名
+vfox search erlang              # 插件可以从源码安装的版本名
+USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang   # 在 Linux 或 macOS 上设置了 USE_PREBUILT_OTP 时，插件可以预编译安装的版本名
 ```
 
 修复：
 
-- 使用 `vfox search erlang` 列出的完整版本名，例如 `26.2.3`。`28` 这类不完整的名字不在列表中，会被拒绝。`master`、`maint-27` 这类分支名不做列表检查，仍按原来的方式安装。
+- 报错信息会给出要运行的命令。在 Linux 或 macOS 上设置了 `USE_PREBUILT_OTP` 时，命令是 `USE_PREBUILT_OTP=<取值> vfox search erlang`，因为安装检查的是预编译列表。请运行这条命令，而不是不带变量的那条。
+- 使用该命令列出的完整版本名，例如 `26.2.3`。`28` 这类不完整的名字不在列表中，会被拒绝。`master`、`maint-27` 这类分支名不做列表检查，仍按原来的方式安装。
 - 正式版本列表和 macOS 列表每周生成一次。在上次更新之后发布的版本，列表包含它之前会被拒绝。
 - Linux 预编译列表在搜索时从 Bob 的索引读取，不受每周更新的影响。见 [预编译安装](prebuilt.md)。
 
