@@ -31,7 +31,7 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 
 ## 源码构建在 configure 之前停止，并指出安装路径中的字符
 
-症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、制表符、换行符、双引号、美元符号或反引号也会以同样的方式报告。
+症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、制表符、换行符、双引号、美元符号或反引号也会以同样的方式报告。该检查会抛出错误，因此 vfox 还会在这条信息下方打印 Lua 堆栈回溯。
 
 检查：
 
@@ -247,8 +247,8 @@ vfox list erlang
 
 原因：vfox 按插件记录的安装名识别已安装的版本，它不知道两个名字是同一个正式版。安装名取决于平台和安装方式：
 
-- 在 Linux 上设置 `USE_PREBUILT_OTP` 时，从 1.2.1 起，两种写法都记为 `29.1.2`，因此安装另一种写法会提示已安装。以 1.2.0 或更早版本安装的 `OTP-29.1.2` 保留原名，`vfox install erlang@29.1.2` 会再装一次。
-- 源码构建、macOS 和 Windows 按你输入的名字记录，所以 `OTP-29.1.2` 和 `29.1.2` 是两份安装。
+- 在 Linux 上设置 `USE_PREBUILT_OTP` 时（从 1.2.1 起），以及在 Windows 上（从 1.2.6 起），两种写法都记为 `29.1.2`，因此安装另一种写法会提示已安装。在 Linux 上，以 1.2.0 或更早版本安装的 `OTP-29.1.2` 保留原名，`vfox install erlang@29.1.2` 会再装一次。
+- 源码构建和 macOS 按你输入的名字记录，所以 `OTP-29.1.2` 和 `29.1.2` 是两份安装。
 
 处理：
 

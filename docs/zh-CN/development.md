@@ -17,6 +17,8 @@ vfox 会调用 `hooks/` 中的钩子：
 | `PreUse` | `hooks/pre_use.lua` | 检查要使用的版本已经安装，并返回该版本。否则报错，并提示使用 `vfox install` 或 `vfox link --detect`。 |
 | `Detect` | `hooks/detect.lua` | 扫描 [链接已安装的 Erlang/OTP](link.md) 中列出的位置，为 `vfox link --detect` 找出已有的安装。扫描代码在 `lib/detect_erlang.lua` 中。 |
 
+PreInstall 拒绝安装（例如版本名不在版本列表中）时，先打印原因，然后返回 nil。vfox 随后以「no installable runtime provided」停止安装，不打印堆栈回溯。钩子抛出的错误之后会打印 Lua 堆栈回溯。PostInstall 抛出错误而不是返回 nil，因为 vfox 会记录 PostInstall 正常返回的安装。
+
 ## 文件结构
 
 ```
