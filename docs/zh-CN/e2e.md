@@ -14,12 +14,13 @@
 | Linux 链接检测 | `tests/e2e/linux` 中的 `TestLinuxDetectSkipsErlThatCannotRun` | `ubuntu-latest`（Test Plugin 工作流，`go test -short`） | 布置一个 `bin/erl` 不可执行的 mise 式安装，检查 `vfox link --detect` 不会列出它；然后设置可执行权限，检查它可以被链接 |
 | Windows 安装器 | `tests/e2e/windows` 中的 `TestWindowsOfficialInstaller` | `windows-2022`、`windows-2025` | 通过插件安装 25.3.2.12（插件会运行官方安装器），然后检查 `erl.exe`、`erlc.exe` 和文档块 |
 | Windows 系统 SDK | `tests/e2e/windows` 中的 `TestWindowsSystemDetect` | `windows-2022`、`windows-2025` | 把 26.2.3 的官方安装器安装到 `%ProgramFiles%`，用 `vfox link --detect` 链接它，并检查卸载链接后安装目录仍然保留 |
+| Windows arm64 安装器 | `tests/e2e/windows` 中的 `TestArm64OfficialInstaller` 和 `TestArm64RefusesReleaseWithoutInstaller` | `windows-11-arm` | 通过插件安装 28.5.0.8；在 arm64 上，插件会下载 32 位安装器。然后检查 `erl` 作为 32 位构建运行（字长为 4），用 `erlc` 编译并运行 `hello.erl`，并检查文档块。还检查 29.1.2（没有 32 位安装器）会在下载前被拒绝 |
 | Darwin 源码构建 | `.github/workflows/e2e_test_darwin.yaml` | `macos-latest` | 在 macOS 上从源码构建，运行 `erlc` 和 `erl`，并显示 `lists` 的文档 |
 | Darwin 预编译 | `.github/workflows/e2e_test_darwin_prebuilt.yaml` | `macos-latest` | 用 `USE_PREBUILT_OTP=true` 安装 erlef/otp_builds 的包，然后运行 `erlc` 和 `erl` |
 | Darwin mise | `.github/workflows/e2e_test_darwin_mise.yaml` | `macos-latest` | 通过 mise 的 vfox 后端安装，见 [mise](mise.md) |
 | Linux mise | `.github/workflows/e2e_test_linux_mise.yaml` | `ubuntu-24.04` | 通过 mise 的 vfox 后端安装，并检查文档块是否存在，见 [mise](mise.md) |
 
-在 `e2e.yml` 中，Linux 任务先运行源码构建和预编译测试，然后安装 `erlang-base`，并以 `E2E_REQUIRE_SYSTEM_ERLANG=1` 运行系统测试。这样，系统安装缺失会让任务失败，而不是跳过测试。Windows 任务运行 `TestWindows`，它包含两个 Windows 测试。
+在 `e2e.yml` 中，Linux 任务先运行源码构建和预编译测试，然后安装 `erlang-base`，并以 `E2E_REQUIRE_SYSTEM_ERLANG=1` 运行系统测试。这样，系统安装缺失会让任务失败，而不是跳过测试。Windows 任务运行 `TestWindows`，它包含两个 Windows 测试。Windows arm64 任务在 `windows-11-arm` 上运行 `TestArm64`，并设置 `E2E_REQUIRE_ARM64=1`，因此非 arm64 的运行环境会让任务失败，而不是跳过测试。
 
 ## Go 套件
 
@@ -42,11 +43,19 @@ Dockerfile 会按 Ubuntu 版本选择 wxWidgets 软件包：22.04 使用 `libwxg
 
 ## Windows
 
-Windows 套件只在 CI 的 Windows 运行环境（`windows-2022` 和 `windows-2025`）上运行。Docker 和 WSL2 无法运行 Windows 容器，因此无法在这些环境中复现。在 Windows 机器上，从 `tests/e2e` 运行：
+Windows 套件只在 CI 的 Windows x64 运行环境（`windows-2022` 和 `windows-2025`）上运行。Windows arm64 测试（`TestArm64`）只在 Windows arm64 机器上运行，例如 CI 中的 `windows-11-arm` 运行环境。Docker 和 WSL2 无法运行 Windows 容器，因此无法在这些环境中复现。在 Windows 机器上，从 `tests/e2e` 运行：
 
 ```pwsh
 cd tests/e2e
 go test -v -timeout 90m -run TestWindows ./windows
+```
+
+在 Windows arm64 机器上，设置 `E2E_REQUIRE_ARM64=1` 后运行 arm64 测试：
+
+```pwsh
+cd tests/e2e
+$env:E2E_REQUIRE_ARM64 = "1"
+go test -v -timeout 50m -run TestArm64 ./windows
 ```
 
 除非 `VFOX_BIN` 指定了另一个可执行文件，否则 vfox 从 `PATH` 中查找。系统测试会把 Erlang/OTP 安装到 `%ProgramFiles%`。如果那里已经存在 Erlang/OTP 目录，测试会被跳过，因此不会覆盖已有的安装。
@@ -55,8 +64,9 @@ go test -v -timeout 90m -run TestWindows ./windows
 
 | 变量 | 默认值 | 含义 |
 | --- | --- | --- |
-| `E2E_ERLANG_VERSION` | `26.2.3` | Linux 套件安装的版本。Windows 套件使用固定版本 25.3.2.12 和 26.2.3 |
+| `E2E_ERLANG_VERSION` | `26.2.3` | Linux 套件安装的版本。Windows 套件使用固定版本 25.3.2.12 和 26.2.3，Windows arm64 套件使用 28.5.0.8 |
 | `E2E_PREBUILT_OS` | `/etc/os-release` 中的 `VERSION_ID`；在 22.04、24.04 和 26.04 以外的版本上，测试会被跳过 | 预编译套件使用的 Ubuntu 版本，例如 `ubuntu-22.04` |
 | `E2E_REQUIRE_SYSTEM_ERLANG` | 未设置 | 设为 `1` 时，找不到系统 Erlang/OTP 会让 Linux 系统测试失败；否则测试被跳过 |
+| `E2E_REQUIRE_ARM64` | 未设置 | 设为 `1` 时，Windows arm64 测试在非 arm64 的主机上失败；否则测试被跳过 |
 | `E2E_REPO` | 从当前目录向上查找得到的插件根目录 | 插件根目录，其中包含 `metadata.lua` 和 `hooks/`。CI 和 Docker 镜像会设置它 |
 | `VFOX_BIN` | `PATH` 中的 `vfox` | 被测试的 vfox 可执行文件 |

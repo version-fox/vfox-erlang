@@ -104,7 +104,7 @@ The shared workflow updates `metadata.lua`, creates the version commit and the t
 
 | Workflow | File | Purpose |
 | --- | --- | --- |
-| E2E | `e2e.yml` | End-to-end suites for Linux and Windows, see [e2e.md](e2e.md) |
+| E2E | `e2e.yml` | End-to-end suites for Linux, Windows and Windows arm64, see [e2e.md](e2e.md) |
 | E2E (macOS and mise) | `e2e_test_darwin.yaml`, `e2e_test_darwin_prebuilt.yaml`, `e2e_test_darwin_mise.yaml`, `e2e_test_linux_mise.yaml` | macOS and mise suites, see [e2e.md](e2e.md) |
 | Plugin | `publish.yaml` | Releases, see above |
 | GitHub Pages | `pages.yaml` | The documentation site |

@@ -104,7 +104,7 @@ python3 -m http.server 8080 --directory /tmp/vfox-erlang-site
 
 | 工作流 | 文件 | 作用 |
 | --- | --- | --- |
-| E2E | `e2e.yml` | Linux 与 Windows 端到端套件，见 [E2E 测试](e2e.md) |
+| E2E | `e2e.yml` | Linux、Windows 与 Windows arm64 端到端套件，见 [E2E 测试](e2e.md) |
 | E2E（macOS 与 mise） | `e2e_test_darwin.yaml`、`e2e_test_darwin_prebuilt.yaml`、`e2e_test_darwin_mise.yaml`、`e2e_test_linux_mise.yaml` | macOS 与 mise 套件，见 [E2E 测试](e2e.md) |
 | Plugin | `publish.yaml` | 发布，见上文 |
 | GitHub Pages | `pages.yaml` | 文档网站 |

@@ -14,12 +14,13 @@ The end-to-end (E2E) tests install real Erlang/OTP versions with the plugin and 
 | Linux link detection | `TestLinuxDetectSkipsErlThatCannotRun` in `tests/e2e/linux` | `ubuntu-latest`, in the Test Plugin workflow with `go test -short` | Lays out a mise-style install whose `bin/erl` is not executable, checks that `vfox link --detect` does not offer it, then sets the execute bit and checks that it is linked |
 | Windows installer | `TestWindowsOfficialInstaller` in `tests/e2e/windows` | `windows-2022`, `windows-2025` | Installs 25.3.2.12 through the plugin, which runs the official installer, then checks `erl.exe`, `erlc.exe` and the documentation chunks |
 | Windows system SDK | `TestWindowsSystemDetect` in `tests/e2e/windows` | `windows-2022`, `windows-2025` | Runs the official installer for 26.2.3 into `%ProgramFiles%`, links it with `vfox link --detect`, and checks that uninstalling the link keeps the installed directory |
+| Windows arm64 installer | `TestArm64OfficialInstaller` and `TestArm64RefusesReleaseWithoutInstaller` in `tests/e2e/windows` | `windows-11-arm` | Installs 28.5.0.8 through the plugin, which downloads the 32-bit installer on arm64, then checks that `erl` runs as the 32-bit build (word size 4), compiles and runs `hello.erl`, and checks the documentation chunks. It also checks that 29.1.2, which has no 32-bit installer, is refused before the download |
 | Darwin source build | `.github/workflows/e2e_test_darwin.yaml` | `macos-latest` | Builds from source on macOS, runs `erlc` and `erl`, and shows the documentation for `lists` |
 | Darwin prebuilt | `.github/workflows/e2e_test_darwin_prebuilt.yaml` | `macos-latest` | Installs the erlef/otp_builds package with `USE_PREBUILT_OTP=true`, then runs `erlc` and `erl` |
 | Darwin mise | `.github/workflows/e2e_test_darwin_mise.yaml` | `macos-latest` | Installs through the vfox backend of mise, see [mise.md](mise.md) |
 | Linux mise | `.github/workflows/e2e_test_linux_mise.yaml` | `ubuntu-24.04` | Installs through the vfox backend of mise, and checks that the documentation chunks are present, see [mise.md](mise.md) |
 
-In `e2e.yml`, the Linux job runs the source and prebuilt tests first. It then installs `erlang-base` and runs the system test with `E2E_REQUIRE_SYSTEM_ERLANG=1`, so a missing system install fails the job instead of skipping the test. The Windows job runs `TestWindows`, which covers both Windows tests.
+In `e2e.yml`, the Linux job runs the source and prebuilt tests first. It then installs `erlang-base` and runs the system test with `E2E_REQUIRE_SYSTEM_ERLANG=1`, so a missing system install fails the job instead of skipping the test. The Windows job runs `TestWindows`, which covers both Windows tests. The Windows arm64 job runs `TestArm64` on `windows-11-arm` with `E2E_REQUIRE_ARM64=1`, so a runner of another architecture fails the job instead of skipping the tests.
 
 ## Go suites
 
@@ -42,11 +43,19 @@ The Dockerfile picks the wxWidgets packages for the Ubuntu release: `libwxgtk3.0
 
 ## Windows
 
-The Windows suite runs only on the Windows runners in CI (`windows-2022` and `windows-2025`). Docker and WSL2 cannot run Windows containers, so the suite cannot be reproduced there. On a Windows machine, run it from `tests/e2e`:
+The Windows suite runs only on the Windows x64 runners in CI (`windows-2022` and `windows-2025`). The Windows arm64 tests (`TestArm64`) run only on a Windows arm64 machine, such as the `windows-11-arm` runner in CI. Docker and WSL2 cannot run Windows containers, so the suite cannot be reproduced there. On a Windows machine, run it from `tests/e2e`:
 
 ```pwsh
 cd tests/e2e
 go test -v -timeout 90m -run TestWindows ./windows
+```
+
+On a Windows arm64 machine, run the arm64 tests with `E2E_REQUIRE_ARM64=1`:
+
+```pwsh
+cd tests/e2e
+$env:E2E_REQUIRE_ARM64 = "1"
+go test -v -timeout 50m -run TestArm64 ./windows
 ```
 
 vfox is found on `PATH` unless `VFOX_BIN` names another binary. The system test installs Erlang/OTP into `%ProgramFiles%`. The test is skipped when Erlang/OTP directories already exist there, so it never installs over an existing installation.
@@ -55,8 +64,9 @@ vfox is found on `PATH` unless `VFOX_BIN` names another binary. The system test 
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `E2E_ERLANG_VERSION` | `26.2.3` | The version the Linux suites install. The Windows suites use fixed versions, 25.3.2.12 and 26.2.3 |
+| `E2E_ERLANG_VERSION` | `26.2.3` | The version the Linux suites install. The Windows suites use fixed versions, 25.3.2.12 and 26.2.3, and the Windows arm64 suite uses 28.5.0.8 |
 | `E2E_PREBUILT_OS` | The `VERSION_ID` from `/etc/os-release`; the test is skipped on releases other than 22.04, 24.04 and 26.04 | The Ubuntu release for the prebuilt suite, such as `ubuntu-22.04` |
 | `E2E_REQUIRE_SYSTEM_ERLANG` | unset | Set to `1` to fail the Linux system test when no system Erlang/OTP is found. Otherwise the test is skipped |
+| `E2E_REQUIRE_ARM64` | unset | Set to `1` to fail the Windows arm64 tests on a host that is not arm64. Otherwise they are skipped |
 | `E2E_REPO` | The plugin root, found by walking up from the current directory | The plugin root, which holds `metadata.lua` and `hooks/`. CI and the Docker image set it |
 | `VFOX_BIN` | `vfox` on `PATH` | The vfox binary under test |

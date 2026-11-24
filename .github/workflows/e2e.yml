@@ -106,3 +106,30 @@ jobs:
         env:
           E2E_REPO: ${{ github.workspace }}
         run: go test -v -timeout 80m -run TestWindows ./windows
+
+  # The Windows arm64 job checks the 32-bit installer that the plugin uses on arm64, on a real arm64 runner.
+  # E2E_REQUIRE_ARM64 makes the tests fail, rather than skip, when the runner is not arm64.
+  e2e-windows-arm64:
+    name: Windows arm64 (windows-11-arm)
+    runs-on: windows-11-arm
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: tests/e2e/go.mod
+          cache: false
+      - name: Install vfox 1.1.0
+        shell: pwsh
+        run: |
+          go install github.com/version-fox/vfox@v1.1.0
+          "$(go env GOPATH)\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Run the Windows arm64 suite
+        shell: pwsh
+        working-directory: tests/e2e
+        env:
+          E2E_REPO: ${{ github.workspace }}
+          E2E_REQUIRE_ARM64: "1"
+        run: go test -v -timeout 50m -run TestArm64 ./windows
