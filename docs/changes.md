@@ -6,6 +6,10 @@ What changed in each release, as a user notices it. For published versions, the 
 
 ## Unreleased
 
+No changes yet.
+
+## 1.2.6 (2026-11-24)
+
 ### Fixed
 
 - A Linux prebuilt install checks the archive against the SHA-256 that Bob's `builds.txt` publishes for the build, before it unpacks it (`Verifying checksum ...`). Before, the plugin read only the name column of the index and passed no checksum to vfox, so the install printed `Checksum is not provided` even for a build that had a published value. A build whose index line has no SHA-256 still installs, with that warning. See [prebuilt.md](prebuilt.md).

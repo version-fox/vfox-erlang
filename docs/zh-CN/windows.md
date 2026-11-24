@@ -8,7 +8,7 @@
 
 - 在 x86-64（`amd64`）机器上，`erlang@25.3.2.12` 会下载 `https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win64_25.3.2.12.exe`。
 - 在 Windows arm64 上，如果发布页面提供 32 位安装器 `otp_win32_<版本号>.exe`，就使用它。下载前，插件会用 HEAD 请求确认该文件存在。Erlang/OTP 29.x 只发布 64 位安装器，因此在 arm64 上，这些版本会在下载前停止，并提示 Erlang/OTP 没有适用于 Windows arm64 的构建。CI 在 `windows-11-arm` 运行环境上用 Erlang/OTP 28.5.0.8 检查过这条路径：32 位安装器可以安装，`erl.exe` 以 32 位构建运行，`hello.erl` 能编译和运行，文档块也存在。其他发布了 32 位安装器的版本尚未在 arm64 上测试。
-- 其他架构使用 32 位安装器 `otp_win32_<版本号>.exe`。
+- 其他架构（既不是 `amd64` 也不是 `arm64`）使用 32 位安装器 `otp_win32_<版本号>.exe`。
 - 安装器以 `/S`（静默）和 `/D=<sdk>\release` 运行，因此 Erlang/OTP 被安装到 `<sdk>\release`。
 - 插件把 `<sdk>\release\bin` 加入 `PATH`。
 
