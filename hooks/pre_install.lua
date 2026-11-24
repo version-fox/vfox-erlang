@@ -52,24 +52,32 @@ function PLUGIN:PreInstall(ctx)
     -- The SHA-256 that builds.txt publishes for a Linux prebuilt build. nil: vfox skips the check and warns.
     local sha256 = nil
     if RUNTIME.osType == "windows" then
-        -- For Windows, always use OTP- prefix for regular versions
-        local win_tag = erlang_version
-        if not (string.match(erlang_version, "latest$") or string.match(erlang_version, "^maint%-")) then
-            win_tag = "OTP-" .. erlang_version
+        -- The installers are published under the OTP-<version> tag and named by the bare version, so OTP-29.1.2
+        -- and 29.1.2 are the same release. Branches are not published on Windows.
+        local release = erlangUtils.bare_release_name(erlang_version)
+        local win_tag = release
+        if not (string.match(release, "latest$") or string.match(release, "^maint%-")) then
+            win_tag = "OTP-" .. release
         end
+        local installer = erlangUtils.windows_installer_name(release, RUNTIME.archType)
+        download_url = "https://github.com/erlang/otp/releases/download/" .. win_tag .. "/" .. installer
+        installed_version = release
 
-        if RUNTIME.archType == "amd64" then
-            download_url = "https://github.com/erlang/otp/releases/download/"
-                .. win_tag
-                .. "/otp_win64_"
-                .. erlang_version
-                .. ".exe"
-        else
-            download_url = "https://github.com/erlang/otp/releases/download/"
-                .. win_tag
-                .. "/otp_win32_"
-                .. erlang_version
-                .. ".exe"
+        -- Erlang/OTP publishes no arm64 installer. arm64 takes the 32-bit one when the release publishes it, so the
+        -- release is asked for it with a HEAD request before the download starts. Branches are not asked.
+        if RUNTIME.archType == "arm64" and not erlangUtils.is_branch_name(erlang_version) then
+            local exists, reason = erlangUtils.url_exists(download_url)
+            if exists == false then
+                error(
+                    "Erlang/OTP "
+                        .. release
+                        .. " has no build for Windows arm64: its release publishes no "
+                        .. installer
+                        .. ". The installers of each release are listed at https://github.com/erlang/otp/releases"
+                )
+            elseif exists == nil then
+                print("Could not check for " .. installer .. ", so the download decides: " .. tostring(reason))
+            end
         end
     elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE then
         local release = erlangUtils.check_prebuilt_release(PRE_BUILT_OS_RELEASE)

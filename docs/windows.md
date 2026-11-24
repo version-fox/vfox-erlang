@@ -7,6 +7,7 @@ On Windows the plugin does not compile Erlang/OTP. It downloads the official ins
 ## What the install does
 
 - On an x86-64 (`amd64`) machine, `erlang@25.3.2.12` downloads `https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win64_25.3.2.12.exe`.
+- On Windows arm64, the 32-bit installer, `otp_win32_<version>.exe`, is used when the release publishes it. The plugin asks for that file with a HEAD request before the download. Erlang/OTP 29.x publishes only the 64-bit installer, so on arm64 those versions stop before the download with a message that Erlang/OTP has no build for Windows arm64. The 32-bit installer has not been tested on Windows arm64, so whether it runs there is not known.
 - On other architectures the 32-bit installer, `otp_win32_<version>.exe`, is used.
 - The installer runs with `/S` (silent) and `/D=<sdk>\release`, so Erlang/OTP is installed in `<sdk>\release`.
 - The plugin adds `<sdk>\release\bin` to `PATH`.

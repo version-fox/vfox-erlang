@@ -147,6 +147,23 @@ Invoke-WebRequest -Method Head -UseBasicParsing -Uri "https://github.com/erlang/
 - 如果状态码不是 200，说明下载被阻止，或该版本没有安装器。检查网络，见 [下载失败或超时](#下载失败或超时)，或者选择发布页面上有安装器的版本。
 - 如果 `vfox list erlang` 仍然显示失败的版本，重试前用 `vfox uninstall erlang@25.3.2.12` 删除它。
 
+## Windows arm64 上版本没有构建
+
+症状：`vfox install` 在下载前停止，并报告 `Erlang/OTP <版本号> has no build for Windows arm64`。
+
+原因：在 arm64 上，插件使用 32 位安装器 `otp_win32_<版本号>.exe`。该版本的发布页面没有这个文件。Erlang/OTP 29.x 只发布 64 位安装器。
+
+列出某个发布的安装器：
+
+```sh
+gh api repos/erlang/otp/releases/tags/OTP-<版本号> --jq '.assets[].name'
+```
+
+修复：
+
+- 选择发布页面列出 `otp_win32_<版本号>.exe` 的版本，例如 28.5.0.8，它同时列出两种安装器。
+- 插件尚未在 Windows arm64 上测试 32 位安装器。安装这类版本后，请按 [windows.md](windows.md) 检查 `erl.exe` 能否运行。
+
 ## link --detect 找不到安装，或命令无法识别
 
 症状：`vfox link --detect erlang` 没有列出任何安装，或者 vfox 不认识 `--detect` 参数。

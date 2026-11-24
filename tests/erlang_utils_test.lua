@@ -14,12 +14,20 @@
 
 local test = require("vfox.test")
 
--- Fake http module: the version list is downloaded through it. It must be in place before
--- the plugin (and erlang_utils, which requires http) is loaded.
+-- Fake http module: the version list is downloaded through it, and the installers are asked for with HEAD requests.
+-- It must be in place before the plugin (and erlang_utils, which requires http) is loaded.
 local responses = {}
+local heads = {}
 package.loaded["http"] = {
     get = function(req)
         local response = responses[req.url]
+        if response == nil then
+            return nil, "no network in tests"
+        end
+        return response, nil
+    end,
+    head = function(req)
+        local response = heads[req.url]
         if response == nil then
             return nil, "no network in tests"
         end
@@ -86,6 +94,36 @@ check(
     "windows linked installs"
 )
 RUNTIME.osType = "linux"
+
+-- The official installer is the 64-bit one on amd64 and the 32-bit one on every other architecture.
+check(
+    erlang_utils.windows_installer_name("29.1.2", "amd64") == "otp_win64_29.1.2.exe",
+    "amd64 has the 64-bit installer"
+)
+check(
+    erlang_utils.windows_installer_name("29.1.2", "arm64") == "otp_win32_29.1.2.exe",
+    "arm64 has the 32-bit installer"
+)
+
+-- url_exists asks with a HEAD request. 200 means the file is there, 404 that it is not. Any other status, and a
+-- failed request, give no answer: the second result says why.
+local installer_url = "https://github.com/erlang/otp/releases/download/OTP-29.1.2/otp_win32_29.1.2.exe"
+heads[installer_url] = { status_code = 200 }
+check(erlang_utils.url_exists(installer_url) == true, "a 200 means the file is there")
+heads[installer_url] = { status_code = 404 }
+check(erlang_utils.url_exists(installer_url) == false, "a 404 means the file is not there")
+heads[installer_url] = { status_code = 503 }
+local unknown, unknown_reason = erlang_utils.url_exists(installer_url)
+check(
+    unknown == nil and string.find(unknown_reason, "HTTP status 503", 1, true) ~= nil,
+    "other statuses give no answer: " .. tostring(unknown_reason)
+)
+heads[installer_url] = nil
+local failed, failed_reason = erlang_utils.url_exists(installer_url)
+check(
+    failed == nil and string.find(failed_reason, "no network in tests", 1, true) ~= nil,
+    "a failed request gives no answer: " .. tostring(failed_reason)
+)
 
 -- The version list is parsed line by line and HTTP failures are reported.
 local list_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"

@@ -25,12 +25,8 @@ function PLUGIN:PostInstall(ctx)
     local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
 
     if RUNTIME.osType == "windows" then
-        local installer
-        if RUNTIME.archType == "amd64" then
-            installer = path .. "\\otp_win64_" .. sdkInfo.version .. ".exe"
-        else
-            installer = path .. "\\otp_win32_" .. sdkInfo.version .. ".exe"
-        end
+        -- The installer that PreInstall downloaded: the 64-bit one on amd64, the 32-bit one on other architectures.
+        local installer = path .. "\\" .. erlangUtils.windows_installer_name(sdkInfo.version, RUNTIME.archType)
 
         -- The OTP installer is an NSIS program: /S installs silently, and /D= must be the last
         -- argument and is not quoted. The installer path is quoted because the user profile
