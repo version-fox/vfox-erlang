@@ -9,6 +9,8 @@
 ### 修复
 
 - Linux 预编译安装会在解压前，用 Bob 的 `builds.txt` 为该构建发布的 SHA-256 校验压缩包（`Verifying checksum ...`）。之前插件只读取索引的名字列，没有把校验和交给 vfox，因此即使索引中有值，安装也会打印 `Checksum is not provided`。索引行没有 SHA-256 的构建仍然会安装，并打印该警告。参见 [prebuilt.md](prebuilt.md)。
+- 在 Windows arm64 上，安装会使用 32 位安装器 `otp_win32_<版本号>.exe`（发布页面提供它时）。Erlang/OTP 29.x 只发布 64 位安装器：对这些版本，安装现在会在下载前停止，并提示 Erlang/OTP 没有适用于 Windows arm64 的构建。之前它会请求 32 位安装器，并在下载时失败，报 `source file not found`。CI 在 Windows arm64 上用 Erlang/OTP 28.5.0.8 检查过 32 位安装器，其他版本尚未在 arm64 上测试。参见 [windows.md](windows.md)。（#48、#49）
+- 在 Windows 上，`erlang@OTP-<版本号>` 会安装该版本。之前下载地址的标签是 `OTP-OTP-<版本号>`，安装在下载时失败。
 
 ## 1.2.5（2026-11-23）
 

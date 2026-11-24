@@ -36,6 +36,17 @@ erlang_utils.get_erlang_release_versions = function()
     }
 end
 
+-- Each arm64 Windows install asks for its installer with a HEAD request. probe_state records the URLs that are
+-- asked, and answer is what the stub returns: true or false, or nil with reason when the request fails.
+local probe_state = { urls = {}, answer = true, reason = nil }
+erlang_utils.url_exists = function(url)
+    table.insert(probe_state.urls, url)
+    if probe_state.answer == nil then
+        return nil, probe_state.reason
+    end
+    return probe_state.answer
+end
+
 local function with_env(env, fn)
     local original = os.getenv
     os.getenv = function(name)
@@ -141,17 +152,56 @@ check(
     "source maint branch: " .. result.url
 )
 
--- Windows installers.
+-- Windows installers. amd64 takes the 64-bit installer and asks for nothing.
+probe_state.urls = {}
 result = pre_install({}, "25.3.2.12", "windows", "amd64")
 check(
     result.url == "https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win64_25.3.2.12.exe",
     "windows amd64 installer: " .. result.url
 )
+check(#probe_state.urls == 0, "windows amd64 is not asked for an installer")
+check(result.version == "25.3.2.12", "windows keeps the requested version")
+
+-- Windows arm64 takes the 32-bit installer when the release publishes it, and asks for it first.
+probe_state.urls = {}
+probe_state.answer = true
 result = pre_install({}, "25.3.2.12", "windows", "arm64")
+local win32_url = "https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win32_25.3.2.12.exe"
+check(result.url == win32_url, "windows arm64 uses the 32-bit installer: " .. result.url)
+check(#probe_state.urls == 1 and probe_state.urls[1] == win32_url, "windows arm64 asks for that installer once")
+
+-- A release without a 32-bit installer is refused before the download, with a message that names the platform.
+probe_state.urls = {}
+probe_state.answer = false
+local missing_ok, missing_err = pcall(pre_install, {}, "29.1.2", "windows", "arm64")
 check(
-    result.url == "https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win32_25.3.2.12.exe",
-    "windows non-amd64 uses the win32 installer: " .. result.url
+    not missing_ok
+        and string.find(tostring(missing_err), "Erlang/OTP 29.1.2 has no build for Windows arm64", 1, true) ~= nil,
+    "a release without a 32-bit installer is refused: " .. tostring(missing_err)
 )
+check(
+    #probe_state.urls == 1 and string.find(probe_state.urls[1], "/otp_win32_29.1.2.exe", 1, true) ~= nil,
+    "the refusal asks for the 32-bit installer of that release"
+)
+
+-- When the request fails, the install goes on and the download decides, as the version list check does.
+probe_state.urls = {}
+probe_state.answer = nil
+probe_state.reason = "HTTP status 503"
+result = pre_install({}, "29.1.2", "windows", "arm64")
+check(
+    result.url == "https://github.com/erlang/otp/releases/download/OTP-29.1.2/otp_win32_29.1.2.exe",
+    "without an answer the 32-bit installer is still the download: " .. result.url
+)
+probe_state.answer = true
+
+-- On Windows an OTP- name is the same release: the tag and the file name use the bare version.
+result = pre_install({}, "OTP-29.1.2", "windows", "amd64")
+check(
+    result.url == "https://github.com/erlang/otp/releases/download/OTP-29.1.2/otp_win64_29.1.2.exe",
+    "windows OTP- name is not prefixed twice: " .. result.url
+)
+check(result.version == "29.1.2", "windows OTP- name is installed as the bare version")
 
 -- macOS prebuilt binaries from erlef/otp_builds.
 result = pre_install({ USE_PREBUILT_OTP = "true" }, "26.2.3", "darwin", "arm64")

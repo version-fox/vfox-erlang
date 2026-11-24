@@ -128,6 +128,15 @@ function erlang_utils.is_windows()
     return RUNTIME ~= nil and RUNTIME.osType == "windows"
 end
 
+--- Returns the file name of the official Windows installer of a release, given its bare version. amd64 has the
+--- 64-bit installer. Every other architecture gets the 32-bit one.
+function erlang_utils.windows_installer_name(version, arch)
+    if arch == "amd64" then
+        return "otp_win64_" .. version .. ".exe"
+    end
+    return "otp_win32_" .. version .. ".exe"
+end
+
 --- Returns the path separator of the platform vfox runs on.
 function erlang_utils.path_sep()
     if erlang_utils.is_windows() then
@@ -166,6 +175,25 @@ end
 
 function erlang_utils.directory_exists(path)
     return erlang_utils.file_exists(path)
+end
+
+--- Asks the server whether the file at url is there, with a HEAD request, so that nothing is downloaded. Redirects
+--- are followed: GitHub's release downloads redirect to the storage of the file. Returns true when the file is there,
+--- false when the server answers 404, and nil with the reason when the answer is neither, such as a failed request.
+function erlang_utils.url_exists(url)
+    local resp, err = http.head({
+        url = url,
+    })
+    if err ~= nil or resp == nil then
+        return nil, tostring(err)
+    end
+    if resp.status_code == 200 then
+        return true
+    end
+    if resp.status_code == 404 then
+        return false
+    end
+    return nil, "HTTP status " .. tostring(resp.status_code)
 end
 
 --- Returns the name builds.hex.pm uses for a version. Numeric releases such as 26.2.3 are

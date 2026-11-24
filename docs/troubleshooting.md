@@ -147,6 +147,23 @@ Fix:
 - If the status code is not 200, the download is blocked or the release has no installer. Check the network, see [Downloads fail or time out](#downloads-fail-or-time-out), or choose a version that has an installer on the releases page.
 - If `vfox list erlang` still shows the failed version, remove it with `vfox uninstall erlang@25.3.2.12` before you retry.
 
+## Windows arm64: the version has no build
+
+Symptom: `vfox install` stops before the download with `Erlang/OTP <version> has no build for Windows arm64`.
+
+Cause: on arm64 the plugin uses the 32-bit installer, `otp_win32_<version>.exe`. The release of that version does not publish it. Erlang/OTP 29.x publishes only the 64-bit installer.
+
+Check the installers of a release:
+
+```sh
+gh api repos/erlang/otp/releases/tags/OTP-<version> --jq '.assets[].name'
+```
+
+Fix:
+
+- Choose a version whose release lists `otp_win32_<version>.exe`, such as 28.5.0.8, which lists both installers.
+- CI checks the 32-bit installer on Windows arm64 with Erlang/OTP 28.5.0.8 only. After you install such a version, check that `erl.exe` runs, as in [windows.md](windows.md).
+
 ## link --detect finds nothing, or the command is not recognized
 
 Symptom: `vfox link --detect erlang` lists nothing, or vfox does not know the `--detect` flag.

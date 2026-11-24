@@ -65,6 +65,16 @@ check(
 )
 check(string.find(recorded.commands[1], "-Wait", 1, true) == nil, "no PowerShell-only flags")
 
+-- Windows arm64 runs the 32-bit installer, the one PreInstall downloaded.
+run_post_install("windows", "arm64", {}, {
+    sdkInfo = { erlang = { path = "C:\\Users\\Jane Doe\\.vfox\\erlang", version = "29.1.2" } },
+})
+check(
+    recorded.commands[1]
+        == '"C:\\Users\\Jane Doe\\.vfox\\erlang\\otp_win32_29.1.2.exe" /S /D=C:\\Users\\Jane Doe\\.vfox\\erlang\\release',
+    "windows arm64 installer command: " .. recorded.commands[1]
+)
+
 -- Linux source build: paths are quoted, OTP_CONFIGURE_ARGS is passed to configure, and the
 -- docs chunks are built and installed.
 run_post_install("linux", "amd64", { OTP_CONFIGURE_ARGS = "--enable-jit" }, {
