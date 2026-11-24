@@ -115,13 +115,13 @@ check(erlang_utils.url_exists(installer_url) == false, "a 404 means the file is 
 heads[installer_url] = { status_code = 503 }
 local unknown, unknown_reason = erlang_utils.url_exists(installer_url)
 check(
-    unknown == nil and string.find(unknown_reason, "HTTP status 503", 1, true) ~= nil,
+    unknown == nil and string.find(tostring(unknown_reason), "HTTP status 503", 1, true) ~= nil,
     "other statuses give no answer: " .. tostring(unknown_reason)
 )
 heads[installer_url] = nil
 local failed, failed_reason = erlang_utils.url_exists(installer_url)
 check(
-    failed == nil and string.find(failed_reason, "no network in tests", 1, true) ~= nil,
+    failed == nil and string.find(tostring(failed_reason), "no network in tests", 1, true) ~= nil,
     "a failed request gives no answer: " .. tostring(failed_reason)
 )
 
