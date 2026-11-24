@@ -362,45 +362,51 @@ check(#available == 1 and available[1].version == "26.2.3", "Available returns t
 -- check_version_listed refuses an unlisted name and names the command that shows the list. A listed name
 -- passes. When the list cannot be read, the check is skipped instead of blocking the install.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
-erlang_utils.check_version_listed("26.2.3")
-local unlisted_ok, unlisted_err = pcall(erlang_utils.check_version_listed, "28")
+local listed = erlang_utils.check_version_listed("26.2.3")
+check(listed ~= nil and listed[1].version == "26.2.3", "a listed name returns the list it checked")
+local unlisted, unlisted_refusal = erlang_utils.check_version_listed("28")
 check(
-    not unlisted_ok and string.find(tostring(unlisted_err), "28 is not in the version list", 1, true) ~= nil,
-    "an unlisted name is refused: " .. tostring(unlisted_err)
+    unlisted == nil and string.find(tostring(unlisted_refusal), "28 is not in the version list", 1, true) ~= nil,
+    "an unlisted name is refused: " .. tostring(unlisted_refusal)
 )
 responses[list_url] = nil
-check(pcall(erlang_utils.check_version_listed, "28"), "without the list the check is skipped")
+local skipped, skipped_refusal = erlang_utils.check_version_listed("28")
+check(skipped == nil and skipped_refusal == nil, "without the list the check is skipped, with no refusal")
 
--- check_prebuilt_config refuses an unsupported Linux release. An unset value, and any value on macOS, pass.
-check(pcall(with_env, {}, erlang_utils.check_prebuilt_config), "an unset USE_PREBUILT_OTP is not checked")
+-- prebuilt_config_refusal refuses an unsupported Linux release. An unset value, and any value on macOS, have no refusal.
+check(with_env({}, erlang_utils.prebuilt_config_refusal) == nil, "an unset USE_PREBUILT_OTP is not checked")
+local bad_release = with_env({ USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.prebuilt_config_refusal)
 check(
-    not pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.check_prebuilt_config),
-    "an unsupported Linux release is refused"
+    bad_release ~= nil and string.find(bad_release, "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "an unsupported Linux release is refused: " .. tostring(bad_release)
 )
 RUNTIME.osType = "darwin"
 check(
-    pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.check_prebuilt_config),
+    with_env({ USE_PREBUILT_OTP = "ubuntu-99.04" }, erlang_utils.prebuilt_config_refusal) == nil,
     "macOS takes any USE_PREBUILT_OTP value"
 )
 RUNTIME.osType = "linux"
+check(erlang_utils.prebuilt_release_refusal("ubuntu-22.04") == nil, "a supported release has no refusal")
 
 -- A bad USE_PREBUILT_OTP is refused by check_version_listed, whether or not the list can be read. It is not
 -- skipped as a list that could not be read.
+local function bad_value_refusal()
+    return with_env({ USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
+        local _, refusal = erlang_utils.check_version_listed("26.2.3")
+        return refusal
+    end)
+end
 responses[list_url] = nil
-local unread_ok, unread_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
-    erlang_utils.check_version_listed("26.2.3")
-end)
+local unread_refusal = bad_value_refusal()
 check(
-    not unread_ok and string.find(tostring(unread_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
-    "a bad value is refused when the list cannot be read: " .. tostring(unread_err)
+    unread_refusal ~= nil and string.find(unread_refusal, "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "a bad value is refused when the list cannot be read: " .. tostring(unread_refusal)
 )
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
-local read_ok, read_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
-    erlang_utils.check_version_listed("26.2.3")
-end)
+local read_refusal = bad_value_refusal()
 check(
-    not read_ok and string.find(tostring(read_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
-    "a bad value is refused when the list can be read: " .. tostring(read_err)
+    read_refusal ~= nil and string.find(read_refusal, "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "a bad value is refused when the list can be read: " .. tostring(read_refusal)
 )
 responses[list_url] = nil
 
@@ -443,24 +449,26 @@ check(
 -- A refused name gets that command in its message. 17.0 is not in the Ubuntu 24.04 prebuilt index.
 responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/builds.txt"] =
     { status_code = 200, body = "OTP-29.1.2 9d37 2026-04-26T02:55:31Z\n" }
-local hinted_ok, hinted_err = pcall(with_env, { USE_PREBUILT_OTP = "ubuntu-24.04" }, function()
-    erlang_utils.check_version_listed("17.0")
+local hinted = with_env({ USE_PREBUILT_OTP = "ubuntu-24.04" }, function()
+    local _, refusal = erlang_utils.check_version_listed("17.0")
+    return refusal
 end)
 local prebuilt_hint = "Run `USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang` to see the names that can be installed"
 check(
-    not hinted_ok and string.find(tostring(hinted_err), prebuilt_hint, 1, true) ~= nil,
-    "the refusal names the prebuilt search command: " .. tostring(hinted_err)
+    hinted ~= nil and string.find(hinted, prebuilt_hint, 1, true) ~= nil,
+    "the refusal names the prebuilt search command: " .. tostring(hinted)
 )
 
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
-local plain_ok, plain_err = pcall(with_env, {}, function()
-    erlang_utils.check_version_listed("28")
+local plain = with_env({}, function()
+    local _, refusal = erlang_utils.check_version_listed("28")
+    return refusal
 end)
 responses[list_url] = nil
 local plain_hint = "Run `vfox search erlang` to see the names that can be installed"
 check(
-    not plain_ok and string.find(tostring(plain_err), plain_hint, 1, true) ~= nil,
-    "the refusal without USE_PREBUILT_OTP names the plain command: " .. tostring(plain_err)
+    plain ~= nil and string.find(plain, plain_hint, 1, true) ~= nil,
+    "the refusal without USE_PREBUILT_OTP names the plain command: " .. tostring(plain)
 )
 
 print("erlang_utils_test: " .. counter.checks .. " checks passed")

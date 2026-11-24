@@ -79,6 +79,31 @@ local function pre_install(env, version, os_name, arch)
     end)
 end
 
+-- A refusal prints its message and returns nil. pre_install_printed returns the result and the printed lines. The
+-- hook must not raise: an error would fail the test, because vfox prints a traceback below an error.
+local function pre_install_printed(env, version, os_name, arch)
+    local printed = {}
+    local original_print = print
+    print = function(...)
+        table.insert(printed, table.concat({ ... }, "\t"))
+    end
+    local ok, result = pcall(pre_install, env, version, os_name, arch)
+    print = original_print
+    if not ok then
+        error(result, 0)
+    end
+    return result, printed
+end
+
+local function printed_has(printed, text)
+    for _, line in ipairs(printed) do
+        if string.find(line, text, 1, true) ~= nil then
+            return true
+        end
+    end
+    return false
+end
+
 -- The count lives in a table: vfox's Lua VM (gopher-lua) can show a stale value for a
 -- local captured by a closure after a pcall, which made the printed count wrong.
 local counter = { checks = 0 }
@@ -123,10 +148,10 @@ check(
     "prebuilt ubuntu-26.04: " .. result.url
 )
 
-local ok, err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-99.04" }, "26.2.3", "linux", "amd64")
+local unknown, unknown_printed = pre_install_printed({ USE_PREBUILT_OTP = "ubuntu-99.04" }, "26.2.3", "linux", "amd64")
 check(
-    not ok and string.find(err, "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
-    "unknown release: " .. tostring(err)
+    unknown == nil and printed_has(unknown_printed, "USE_PREBUILT_OTP must be one of"),
+    "unknown release is refused with a message: " .. table.concat(unknown_printed, " | ")
 )
 
 -- An empty USE_PREBUILT_OTP is unset, so the source archive is used.
@@ -173,11 +198,10 @@ check(#probe_state.urls == 1 and probe_state.urls[1] == win32_url, "windows arm6
 -- A release without a 32-bit installer is refused before the download, with a message that names the platform.
 probe_state.urls = {}
 probe_state.answer = false
-local missing_ok, missing_err = pcall(pre_install, {}, "29.1.2", "windows", "arm64")
+local missing, missing_printed = pre_install_printed({}, "29.1.2", "windows", "arm64")
 check(
-    not missing_ok
-        and string.find(tostring(missing_err), "Erlang/OTP 29.1.2 has no build for Windows arm64", 1, true) ~= nil,
-    "a release without a 32-bit installer is refused: " .. tostring(missing_err)
+    missing == nil and printed_has(missing_printed, "Erlang/OTP 29.1.2 has no build for Windows arm64"),
+    "a release without a 32-bit installer is refused: " .. table.concat(missing_printed, " | ")
 )
 check(
     #probe_state.urls == 1 and string.find(probe_state.urls[1], "/otp_win32_29.1.2.exe", 1, true) ~= nil,
@@ -209,50 +233,51 @@ check(
     result.url == "https://github.com/erlef/otp_builds/releases/download/OTP-26.2.3/OTP-26.2.3-macos-arm64.tar.gz",
     "macOS arm64 prebuilt: " .. result.url
 )
-
--- A missing version fails with a message that says what to type.
-ok, err = pcall(pre_install, {}, nil, "linux", "amd64")
+-- An architecture without a macOS prebuilt binary is refused, with a message that lists the supported ones.
+local mac_arch, mac_arch_printed = pre_install_printed({ USE_PREBUILT_OTP = "true" }, "26.2.3", "darwin", "riscv64")
 check(
-    not ok and string.find(err, "You must provide a version number", 1, true) ~= nil,
-    "missing version: " .. tostring(err)
+    mac_arch == nil and printed_has(mac_arch_printed, "Unsupported architecture for prebuilt MacOS binaries: riscv64"),
+    "an unsupported macOS architecture is refused: " .. table.concat(mac_arch_printed, " | ")
+)
+
+-- A missing version is refused with a message that says what to type.
+local no_version, no_version_printed = pre_install_printed({}, nil, "linux", "amd64")
+check(
+    no_version == nil and printed_has(no_version_printed, "You must provide a version number"),
+    "missing version is refused: " .. table.concat(no_version_printed, " | ")
 )
 
 -- A name that the list does not show is refused before the download, on every platform, and the refusal says
 -- what to run. A partial name, such as 28, is one of them.
-local partial_ok, partial_err = pcall(pre_install, {}, "28", "linux", "amd64")
+local partial, partial_printed = pre_install_printed({}, "28", "linux", "amd64")
 check(
-    not partial_ok and string.find(tostring(partial_err), "28 is not in the version list", 1, true) ~= nil,
-    "a partial name is refused: " .. tostring(partial_err)
+    partial == nil and printed_has(partial_printed, "28 is not in the version list"),
+    "a partial name is refused: " .. table.concat(partial_printed, " | ")
 )
-check(string.find(tostring(partial_err), "vfox search erlang", 1, true) ~= nil, "the refusal points to vfox search")
-local unknown_ok, unknown_err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-22.04" }, "OTP-99.9", "linux", "amd64")
+check(printed_has(partial_printed, "vfox search erlang"), "the refusal points to vfox search")
+local unknown_name, unknown_printed =
+    pre_install_printed({ USE_PREBUILT_OTP = "ubuntu-22.04" }, "OTP-99.9", "linux", "amd64")
 check(
-    not unknown_ok and string.find(tostring(unknown_err), "OTP-99.9 is not in the version list", 1, true) ~= nil,
-    "an unknown OTP- name is refused: " .. tostring(unknown_err)
+    unknown_name == nil and printed_has(unknown_printed, "OTP-99.9 is not in the version list"),
+    "an unknown OTP- name is refused: " .. table.concat(unknown_printed, " | ")
 )
-check(not pcall(pre_install, {}, "28", "windows", "amd64"), "the check applies on Windows")
-check(not pcall(pre_install, { USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64"), "the check applies on macOS")
+check(pre_install_printed({}, "28", "windows", "amd64") == nil, "the check applies on Windows")
+check(pre_install_printed({ USE_PREBUILT_OTP = "true" }, "28", "darwin", "arm64") == nil, "the check applies on macOS")
 -- With USE_PREBUILT_OTP set, the refusal names the prebuilt search command: the list that the install checks.
-local prebuilt_refused, prebuilt_reason =
-    pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-24.04" }, "17.0", "linux", "amd64")
+local prebuilt_refused, prebuilt_printed =
+    pre_install_printed({ USE_PREBUILT_OTP = "ubuntu-24.04" }, "17.0", "linux", "amd64")
 check(
-    not prebuilt_refused
-        and string.find(
-                tostring(prebuilt_reason),
-                "Run `USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang` to see",
-                1,
-                true
-            )
-            ~= nil,
-    "the PreInstall refusal names the prebuilt search command: " .. tostring(prebuilt_reason)
+    prebuilt_refused == nil
+        and printed_has(prebuilt_printed, "Run `USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang` to see"),
+    "the PreInstall refusal names the prebuilt search command: " .. table.concat(prebuilt_printed, " | ")
 )
 
 -- Only the macOS prebuilt branches end in latest, and only with USE_PREBUILT_OTP on macOS. Any other such name is
 -- a release: foo-latest is refused before the download, as a name without latest is.
-local latest_ok, latest_err = pcall(pre_install, {}, "foo-latest", "linux", "amd64")
+local latest, latest_printed = pre_install_printed({}, "foo-latest", "linux", "amd64")
 check(
-    not latest_ok and string.find(tostring(latest_err), "foo-latest is not in the version list", 1, true) ~= nil,
-    "an unlisted name that ends in latest is refused: " .. tostring(latest_err)
+    latest == nil and printed_has(latest_printed, "foo-latest is not in the version list"),
+    "an unlisted name that ends in latest is refused: " .. table.concat(latest_printed, " | ")
 )
 -- These names are refused where they are not macOS prebuilt branches: in a Linux source build, in a Linux prebuilt
 -- install, and in a macOS source build. Before, they skipped the list and failed in the download.
@@ -261,10 +286,10 @@ for _, case in ipairs({
     { { USE_PREBUILT_OTP = "ubuntu-24.04" }, "maint-27-latest", "linux", "amd64" },
     { {}, "master-latest", "darwin", "arm64" },
 }) do
-    local refused, reason = pcall(pre_install, case[1], case[2], case[3], case[4])
+    local refused, printed = pre_install_printed(case[1], case[2], case[3], case[4])
     check(
-        not refused and string.find(tostring(reason), case[2] .. " is not in the version list", 1, true) ~= nil,
-        case[2] .. " is refused on " .. case[3] .. ": " .. tostring(reason)
+        refused == nil and printed_has(printed, case[2] .. " is not in the version list"),
+        case[2] .. " is refused on " .. case[3] .. ": " .. table.concat(printed, " | ")
     )
 end
 
@@ -293,24 +318,20 @@ list_state.failure = nil
 -- An unsupported USE_PREBUILT_OTP is reported as the value, once, even when the version list cannot be read. The
 -- value is checked before the list is read, so the failed read is not reported as a skipped check.
 list_state.failure = "Failed to download the Erlang/OTP version list: no network"
-local printed = {}
-local original_print = print
-print = function(...)
-    table.insert(printed, table.concat({ ... }, "\t"))
-end
-local value_ok, value_err = pcall(pre_install, { USE_PREBUILT_OTP = "ubuntu-99.04" }, "28", "linux", "amd64")
-print = original_print
+local value_result, value_printed = pre_install_printed({ USE_PREBUILT_OTP = "ubuntu-99.04" }, "28", "linux", "amd64")
 list_state.failure = nil
-local skipped = false
-for _, line in ipairs(printed) do
-    if string.find(line, "Could not read the version list", 1, true) ~= nil then
-        skipped = true
-    end
-end
-local names_value = string.find(tostring(value_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil
 check(
-    not value_ok and names_value and not skipped,
-    "an unsupported value is reported as the value: " .. tostring(value_err)
+    value_result == nil
+        and printed_has(value_printed, "USE_PREBUILT_OTP must be one of")
+        and not printed_has(value_printed, "Could not read the version list"),
+    "an unsupported value is reported as the value: " .. table.concat(value_printed, " | ")
+)
+
+-- A branch is refused as well when USE_PREBUILT_OTP has a bad value on Linux: the value is checked before any name.
+local branch_bad, branch_bad_printed = pre_install_printed({ USE_PREBUILT_OTP = "bogus" }, "master", "linux", "amd64")
+check(
+    branch_bad == nil and printed_has(branch_bad_printed, "USE_PREBUILT_OTP must be one of"),
+    "a bad value is refused for a branch too: " .. table.concat(branch_bad_printed, " | ")
 )
 
 print("pre_install_test: " .. counter.checks .. " checks passed")
