@@ -162,7 +162,7 @@ gh api repos/erlang/otp/releases/tags/OTP-<版本号> --jq '.assets[].name'
 修复：
 
 - 选择发布页面列出 `otp_win32_<版本号>.exe` 的版本，例如 28.5.0.8，它同时列出两种安装器。
-- 插件尚未在 Windows arm64 上测试 32 位安装器。安装这类版本后，请按 [windows.md](windows.md) 检查 `erl.exe` 能否运行。
+- CI 只在 Windows arm64 上用 Erlang/OTP 28.5.0.8 检查过 32 位安装器。安装这类版本后，请按 [windows.md](windows.md) 检查 `erl.exe` 能否运行。
 
 ## link --detect 找不到安装，或命令无法识别
 

@@ -162,7 +162,7 @@ gh api repos/erlang/otp/releases/tags/OTP-<version> --jq '.assets[].name'
 Fix:
 
 - Choose a version whose release lists `otp_win32_<version>.exe`, such as 28.5.0.8, which lists both installers.
-- The plugin has not been tested with the 32-bit installer on Windows arm64. After you install such a version, check that `erl.exe` runs, as in [windows.md](windows.md).
+- CI checks the 32-bit installer on Windows arm64 with Erlang/OTP 28.5.0.8 only. After you install such a version, check that `erl.exe` runs, as in [windows.md](windows.md).
 
 ## link --detect finds nothing, or the command is not recognized
 
