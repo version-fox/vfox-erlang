@@ -72,28 +72,37 @@ erlang_utils.PREBUILT_OS_RELEASES = {
     "ubuntu-26.04",
 }
 
---- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value
---- is an error that lists the supported values.
+--- Returns the refusal for a USE_PREBUILT_OTP value that names no supported Ubuntu release: a message that lists
+--- the supported values. Returns nil when the value is supported.
+function erlang_utils.prebuilt_release_refusal(release)
+    if erlang_utils.array_contains(erlang_utils.PREBUILT_OS_RELEASES, release) then
+        return nil
+    end
+    return "USE_PREBUILT_OTP must be one of: "
+        .. table.concat(erlang_utils.PREBUILT_OS_RELEASES, ", ")
+        .. ". Got: "
+        .. release
+end
+
+--- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value is an error.
+--- get_erlang_release_versions uses it for `vfox search`, which does not return a refusal.
 function erlang_utils.check_prebuilt_release(release)
-    if not erlang_utils.array_contains(erlang_utils.PREBUILT_OS_RELEASES, release) then
-        error(
-            "USE_PREBUILT_OTP must be one of: "
-                .. table.concat(erlang_utils.PREBUILT_OS_RELEASES, ", ")
-                .. ". Got: "
-                .. release
-        )
+    local refusal = erlang_utils.prebuilt_release_refusal(release)
+    if refusal ~= nil then
+        error(refusal)
     end
     return release
 end
 
---- Refuses a USE_PREBUILT_OTP value that names no supported Linux release, as get_erlang_release_versions does.
---- check_version_listed runs it before it reads the list, so a bad value is reported as such, and not as a list
---- that could not be read.
-function erlang_utils.check_prebuilt_config()
+--- Returns the refusal for a USE_PREBUILT_OTP value that names no supported Linux release, or nil. An unset value,
+--- and any value on another platform, has no refusal. Callers check the value before they read a list, so a bad
+--- value is refused as such, and not reported as a list that could not be read.
+function erlang_utils.prebuilt_config_refusal()
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
     if use_prebuilt ~= nil and RUNTIME.osType == "linux" then
-        erlang_utils.check_prebuilt_release(use_prebuilt)
+        return erlang_utils.prebuilt_release_refusal(use_prebuilt)
     end
+    return nil
 end
 
 --- The other spelling of a release name: 29.1.2 for OTP-29.1.2, and OTP-29.1.2 for 29.1.2. Other
@@ -416,10 +425,9 @@ function erlang_utils.search_command()
     return "vfox search erlang"
 end
 
---- Reads the version list. The value of USE_PREBUILT_OTP is checked first, so a bad value is an error and not a
---- list that could not be read. Returns the list, or nil and the reason when the list cannot be read.
+--- Reads the version list. Returns the list, or nil and the reason when the list cannot be read. A caller checks the
+--- value of USE_PREBUILT_OTP first, with prebuilt_config_refusal.
 function erlang_utils.read_version_list()
-    erlang_utils.check_prebuilt_config()
     local ok, result = pcall(erlang_utils.get_erlang_release_versions)
     if not ok then
         return nil, tostring(result)
@@ -427,23 +435,28 @@ function erlang_utils.read_version_list()
     return result, nil
 end
 
---- Refuses a version name that the version list does not show, before anything is downloaded. Such a name
---- would fail in the download with a generic message. When the list cannot be read, the check is skipped with
---- a note: the download decides, as it did before the check existed. Returns the list it checked, or nil.
+--- Checks that the version list shows a version name, before anything is downloaded. Such a name would fail in
+--- the download with a generic message. Returns the list it checked. When the list cannot be read, the check is
+--- skipped with a note, the download decides as it did before the check existed, and nil is returned. A name that
+--- is refused, because USE_PREBUILT_OTP has a bad value or because the list does not show the name, returns nil and
+--- the refusal message. The caller prints the message and stops the install.
 function erlang_utils.check_version_listed(name)
+    local config_refusal = erlang_utils.prebuilt_config_refusal()
+    if config_refusal ~= nil then
+        return nil, config_refusal
+    end
     local versions, reason = erlang_utils.read_version_list()
     if versions == nil then
         print("Could not read the version list, so " .. name .. " is not checked against it: " .. reason)
         return nil
     end
     if not erlang_utils.is_listed(name, versions) then
-        error(
-            "Erlang/OTP "
-                .. name
-                .. " is not in the version list, so it cannot be installed. Run `"
-                .. erlang_utils.search_command()
-                .. "` to see the names that can be installed. A partial name, such as 28, is not one of them."
-        )
+        local refusal = "Erlang/OTP "
+            .. name
+            .. " is not in the version list, so it cannot be installed. Run `"
+            .. erlang_utils.search_command()
+            .. "` to see the names that can be installed. A partial name, such as 28, is not one of them."
+        return nil, refusal
     end
     return versions
 end
@@ -464,7 +477,9 @@ local CONFIGURE_PATH_PROBLEMS = {
 }
 
 --- Refuses a source build whose install path holds one of the characters above, before configure starts.
---- Without the check the build fails part way through, or it configures a different directory.
+--- Without the check the build fails part way through, or it configures a different directory. It raises an error
+--- instead of returning a refusal: vfox records an install whose PostInstall returns normally, so only an error
+--- stops the install here.
 function erlang_utils.check_configure_path(path)
     local found = {}
     for _, problem in ipairs(CONFIGURE_PATH_PROBLEMS) do

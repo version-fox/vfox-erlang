@@ -17,15 +17,24 @@ local erlangUtils = require("erlang_utils")
 --- Returns some pre-installed information, such as version number, download address, local files, etc.
 --- If checksum is provided, vfox will automatically check it for you.
 --- ctx.version is the version the user typed.
+--- A refusal prints its message and returns nil. vfox prints a stack traceback below an error that a hook raises, but
+--- for a nil result it stops the install with "no installable runtime provided" and no traceback.
 --- @param ctx table
---- @return table Version information
+--- @return table|nil Version information, or nil when the install is refused, after the reason is printed
 function PLUGIN:PreInstall(ctx)
     local erlang_version = ctx.version
     if erlang_version == nil or erlang_version == "" then
-        error("You must provide a version number for Erlang/OTP, eg: vfox install erlang@26.2.3")
+        print("You must provide a version number for Erlang/OTP, eg: vfox install erlang@26.2.3")
+        return nil
     end
     print("You will install the Erlang/OTP version is: " .. erlang_version)
     local PRE_BUILT_OS_RELEASE = erlangUtils.get_config_from_env("USE_PREBUILT_OTP")
+    -- A USE_PREBUILT_OTP value that names no supported Ubuntu release is refused before any list is read.
+    local config_refusal = erlangUtils.prebuilt_config_refusal()
+    if config_refusal ~= nil then
+        print(config_refusal)
+        return nil
+    end
     -- Branches are not looked up in a version list. Any other name must be listed before the download starts: a name
     -- that is not listed would fail in the download, with a generic message.
     local macos_prebuilt_branch = RUNTIME.osType == "darwin"
@@ -35,7 +44,12 @@ function PLUGIN:PreInstall(ctx)
     -- checked against it, but the same index publishes its SHA-256, so it is read for that.
     local versions = nil
     if not (erlangUtils.is_branch_name(erlang_version) or macos_prebuilt_branch) then
-        versions = erlangUtils.check_version_listed(erlang_version)
+        local refusal
+        versions, refusal = erlangUtils.check_version_listed(erlang_version)
+        if refusal ~= nil then
+            print(refusal)
+            return nil
+        end
     elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE ~= nil then
         local reason
         versions, reason = erlangUtils.read_version_list()
@@ -68,19 +82,21 @@ function PLUGIN:PreInstall(ctx)
         if RUNTIME.archType == "arm64" and not erlangUtils.is_branch_name(erlang_version) then
             local exists, reason = erlangUtils.url_exists(download_url)
             if exists == false then
-                error(
+                print(
                     "Erlang/OTP "
                         .. release
                         .. " has no build for Windows arm64: its release publishes no "
                         .. installer
                         .. ". The installers of each release are listed at https://github.com/erlang/otp/releases"
                 )
+                return nil
             elseif exists == nil then
                 print("Could not check for " .. installer .. ", so the download decides: " .. tostring(reason))
             end
         end
     elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE then
-        local release = erlangUtils.check_prebuilt_release(PRE_BUILT_OS_RELEASE)
+        -- The value was checked above, so it names a supported release.
+        local release = PRE_BUILT_OS_RELEASE
         -- builds.hex.pm names numeric releases with the OTP- prefix, e.g. OTP-26.2.3.tar.gz
         download_url = "https://builds.hex.pm/builds/otp/"
             .. RUNTIME.archType
@@ -104,11 +120,12 @@ function PLUGIN:PreInstall(ctx)
 
         local mapped_arch = arch_mapping[RUNTIME.archType]
         if not mapped_arch then
-            error(
+            print(
                 "Unsupported architecture for prebuilt MacOS binaries: "
                     .. RUNTIME.archType
                     .. ". Supported architectures: amd64, x86_64, arm64, aarch64"
             )
+            return nil
         end
 
         -- Prepare tag name and file prefix for download URL
