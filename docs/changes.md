@@ -6,9 +6,17 @@ What changed in each release, as a user notices it. For published versions, the 
 
 ## Unreleased
 
+No changes yet.
+
+## 1.2.7 (2026-11-24)
+
 ### Fixed
 
 - A refused install prints its message, and no Lua stack traceback follows it. This covers the refusals that PreInstall makes: a missing version, a `USE_PREBUILT_OTP` value that names no supported Ubuntu release, a version name that the version list does not show, a release without a Windows arm64 build, and an unsupported macOS architecture. A source build whose install path holds a space, or another character that OTP's configure cannot take, still prints a traceback after its message. (#53)
+
+### Changed
+
+- On Windows, `erlang@OTP-<version>` and `erlang@<version>` are the same release. Both record it as `<version>`, as Linux prebuilt installs do, so installing the other spelling reports it as already installed. Version 1.2.6 made this change with #50, but its section did not list it. See [troubleshooting.md](troubleshooting.md).
 
 ## 1.2.6 (2026-11-24)
 

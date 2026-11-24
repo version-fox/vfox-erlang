@@ -17,6 +17,8 @@ vfox calls the hooks in `hooks/`:
 | `PreUse` | `hooks/pre_use.lua` | Checks that the version being used is installed, and returns it. Otherwise it fails and suggests `vfox install` or `vfox link --detect`. |
 | `Detect` | `hooks/detect.lua` | Scans the locations listed in [link.md](link.md) for existing Erlang/OTP installations, for `vfox link --detect`. The scanning code is in `lib/detect_erlang.lua`. |
 
+A refusal, such as a version name that the version list does not show, is printed by PreInstall, which then returns nil. vfox stops the install with "no installable runtime provided" and prints no traceback. An error that a hook raises is followed by a Lua stack traceback. PostInstall raises its errors instead of returning nil, because vfox records an install whose PostInstall returns normally.
+
 ## File layout
 
 ```

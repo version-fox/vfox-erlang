@@ -31,7 +31,7 @@ Fix:
 
 ## The source build stops before configure, naming a character in the install path
 
-Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a tab, a newline, a double quote, a dollar sign or a backtick is reported in the same way.
+Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a tab, a newline, a double quote, a dollar sign or a backtick is reported in the same way. The check raises an error, so vfox also prints a Lua stack traceback below that message.
 
 Check:
 
@@ -247,8 +247,8 @@ Symptom: `vfox list erlang` shows two entries for one release, such as `OTP-29.1
 
 Cause: vfox recognises an install by the name the plugin records for it, and it does not know that two names are the same release. The recorded name depends on the platform and the install method:
 
-- On Linux with `USE_PREBUILT_OTP`, from 1.2.1 on, both spellings are recorded as `29.1.2`, so installing the other spelling reports `already installed`. A release installed as `OTP-29.1.2` with 1.2.0 or earlier keeps that name, and `vfox install erlang@29.1.2` installs it again.
-- Source builds, macOS and Windows record the name as you typed it, so `OTP-29.1.2` and `29.1.2` are two installs.
+- On Linux with `USE_PREBUILT_OTP`, from 1.2.1 on, and on Windows, from 1.2.6 on, both spellings are recorded as `29.1.2`, so installing the other spelling reports `already installed`. On Linux, a release installed as `OTP-29.1.2` with 1.2.0 or earlier keeps that name, and `vfox install erlang@29.1.2` installs it again.
+- Source builds and macOS record the name as you typed it, so `OTP-29.1.2` and `29.1.2` are two installs.
 
 Fix:
 
