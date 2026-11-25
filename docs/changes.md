@@ -6,7 +6,10 @@ What changed in each release, as a user notices it. For published versions, the 
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+
+- A source build whose install path holds a space, or another character that OTP's configure cannot take, is refused before the download, and no Lua stack traceback follows the message. Before, the refusal came from PostInstall, after the archive had been downloaded and unpacked, and a traceback followed it. The install path is `<VFOX_HOME>/cache/erlang/v-<version>/erlang-<version>`. When VFOX_HOME is unset, the path is under the vfox directory of your home: `~/.version-fox` when that exists, and `~/.vfox` otherwise. (#56)
+- `vfox search erlang` prints the reason once, with no Lua stack traceback, when `USE_PREBUILT_OTP` names no supported Ubuntu release or the version list cannot be read. The reason is no longer preceded by a second `plugin [Available] method error:` prefix. The search then reports `plugin [Available] method error: no available version provided` and exits with status 1. (#55)
 
 ## 1.2.7 (2026-11-24)
 

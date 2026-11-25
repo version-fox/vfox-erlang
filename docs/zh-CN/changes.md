@@ -6,7 +6,10 @@
 
 ## 未发布
 
-暂无变更。
+### 修复
+
+- 安装路径含空格，或含 OTP 的 configure 无法处理的其他字符的源码构建，会在下载之前被拒绝，拒绝原因之后不再打印 Lua 堆栈回溯。之前该拒绝来自 PostInstall，在压缩包下载并解压之后才发生，其后仍有堆栈回溯。安装路径为 `<VFOX_HOME>/cache/erlang/v-<版本号>/erlang-<版本号>`；未设置 VFOX_HOME 时，路径位于用户主目录下的 vfox 目录中，即存在 `~/.version-fox` 时为它，否则为 `~/.vfox`。（#56）
+- 当 `USE_PREBUILT_OTP` 取值不是受支持的 Ubuntu 版本，或版本列表无法读取时，`vfox search erlang` 只打印一次原因，之后不再打印 Lua 堆栈回溯。原因前不再多出第二个 `plugin [Available] method error:` 前缀。之后搜索报告 `plugin [Available] method error: no available version provided`，并以状态码 1 退出。（#55）
 
 ## 1.2.7（2026-11-24）
 

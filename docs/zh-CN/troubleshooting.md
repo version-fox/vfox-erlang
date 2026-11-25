@@ -31,7 +31,7 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 
 ## 源码构建在 configure 之前停止，并指出安装路径中的字符
 
-症状：`vfox install` 在下载完成后停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、制表符、换行符、双引号、美元符号或反引号也会以同样的方式报告。该检查会抛出错误，因此 vfox 还会在这条信息下方打印 Lua 堆栈回溯。
+症状：`vfox install` 在下载开始之前停止，并报告 `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.`。空格、制表符、换行符、双引号、美元符号或反引号也会以同样的方式报告。这条信息之后不再打印 Lua 堆栈回溯。
 
 检查：
 
@@ -109,7 +109,7 @@ USE_PREBUILT_OTP=ubuntu-24.04 vfox search erlang   # 在 Linux 或 macOS 上设�
 
 ## USE_PREBUILT_OTP 取值不合法
 
-症状：在 Linux 上，安装在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`。
+症状：在 Linux 上，安装或 `vfox search erlang` 在报错后停止，错误信息为 `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`。
 
 检查：
 

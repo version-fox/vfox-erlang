@@ -14,9 +14,16 @@
 
 local erlangUtils = require("erlang_utils")
 
---- Return all available versions provided by this plugin
+--- Return all available versions provided by this plugin.
+--- When the list cannot be read, or USE_PREBUILT_OTP names no supported release, the reason is printed and nil is
+--- returned, as PreInstall does for its refusals: vfox then reports the failure without a Lua stack traceback.
 --- @param ctx table Empty table used as context, for future extension
---- @return table Descriptions of available versions and accompanying tool descriptions
+--- @return table|nil Descriptions of available versions and accompanying tool descriptions, or nil
 function PLUGIN:Available(ctx)
-    return erlangUtils.get_erlang_release_versions()
+    local versions, reason = erlangUtils.get_erlang_release_versions()
+    if versions == nil then
+        print(reason)
+        return nil
+    end
+    return versions
 end

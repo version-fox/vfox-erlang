@@ -20,13 +20,13 @@ local plugin = test.load({ os = "linux", arch = "amd64", env = {} })
 local erlang_utils = require("erlang_utils")
 
 -- The version list is read over the network, so the checks use a fixed list. list_state counts the reads,
--- and failure makes a read fail, as on a machine without a network. It is a table for the same reason as
--- the counter below.
+-- and failure makes a read fail, as on a machine without a network: the read returns nil and the reason. It is a
+-- table for the same reason as the counter below.
 local list_state = { reads = 0, failure = nil }
 erlang_utils.get_erlang_release_versions = function()
     list_state.reads = list_state.reads + 1
     if list_state.failure ~= nil then
-        error(list_state.failure, 0)
+        return nil, list_state.failure
     end
     return {
         { version = "29.1.2" },
@@ -333,5 +333,79 @@ check(
     branch_bad == nil and printed_has(branch_bad_printed, "USE_PREBUILT_OTP must be one of"),
     "a bad value is refused for a branch too: " .. table.concat(branch_bad_printed, " | ")
 )
+
+-- A source build runs configure in its install path, so PreInstall refuses a path that configure cannot take, before
+-- the download. The path is <root>/cache/erlang/v-<version>/erlang-<version>. The root is VFOX_HOME, or the vfox
+-- directory of HOME when VFOX_HOME is unset. legacy_dirs lists the directories that exist, for ~/.version-fox.
+local legacy_dirs = {}
+local original_directory_exists = erlang_utils.directory_exists
+erlang_utils.directory_exists = function(path)
+    return legacy_dirs[path] == true
+end
+
+local refused_path, refused_path_printed =
+    pre_install_printed({ VFOX_HOME = "/opt/vfox home" }, "26.2.3", "linux", "amd64")
+check(
+    refused_path == nil
+        and printed_has(
+            refused_path_printed,
+            "The Erlang/OTP install path /opt/vfox home/cache/erlang/v-26.2.3/erlang-26.2.3 contains a space"
+        ),
+    "a source build with a space in VFOX_HOME is refused: " .. table.concat(refused_path_printed, " | ")
+)
+check(not printed_has(refused_path_printed, "Download Erlang/OTP from"), "the refusal comes before the download")
+
+local refused_branch, refused_branch_printed =
+    pre_install_printed({ VFOX_HOME = "/opt/vfox home" }, "master", "linux", "amd64")
+check(
+    refused_branch == nil and printed_has(refused_branch_printed, "contains a space"),
+    "a branch build is refused the same way: " .. table.concat(refused_branch_printed, " | ")
+)
+
+local refused_home, refused_home_printed =
+    pre_install_printed({ VFOX_HOME = "", HOME = "/home/jane's home" }, "26.2.3", "darwin", "arm64")
+check(
+    refused_home == nil
+        and printed_has(
+            refused_home_printed,
+            "/home/jane's home/.vfox/cache/erlang/v-26.2.3/erlang-26.2.3 contains an apostrophe"
+        ),
+    "without VFOX_HOME, the vfox directory of HOME is checked: " .. table.concat(refused_home_printed, " | ")
+)
+
+legacy_dirs["/home/jane doe/.version-fox"] = true
+local legacy_refused, legacy_printed = pre_install_printed({ HOME = "/home/jane doe" }, "26.2.3", "linux", "amd64")
+check(
+    legacy_refused == nil
+        and printed_has(
+            legacy_printed,
+            "/home/jane doe/.version-fox/cache/erlang/v-26.2.3/erlang-26.2.3 contains a space"
+        ),
+    "an existing ~/.version-fox is the root that is checked: " .. table.concat(legacy_printed, " | ")
+)
+legacy_dirs["/home/jane doe/.version-fox"] = nil
+
+-- Paths that configure can take are not refused, and neither are the installs that do not run configure.
+result = pre_install({ VFOX_HOME = "/opt/vfox" }, "26.2.3", "linux", "amd64")
+check(
+    result.url == "https://github.com/erlang/otp/archive/refs/tags/OTP-26.2.3.tar.gz",
+    "a clean VFOX_HOME builds from source: " .. result.url
+)
+result = pre_install({ VFOX_HOME = "/opt/vfox home", USE_PREBUILT_OTP = "ubuntu-22.04" }, "26.2.3", "linux", "amd64")
+check(
+    result.url == "https://builds.hex.pm/builds/otp/amd64/ubuntu-22.04/OTP-26.2.3.tar.gz",
+    "a Linux prebuilt install does not run configure, so a space is not refused: " .. result.url
+)
+result = pre_install({ VFOX_HOME = "/opt/vfox home", USE_PREBUILT_OTP = "true" }, "26.2.3", "darwin", "arm64")
+check(
+    result.url == "https://github.com/erlef/otp_builds/releases/download/OTP-26.2.3/OTP-26.2.3-macos-arm64.tar.gz",
+    "a macOS prebuilt install is not refused either: " .. result.url
+)
+result = pre_install({ VFOX_HOME = "/opt/vfox home" }, "25.3.2.12", "windows", "amd64")
+check(
+    result.url == "https://github.com/erlang/otp/releases/download/OTP-25.3.2.12/otp_win64_25.3.2.12.exe",
+    "Windows runs its installer, so the path is not checked: " .. result.url
+)
+erlang_utils.directory_exists = original_directory_exists
 
 print("pre_install_test: " .. counter.checks .. " checks passed")

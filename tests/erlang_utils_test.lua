@@ -128,50 +128,52 @@ check(
 -- The version list is parsed line by line and HTTP failures are reported.
 local list_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 responses[list_url] = { status_code = 200, body = "25.3.2.12\r\n26.2.3\n\n" }
-local list = erlang_utils.get_erlang_release_versions()
+local list, list_reason = erlang_utils.get_erlang_release_versions()
+assert(list ~= nil, "the version list is read: " .. tostring(list_reason))
 check(#list == 2, "blank lines are skipped")
 check(list[1].version == "26.2.3" and list[2].version == "25.3.2.12", "versions are listed in descending order")
 
+-- A failed read returns nil and the reason. Nothing is raised, so the caller can print the reason without a traceback.
 responses[list_url] = { status_code = 503, body = "" }
-local http_ok, http_failure = pcall(erlang_utils.get_erlang_release_versions)
-local http_reason = tostring(http_failure)
+local http_list, http_reason = erlang_utils.get_erlang_release_versions()
 check(
-    not http_ok and string.find(http_reason, "HTTP status 503", 1, true) ~= nil,
-    "HTTP errors are reported: " .. http_reason
+    http_list == nil and string.find(tostring(http_reason), "HTTP status 503", 1, true) ~= nil,
+    "HTTP errors are returned as the reason: " .. tostring(http_reason)
 )
 
 responses[list_url] = nil
-local net_ok, net_failure = pcall(erlang_utils.get_erlang_release_versions)
-local net_reason = tostring(net_failure)
+local net_list, net_reason = erlang_utils.get_erlang_release_versions()
 check(
-    not net_ok and string.find(net_reason, "version list", 1, true) ~= nil,
-    "download errors name the version list: " .. net_reason
+    net_list == nil and string.find(tostring(net_reason), "version list", 1, true) ~= nil,
+    "download errors name the version list: " .. tostring(net_reason)
 )
 
 -- USE_PREBUILT_OTP only changes the list on macOS and Linux. An empty value is unset, and an
 -- unknown Linux release is an error instead of a list of other builds.
+-- with_env returns what fn returns: its first value, and its second value when it has one.
 local function with_env(env, fn)
     local original = os.getenv
     os.getenv = function(name)
         return env[name]
     end
-    local ok, result = pcall(fn)
+    local ok, result, extra = pcall(fn)
     os.getenv = original
     if not ok then
         error(result, 0)
     end
-    return result
+    return result, extra
 end
 
+-- search_on returns the list, or nil and the reason, as get_erlang_release_versions does.
 local function search_on(os_name, env, arch)
     local saved_os, saved_arch = RUNTIME.osType, RUNTIME.archType
     RUNTIME.osType, RUNTIME.archType = os_name, arch or "amd64"
-    local ok, result = pcall(with_env, env, erlang_utils.get_erlang_release_versions)
+    local ok, result, reason = pcall(with_env, env, erlang_utils.get_erlang_release_versions)
     RUNTIME.osType, RUNTIME.archType = saved_os, saved_arch
     if not ok then
         error(result, 0)
     end
-    return result
+    return result, reason
 end
 
 local base_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/"
@@ -274,12 +276,12 @@ responses["https://builds.hex.pm/builds/otp/amd64/ubuntu-26.04/builds.txt"] =
 local resolute = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-26.04" })
 check(#resolute == 1 and resolute[1].version == "26.0", "ubuntu-26.04 reads its own index")
 
-local search_ok, search_err = pcall(search_on, "linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
+local refused_list, search_err = search_on("linux", { USE_PREBUILT_OTP = "ubuntu-99.04" })
 check(
-    not search_ok and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
-    "search rejects an unknown release: " .. tostring(search_err)
+    refused_list == nil and string.find(tostring(search_err), "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "search refuses an unknown release: " .. tostring(search_err)
 )
-check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the error lists ubuntu-26.04")
+check(string.find(tostring(search_err), "ubuntu-26.04", 1, true) ~= nil, "the refusal lists ubuntu-26.04")
 
 -- builds.txt publishes the SHA-256 of an archive in its fourth column. vfox compares it as lowercase hex, so the
 -- value is lowercased here. A column that is not 64 hexadecimal digits is not a checksum.
@@ -359,6 +361,44 @@ responses[list_url] = { status_code = 200, body = "26.2.3\n" }
 local available = plugin:Available({})
 check(#available == 1 and available[1].version == "26.2.3", "Available returns the list")
 
+-- When the list cannot be read, or USE_PREBUILT_OTP names no supported release, Available prints the reason once and
+-- returns nil. vfox then reports the failure with no traceback, as it does for the PreInstall refusals.
+local function printed_by(fn)
+    local printed = {}
+    local original_print = print
+    print = function(...)
+        table.insert(printed, table.concat({ ... }, "\t"))
+    end
+    local ok, result = pcall(fn)
+    print = original_print
+    if not ok then
+        error(result, 0)
+    end
+    return result, printed
+end
+
+responses[list_url] = nil
+local no_list, no_list_printed = printed_by(function()
+    return plugin:Available({})
+end)
+check(
+    no_list == nil
+        and #no_list_printed == 1
+        and string.find(no_list_printed[1], "Failed to download the Erlang/OTP version list", 1, true) ~= nil,
+    "Available returns nil and prints the reason once: " .. table.concat(no_list_printed, " | ")
+)
+local bad_value, bad_value_printed = printed_by(function()
+    return with_env({ USE_PREBUILT_OTP = "ubuntu-99.04" }, function()
+        return plugin:Available({})
+    end)
+end)
+check(
+    bad_value == nil
+        and #bad_value_printed == 1
+        and string.find(bad_value_printed[1], "USE_PREBUILT_OTP must be one of", 1, true) ~= nil,
+    "Available refuses a bad USE_PREBUILT_OTP the same way: " .. table.concat(bad_value_printed, " | ")
+)
+
 -- check_version_listed refuses an unlisted name and names the command that shows the list. A listed name
 -- passes. When the list cannot be read, the check is skipped instead of blocking the install.
 responses[list_url] = { status_code = 200, body = "26.2.3\n" }
@@ -387,6 +427,85 @@ check(
 )
 RUNTIME.osType = "linux"
 check(erlang_utils.prebuilt_release_refusal("ubuntu-22.04") == nil, "a supported release has no refusal")
+
+-- The source install path is <root>/cache/erlang/v-<version>/erlang-<version>. The root is VFOX_HOME when it is set,
+-- and otherwise the vfox directory of HOME: ~/.version-fox when that exists, and ~/.vfox when it does not. The
+-- directories that exist are listed in dirs.
+local dirs = {}
+local original_directory_exists = erlang_utils.directory_exists
+erlang_utils.directory_exists = function(path)
+    return dirs[path] == true
+end
+
+local function source_path_on(env, version)
+    return with_env(env, function()
+        return erlang_utils.source_install_path(version)
+    end)
+end
+
+check(
+    source_path_on({ VFOX_HOME = "/opt/vfox home" }, "26.2.3") == "/opt/vfox home/cache/erlang/v-26.2.3/erlang-26.2.3",
+    "VFOX_HOME is the root of the source install path"
+)
+check(
+    source_path_on({ VFOX_HOME = "/opt/vfox/" }, "OTP-26.2.3")
+        == "/opt/vfox/cache/erlang/v-OTP-26.2.3/erlang-OTP-26.2.3",
+    "a trailing slash in VFOX_HOME is not repeated, and an OTP- name keeps its prefix"
+)
+check(
+    source_path_on({ VFOX_HOME = "", HOME = "/home/jane" }, "26.2.3")
+        == "/home/jane/.vfox/cache/erlang/v-26.2.3/erlang-26.2.3",
+    "an empty VFOX_HOME is unset, so the vfox directory of HOME is the root"
+)
+dirs["/home/jane doe/.version-fox"] = true
+check(
+    source_path_on({ HOME = "/home/jane doe/" }, "26.2.3")
+        == "/home/jane doe/.version-fox/cache/erlang/v-26.2.3/erlang-26.2.3",
+    "an existing ~/.version-fox is the root when VFOX_HOME is unset"
+)
+dirs["/home/jane doe/.version-fox"] = nil
+check(
+    source_path_on({ HOME = "/home/jane doe/" }, "26.2.3") == "/home/jane doe/.vfox/cache/erlang/v-26.2.3/erlang-26.2.3",
+    "~/.vfox is the root when ~/.version-fox does not exist"
+)
+check(source_path_on({}, "26.2.3") == nil, "without VFOX_HOME or HOME there is no source path")
+
+-- configure_path_refusal names every character it finds, in the order of the list.
+check(erlang_utils.configure_path_refusal("/opt/vfox/cache/erlang/v-26.2.3") == nil, "a clean path has no refusal")
+local space_refusal = erlang_utils.configure_path_refusal("/opt/vfox home/erlang")
+check(
+    space_refusal ~= nil
+        and string.find(
+                space_refusal,
+                "The Erlang/OTP install path /opt/vfox home/erlang contains a space",
+                1,
+                true
+            )
+            ~= nil,
+    "a space is refused and named: " .. tostring(space_refusal)
+)
+local two_refusal = erlang_utils.configure_path_refusal("/home/jane's doe/erlang")
+check(
+    two_refusal ~= nil and string.find(two_refusal, "contains an apostrophe and a space", 1, true) ~= nil,
+    "every character found is named: " .. tostring(two_refusal)
+)
+
+-- source_path_refusal checks the path that vfox gives the install, and has no refusal when the root is unknown.
+local function source_refusal_on(env, version)
+    return with_env(env, function()
+        return erlang_utils.source_path_refusal(version)
+    end)
+end
+
+local refused_path = source_refusal_on({ VFOX_HOME = "/opt/vfox home" }, "26.2.3")
+local expected_path = "/opt/vfox home/cache/erlang/v-26.2.3/erlang-26.2.3"
+check(
+    refused_path ~= nil and string.find(refused_path, expected_path, 1, true) ~= nil,
+    "the refusal names the path that vfox gives the install: " .. tostring(refused_path)
+)
+check(source_refusal_on({ VFOX_HOME = "/opt/vfox" }, "26.2.3") == nil, "a clean VFOX_HOME is not refused")
+check(source_refusal_on({}, "26.2.3") == nil, "without a root there is no refusal here; PostInstall checks the path")
+erlang_utils.directory_exists = original_directory_exists
 
 -- A bad USE_PREBUILT_OTP is refused by check_version_listed, whether or not the list can be read. It is not
 -- skipped as a list that could not be read.

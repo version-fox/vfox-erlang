@@ -31,7 +31,7 @@ Fix:
 
 ## The source build stops before configure, naming a character in the install path
 
-Symptom: `vfox install` stops after the download with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a tab, a newline, a double quote, a dollar sign or a backtick is reported in the same way. The check raises an error, so vfox also prints a Lua stack traceback below that message.
+Symptom: `vfox install` stops before the download starts, with `The Erlang/OTP install path ... contains an apostrophe, which OTP's configure cannot take.` A space, a tab, a newline, a double quote, a dollar sign or a backtick is reported in the same way. No Lua stack traceback follows the message.
 
 Check:
 
@@ -109,7 +109,7 @@ Fix:
 
 ## USE_PREBUILT_OTP has an unsupported value
 
-Symptom: on Linux, the install stops with `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`.
+Symptom: on Linux, the install, or `vfox search erlang`, stops with `USE_PREBUILT_OTP must be one of: ubuntu-14.04, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04. Got: ...`.
 
 Check:
 
