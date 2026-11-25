@@ -18,7 +18,7 @@
 vfox config cache.availableHookDuration 0
 ```
 
-`0` 表示不缓存。用完之后可以恢复默认值：`vfox config cache.availableHookDuration 12h`。也可以直接删除 `~/.vfox/plugin/erlang/.available.cache`。
+`0` 表示不缓存。用完之后可以恢复默认值：`vfox config cache.availableHookDuration 12h`。也可以直接删除 vfox 主目录下的 `plugin/erlang/.available.cache`。主目录为 `~/.version-fox` 或 `~/.vfox`；设置了 `VFOX_HOME` 时，为 `VFOX_HOME` 指定的目录。
 
 ## Linux（Bob）
 

@@ -11,7 +11,7 @@
 3. 执行 `make` 和 `make install`。
 4. 使用 `DOC_TARGETS` 执行 `make docs` 和 `make install-docs`，默认值为 `chunks`。
 
-`<sdk>` 是 vfox 为该版本管理的目录。vfox 默认把 SDK 放在 `~/.vfox/cache` 下，见 [vfox 配置文档](https://vfox.dev/zh-hans/guides/configuration.html)。构建产物位于 `<sdk>/release`，插件会把 `<sdk>/release/bin` 加入 `PATH`。
+`<sdk>` 是 vfox 为该版本管理的目录，即 `<VFOX_HOME>/cache/erlang/v-<版本号>/erlang-<版本号>`。`VFOX_HOME` 是 vfox 的主目录。未设置时，若存在 `~/.version-fox` 目录则使用它，否则使用 `~/.vfox`。见 [vfox 配置文档](https://vfox.dev/zh-hans/guides/configuration.html)。构建产物位于 `<sdk>/release`，插件会把 `<sdk>/release/bin` 加入 `PATH`。
 
 安装路径（即 `<sdk>`）不能包含空格、制表符、换行符、单引号（`'`）、双引号（`"`）、美元符号（`$`）或反引号。OTP 的 `configure` 无法处理这些字符：单引号会破坏它的引号，其他字符会被展开，空格、制表符和换行符则会让 `configure` 中一条未加引号的 `cd` 把路径切开。插件会在下载开始之前拒绝安装，并指出是哪个字符。请把 `VFOX_HOME` 设为不含这些字符的路径。见 [问题排查](troubleshooting.md)。
 

@@ -6,6 +6,10 @@ What changed in each release, as a user notices it. For published versions, the 
 
 ## Unreleased
 
+No changes yet.
+
+## 1.2.8 (2026-11-25)
+
 ### Fixed
 
 - A source build whose install path holds a space, or another character that OTP's configure cannot take, is refused before the download, and no Lua stack traceback follows the message. Before, the refusal came from PostInstall, after the archive had been downloaded and unpacked, and a traceback followed it. The install path is `<VFOX_HOME>/cache/erlang/v-<version>/erlang-<version>`. When VFOX_HOME is unset, the path is under the vfox directory of your home: `~/.version-fox` when that exists, and `~/.vfox` otherwise. (#56)
