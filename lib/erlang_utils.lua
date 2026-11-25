@@ -84,16 +84,6 @@ function erlang_utils.prebuilt_release_refusal(release)
         .. release
 end
 
---- Returns the USE_PREBUILT_OTP value when it names a supported Ubuntu release. Any other value is an error.
---- get_erlang_release_versions uses it for `vfox search`, which does not return a refusal.
-function erlang_utils.check_prebuilt_release(release)
-    local refusal = erlang_utils.prebuilt_release_refusal(release)
-    if refusal ~= nil then
-        error(refusal)
-    end
-    return release
-end
-
 --- Returns the refusal for a USE_PREBUILT_OTP value that names no supported Linux release, or nil. An unset value,
 --- and any value on another platform, has no refusal. Callers check the value before they read a list, so a bad
 --- value is refused as such, and not reported as a list that could not be read.
@@ -299,11 +289,18 @@ local function checksum_of(value)
     return nil
 end
 
+--- Returns the versions that `vfox search` lists, with the SHA-256 that builds.txt publishes for each build when there
+--- is one. When the list cannot be read, or USE_PREBUILT_OTP names no supported Ubuntu release, returns nil and the
+--- reason. Nothing is raised: the caller prints the reason, so that vfox prints no Lua stack traceback.
 function erlang_utils.get_erlang_release_versions()
     local search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/versions.txt"
 
     -- USE_PREBUILT_OTP selects the prebuilt list of the platform. Windows always uses the official
     -- installer, so its list does not change.
+    local refusal = erlang_utils.prebuilt_config_refusal()
+    if refusal ~= nil then
+        return nil, refusal
+    end
     local use_prebuilt = erlang_utils.get_config_from_env("USE_PREBUILT_OTP")
     local prebuilt_list = use_prebuilt ~= nil and (RUNTIME.osType == "darwin" or RUNTIME.osType == "linux")
     -- Bob's names carry the OTP- prefix; the Linux list shows release names without it.
@@ -312,24 +309,19 @@ function erlang_utils.get_erlang_release_versions()
         search_url = "https://fastly.jsdelivr.net/gh/version-fox/vfox-erlang@main/assets/macos_prebuilt_versions.txt"
     elseif use_prebuilt and RUNTIME.osType == "linux" then
         -- Bob lists the builds of each Ubuntu release in its own index. Read that index, so the list
-        -- is the one the install downloads from.
-        local release = erlang_utils.check_prebuilt_release(use_prebuilt)
-        search_url = erlang_utils.prebuilt_index_url(release)
+        -- is the one the install downloads from. The value was checked above.
+        search_url = erlang_utils.prebuilt_index_url(use_prebuilt)
     end
 
     local resp, err = http.get({
         url = search_url,
     })
     if err ~= nil or resp == nil then
-        error("Failed to download the Erlang/OTP version list from " .. search_url .. ": " .. tostring(err))
+        return nil, "Failed to download the Erlang/OTP version list from " .. search_url .. ": " .. tostring(err)
     end
     if resp.status_code ~= 200 then
-        error(
-            "Failed to download the Erlang/OTP version list from "
-                .. search_url
-                .. ", HTTP status "
-                .. tostring(resp.status_code)
-        )
+        local status = tostring(resp.status_code)
+        return nil, "Failed to download the Erlang/OTP version list from " .. search_url .. ", HTTP status " .. status
     end
 
     -- The first column is the name. The jsDelivr lists hold one name per line. builds.txt adds the commit and
@@ -425,16 +417,6 @@ function erlang_utils.search_command()
     return "vfox search erlang"
 end
 
---- Reads the version list. Returns the list, or nil and the reason when the list cannot be read. A caller checks the
---- value of USE_PREBUILT_OTP first, with prebuilt_config_refusal.
-function erlang_utils.read_version_list()
-    local ok, result = pcall(erlang_utils.get_erlang_release_versions)
-    if not ok then
-        return nil, tostring(result)
-    end
-    return result, nil
-end
-
 --- Checks that the version list shows a version name, before anything is downloaded. Such a name would fail in
 --- the download with a generic message. Returns the list it checked. When the list cannot be read, the check is
 --- skipped with a note, the download decides as it did before the check existed, and nil is returned. A name that
@@ -445,7 +427,7 @@ function erlang_utils.check_version_listed(name)
     if config_refusal ~= nil then
         return nil, config_refusal
     end
-    local versions, reason = erlang_utils.read_version_list()
+    local versions, reason = erlang_utils.get_erlang_release_versions()
     if versions == nil then
         print("Could not read the version list, so " .. name .. " is not checked against it: " .. reason)
         return nil
@@ -476,27 +458,69 @@ local CONFIGURE_PATH_PROBLEMS = {
     { "\n", "a newline" },
 }
 
---- Refuses a source build whose install path holds one of the characters above, before configure starts.
---- Without the check the build fails part way through, or it configures a different directory. It raises an error
---- instead of returning a refusal: vfox records an install whose PostInstall returns normally, so only an error
---- stops the install here.
-function erlang_utils.check_configure_path(path)
+--- Returns the refusal for a source build whose install path holds one of the characters above, or nil. Without the
+--- check the build fails part way through, or it configures a different directory.
+function erlang_utils.configure_path_refusal(path)
     local found = {}
     for _, problem in ipairs(CONFIGURE_PATH_PROBLEMS) do
         if string.find(path, problem[1], 1, true) ~= nil then
             table.insert(found, problem[2])
         end
     end
-    if #found > 0 then
-        error(
-            "The Erlang/OTP install path "
-                .. path
-                .. " contains "
-                .. table.concat(found, " and ")
-                .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without spaces, tabs, newlines,"
-                .. " apostrophes, double quotes, dollar signs or backticks, then install again."
-        )
+    if #found == 0 then
+        return nil
     end
+    return "The Erlang/OTP install path "
+        .. path
+        .. " contains "
+        .. table.concat(found, " and ")
+        .. ", which OTP's configure cannot take. Set VFOX_HOME to a path without spaces, tabs, newlines,"
+        .. " apostrophes, double quotes, dollar signs or backticks, then install again."
+end
+
+--- Returns the value without its trailing slashes, as vfox joins paths: "/opt/vfox/" becomes "/opt/vfox".
+local function without_trailing_slashes(value)
+    return (string.gsub(value, "/+$", ""))
+end
+
+--- Returns the directory that vfox keeps its SDKs in, as vfox computes it: VFOX_HOME when it is set. Otherwise it is
+--- the vfox directory of HOME, which is ~/.version-fox when that exists and ~/.vfox when it does not. Returns nil when
+--- neither VFOX_HOME nor HOME is set.
+function erlang_utils.vfox_root()
+    local vfox_home = erlang_utils.get_config_from_env("VFOX_HOME")
+    if vfox_home ~= nil then
+        return without_trailing_slashes(vfox_home)
+    end
+    local home = erlang_utils.get_config_from_env("HOME")
+    if home == nil then
+        return nil
+    end
+    home = without_trailing_slashes(home)
+    if erlang_utils.directory_exists(home .. "/.version-fox") then
+        return home .. "/.version-fox"
+    end
+    return home .. "/.vfox"
+end
+
+--- Returns the install path of a source build of version, as vfox gives it:
+--- <root>/cache/erlang/v-<version>/erlang-<version>. Returns nil when the root cannot be computed.
+function erlang_utils.source_install_path(version)
+    local root = erlang_utils.vfox_root()
+    if root == nil then
+        return nil
+    end
+    return root .. "/cache/erlang/v-" .. version .. "/erlang-" .. version
+end
+
+--- Returns the refusal for a source build of version whose install path holds a character that configure cannot
+--- take, or nil. PreInstall calls it before the download. When the path cannot be computed there is no refusal, and
+--- PostInstall checks the path that vfox gives the install.
+function erlang_utils.source_path_refusal(version)
+    local path = erlang_utils.source_install_path(version)
+    if path == nil then
+        return nil
+    end
+    return erlang_utils.configure_path_refusal(path)
 end
 
 return erlang_utils

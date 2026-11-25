@@ -63,8 +63,13 @@ function PLUGIN:PostInstall(ctx)
         end
     else
         -- OTP's configure takes the install path through eval, so some characters in it break the build.
-        -- Refuse such a path before configure starts.
-        erlangUtils.check_configure_path(path)
+        -- PreInstall refuses such a path before the download. This check repeats it for the path that vfox gives
+        -- the install, before configure starts. It raises an error, not a nil result: vfox records an install whose
+        -- PostInstall returns normally, so only an error stops the install here.
+        local path_refusal = erlangUtils.configure_path_refusal(path)
+        if path_refusal ~= nil then
+            error(path_refusal, 0)
+        end
 
         -- use ENV OTP_CONFIGURE_ARGS to control configure behavior, e.g. "--enable-jit"
         local configure_args = os.getenv("OTP_CONFIGURE_ARGS") or ""

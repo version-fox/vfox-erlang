@@ -52,7 +52,7 @@ function PLUGIN:PreInstall(ctx)
         end
     elseif RUNTIME.osType == "linux" and PRE_BUILT_OS_RELEASE ~= nil then
         local reason
-        versions, reason = erlangUtils.read_version_list()
+        versions, reason = erlangUtils.get_erlang_release_versions()
         if versions == nil then
             print(
                 "Could not read the version list, so the SHA-256 of " .. erlang_version .. " is not checked: " .. reason
@@ -181,6 +181,15 @@ function PLUGIN:PreInstall(ctx)
                 .. "/otp-x86_64-apple-darwin.tar.gz"
         end
     else
+        -- A source build runs configure in its install path, so a path that configure cannot take is refused here,
+        -- before the download. PostInstall checks the path that vfox gives the install as well.
+        if PRE_BUILT_OS_RELEASE == nil then
+            local path_refusal = erlangUtils.source_path_refusal(erlang_version)
+            if path_refusal ~= nil then
+                print(path_refusal)
+                return nil
+            end
+        end
         -- Source archives: release versions are tags named OTP-<version>, while master and the
         -- maint branches are branches of the repository and must be fetched from refs/heads.
         local archive_ref

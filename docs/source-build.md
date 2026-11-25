@@ -13,7 +13,7 @@ On Linux and macOS, `vfox install` builds Erlang/OTP from source unless `USE_PRE
 
 `<sdk>` is the directory that vfox manages for the version. By default vfox keeps SDKs under `~/.vfox/cache`, see the [vfox configuration guide](https://vfox.dev/guides/configuration.html). The build output goes to `<sdk>/release`, and the plugin adds `<sdk>/release/bin` to `PATH`.
 
-The install path, which is `<sdk>`, must not contain a space, a tab, a newline, an apostrophe (`'`), a double quote (`"`), a dollar sign (`$`) or a backtick. OTP's `configure` cannot take these characters: an apostrophe breaks its quoting, the others are expanded, and a space, a tab or a newline splits the path in a `cd` that `configure` runs without quotes. The plugin stops before `configure` starts, and the error names the character. Set `VFOX_HOME` to a path without them. See [troubleshooting.md](troubleshooting.md).
+The install path, which is `<sdk>`, must not contain a space, a tab, a newline, an apostrophe (`'`), a double quote (`"`), a dollar sign (`$`) or a backtick. OTP's `configure` cannot take these characters: an apostrophe breaks its quoting, the others are expanded, and a space, a tab or a newline splits the path in a `cd` that `configure` runs without quotes. The plugin refuses the install before the download starts, and the message names the character. Set `VFOX_HOME` to a path without them. See [troubleshooting.md](troubleshooting.md).
 
 ## Dependencies
 
