@@ -36,7 +36,8 @@ Symptom: `vfox install` stops before the download starts, with `The Erlang/OTP i
 Check:
 
 ```shell
-echo "$HOME" "$VFOX_HOME"             # the install path is under VFOX_HOME, or under ~/.vfox when VFOX_HOME is unset
+echo "$VFOX_HOME"                      # the install path is under VFOX_HOME when it is set
+ls -d ~/.version-fox ~/.vfox 2>/dev/null   # when VFOX_HOME is unset, ~/.version-fox is used if it exists, else ~/.vfox
 ```
 
 Fix:
@@ -192,14 +193,14 @@ Check:
 
 ```shell
 vfox config cache.availableHookDuration     # the cache time; the default is 12h
-ls -l ~/.vfox/plugin/erlang/.available.cache
+ls -l ~/.version-fox/plugin/erlang/.available.cache ~/.vfox/plugin/erlang/.available.cache 2>/dev/null   # with VFOX_HOME set, look in $VFOX_HOME/plugin/erlang instead
 ```
 
 Fix:
 
 ```shell
 vfox config cache.availableHookDuration 0   # no caching while you work
-rm -f ~/.vfox/plugin/erlang/.available.cache
+rm -f ~/.version-fox/plugin/erlang/.available.cache ~/.vfox/plugin/erlang/.available.cache   # or $VFOX_HOME/plugin/erlang/.available.cache when VFOX_HOME is set
 vfox search erlang
 ```
 

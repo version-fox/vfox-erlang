@@ -36,7 +36,8 @@ brew list --versions autoconf libxslt fop wxwidgets openssl@3
 检查：
 
 ```shell
-echo "$HOME" "$VFOX_HOME"             # 安装路径位于 VFOX_HOME 下；未设置 VFOX_HOME 时位于 ~/.vfox 下
+echo "$VFOX_HOME"                      # 设置了 VFOX_HOME 时，安装路径位于其下
+ls -d ~/.version-fox ~/.vfox 2>/dev/null   # 未设置 VFOX_HOME 时，若存在 ~/.version-fox 则使用它，否则使用 ~/.vfox
 ```
 
 修复：
@@ -192,14 +193,14 @@ vfox list erlang                                # 已安装和已链接的版本
 
 ```shell
 vfox config cache.availableHookDuration     # 缓存时间，默认 12h
-ls -l ~/.vfox/plugin/erlang/.available.cache
+ls -l ~/.version-fox/plugin/erlang/.available.cache ~/.vfox/plugin/erlang/.available.cache 2>/dev/null   # 设置了 VFOX_HOME 时，改为查看 $VFOX_HOME/plugin/erlang/.available.cache
 ```
 
 修复：
 
 ```shell
 vfox config cache.availableHookDuration 0   # 工作期间不缓存
-rm -f ~/.vfox/plugin/erlang/.available.cache
+rm -f ~/.version-fox/plugin/erlang/.available.cache ~/.vfox/plugin/erlang/.available.cache   # 设置了 VFOX_HOME 时，改为删除 $VFOX_HOME/plugin/erlang/.available.cache
 vfox search erlang
 ```
 

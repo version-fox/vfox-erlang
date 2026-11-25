@@ -22,6 +22,7 @@ A refusal, such as a version name that the version list does not show, or a sour
 ## File layout
 
 ```
+.github/         CI workflows and Dependabot settings, see Other workflows below
 hooks/           vfox hooks, one file per hook
 lib/             shared Lua helpers: erlang_utils.lua and detect_erlang.lua
 tests/           offline Lua tests (tests/*_test.lua) and the Go end-to-end suites (tests/e2e)
@@ -108,6 +109,9 @@ The shared workflow updates `metadata.lua`, creates the version commit and the t
 | --- | --- | --- |
 | E2E | `e2e.yml` | End-to-end suites for Linux, Windows and Windows arm64, see [e2e.md](e2e.md) |
 | E2E (macOS and mise) | `e2e_test_darwin.yaml`, `e2e_test_darwin_prebuilt.yaml`, `e2e_test_darwin_mise.yaml`, `e2e_test_linux_mise.yaml` | macOS and mise suites, see [e2e.md](e2e.md) |
+| Test Plugin | `test.yml` | The offline Lua tests (`vfox plugin test .`) and the Go unit tests, see [Checks](#checks) |
+| Lint | `lint.yml` | stylua, LuaLS, gofmt, go vet, ruff and actionlint, see [Checks](#checks) |
+| License | `license.yml` | License headers, see [Adding files](#adding-files) |
 | Plugin | `publish.yaml` | Releases, see above |
 | GitHub Pages | `pages.yaml` | The documentation site |
 | update_otp_versions | `update_otp_versions.yaml` | The weekly update of the version lists |

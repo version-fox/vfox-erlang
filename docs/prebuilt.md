@@ -18,7 +18,7 @@ Turn off vfox's search cache before you use prebuilt releases. vfox keeps one se
 vfox config cache.availableHookDuration 0
 ```
 
-`0` means no caching. When you are done, restore the default with `vfox config cache.availableHookDuration 12h`. You can also delete `~/.vfox/plugin/erlang/.available.cache`.
+`0` means no caching. When you are done, restore the default with `vfox config cache.availableHookDuration 12h`. You can also delete the `plugin/erlang/.available.cache` file in the vfox home directory: `~/.version-fox` or `~/.vfox`, or the directory that `VFOX_HOME` names when it is set. See [source-build.md](source-build.md) for how the home directory is chosen.
 
 ## Linux (Bob)
 

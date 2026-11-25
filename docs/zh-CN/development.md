@@ -22,6 +22,7 @@ PreInstall 拒绝安装（例如版本名不在版本列表中，或源码构建
 ## 文件结构
 
 ```
+.github/         CI 工作流和 Dependabot 设置，见其他工作流
 hooks/           vfox 钩子，每个钩子一个文件
 lib/             共享的 Lua 辅助代码：erlang_utils.lua 和 detect_erlang.lua
 tests/           离线 Lua 测试（tests/*_test.lua）和 Go 端到端套件（tests/e2e）
@@ -108,6 +109,9 @@ python3 -m http.server 8080 --directory /tmp/vfox-erlang-site
 | --- | --- | --- |
 | E2E | `e2e.yml` | Linux、Windows 与 Windows arm64 端到端套件，见 [E2E 测试](e2e.md) |
 | E2E（macOS 与 mise） | `e2e_test_darwin.yaml`、`e2e_test_darwin_prebuilt.yaml`、`e2e_test_darwin_mise.yaml`、`e2e_test_linux_mise.yaml` | macOS 与 mise 套件，见 [E2E 测试](e2e.md) |
+| Test Plugin | `test.yml` | 离线 Lua 测试（`vfox plugin test .`）和 Go 单元测试，见 [检查](#检查) |
+| Lint | `lint.yml` | stylua、LuaLS、gofmt、go vet、ruff 和 actionlint，见 [检查](#检查) |
+| License | `license.yml` | 许可证头检查，见 [添加文件](#添加文件) |
 | Plugin | `publish.yaml` | 发布，见上文 |
 | GitHub Pages | `pages.yaml` | 文档网站 |
 | update_otp_versions | `update_otp_versions.yaml` | 每周更新版本列表 |
